@@ -6,7 +6,7 @@ Description:
 Author: Paul Menard (Incsub)
 Version: 1.0.0
 Author URI: http://premium.wpmudev.org/
-WDP ID: 679160
+WDP ID: XX
 Text Domain: site-categories
 Domain Path: languages
 
@@ -690,19 +690,19 @@ class SiteCategories {
 		add_meta_box('site-categories-settings-main-admin-display_options-panel', 
 			__('Landing Page Selection', SITE_CATEGORIES_I18N_DOMAIN), 
 			array(&$this, 'settings_main_admin_display_options_panel'), 
-			$this->_pagehooks['site-categories-settings-main-admin-display_options-panel'], 
+			$this->_pagehooks['site-categories-settings-main-site'], 
 			'normal', 'core');
 
 		add_meta_box('site-categories-settings-main-categories-display-options-panel', 
 			__('Landing Page Categories Display Options', SITE_CATEGORIES_I18N_DOMAIN), 
 			array(&$this, 'settings_main_categories_display_options_panel'), 
-			$this->_pagehooks['site-categories-settings-main-categories-display-options-panel'], 
+			$this->_pagehooks['site-categories-settings-main-site'], 
 			'normal', 'core');
 
 		add_meta_box('site-categories-settings-main-sites-display-options-panel', 
 			__('Landing Page Sites Display Options', SITE_CATEGORIES_I18N_DOMAIN), 
 			array(&$this, 'settings_main_sites_display_options_panel'), 
-			$this->_pagehooks['site-categories-settings-main-sites-display-options-panel'], 
+			$this->_pagehooks['site-categories-settings-main-site'], 
 			'normal', 'core');
 
 	}
@@ -725,13 +725,13 @@ class SiteCategories {
 		add_meta_box('site-categories-settings-site-categories-panel', 
 			__('Select the Categories for this site', SITE_CATEGORIES_I18N_DOMAIN), 
 			array(&$this, 'settings_site_select_categories_panel'), 
-			$this->_pagehooks['site-categories-settings-site-categories-panel'], 
+			$this->_pagehooks['site-categories-settings-site'], 
 			'normal', 'core');
 
 		add_meta_box('site-categories-settings-site-description-panel', 
 			__('Site Description', SITE_CATEGORIES_I18N_DOMAIN), 
 			array(&$this, 'settings_site_description_panel'), 
-			$this->_pagehooks['site-categories-settings-site-description-panel'], 
+			$this->_pagehooks['site-categories-settings-site'], 
 			'normal', 'core');
 
 	}
@@ -1073,7 +1073,14 @@ class SiteCategories {
 				<p class="description"><?php _e('default is 32px', SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 			</td>
 		</tr>		
-		
+
+		<?php
+			if ((isset($this->opts['categories']['default_icon_id'])) && (intval($this->opts['categories']['default_icon_id']))) {
+				$bcat_image_id = intval($this->opts['categories']['default_icon_id']);
+			} else {
+				$bcat_image_id = 0;
+			}
+		?>
 		<tr>
 			<th scope="row" valign="top"><label for="upload_image"><?php _ex('Default Category Image', 'Category Image', SITE_CATEGORIES_I18N_DOMAIN); ?></label></th>
 			<td>
