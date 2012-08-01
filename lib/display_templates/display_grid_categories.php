@@ -34,9 +34,9 @@ function process_site_categories_grid_display($content, $data, $args) {
 
 			$content .= '<span class="site-category-title">'. $category->name .'</span>';
 
-			if ($args['show_counts']) {
-				$content .= '<span class="site-category-count">('. $category->count .')</span>';
-			}
+//			if ($args['show_counts']) {
+//				$content .= '<span class="site-category-count">('. $category->count .')</span>';
+//			}
 			
 			if ($category->count > 0)
 				$content .= '</a>';

@@ -29,7 +29,8 @@
 }
 
 
-#site-categories-wrapper .site-categories-list li {
+#site-categories-wrapper .site-categories-list li,
+.site-categories-widget li {
 	float: left;
 	clear: both;
 	margin: 5px 0;
@@ -46,12 +47,18 @@
 	list-style: none;
 }
 
-#site-categories-wrapper  img.site-category-icon {
+ul.site-categories-widget li {
+	list-style: none;
+}
+
+#site-categories-wrapper  img.site-category-icon,
+.site-categories-widget li img.site-category-icon {
 	float: left;
 	padding-right: 10px;
 }
 
-#site-categories-wrapper span.site-category-title {
+#site-categories-wrapper span.site-category-title,
+.site-categories-widget span.site-category-title {
 	float: left;
 	font-size: 1.1em;
 /*
@@ -61,7 +68,8 @@
 */
 }
 
-#site-categories-wrapper span.site-category-count {
+#site-categories-wrapper span.site-category-count,
+.site-categories-widget li span.site-category-count {
 	padding-left: 3px;
 	font-size: 1.0em;
 }

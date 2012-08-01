@@ -5,21 +5,25 @@
 class Bcat_WidgetCategorySites extends WP_Widget {
 
 	function Bcat_WidgetCategorySites () {
-		$widget_ops = array('classname' => __CLASS__, 'description' => __('Shows a list of all blogs that belong to selected blog category.', SITE_CATEGORIES_I18N_DOMAIN));
-		parent::WP_Widget(__CLASS__, __('Blogs from a single category', SITE_CATEGORIES_I18N_DOMAIN), $widget_ops);
+		$widget_ops = array('classname' => __CLASS__, 'description' => __('Shows a list of all sites that belong to selected site category.', SITE_CATEGORIES_I18N_DOMAIN));
+		parent::WP_Widget(__CLASS__, __('Sites from a single site category', SITE_CATEGORIES_I18N_DOMAIN), $widget_ops);
 	}
 
 	function form($instance) {
 		
 		$defaults	=	array(
-			'category'			=>	0,
-			'per_page'			=>	5,
-			'show_style'		=>	'ul',
-			'icon_show' 		=> 	1,
-			'icon_size'			=>	32,
-			'ordering' 			=> 	'name',
-			'order' 			=> 	'ASC',
-			'show_more_link'	=>	1			
+			'title'					=>	'',
+			'category'				=>	0,
+			'include_children'		=>	0,
+			'per_page'				=>	5,
+			'show_style'			=>	'ul',
+			'icon_show' 			=> 	1,
+			'icon_size'				=>	32,
+			'ordering' 				=> 	'name',
+			'order' 				=> 	'ASC',
+			'show_more_link'		=>	1,
+			'landing_link_label'	=>	__('more sites', SITE_CATEGORIES_I18N_DOMAIN)
+			
 		);
 
 		$instance = wp_parse_args( (array) $instance, $defaults ); 
@@ -49,8 +53,17 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 			
 				wp_dropdown_categories( $bcat_args ); 
 				restore_current_blog();
-				
 			?>
+		</p>
+
+		<p>
+			<label for="<?php echo $this->get_field_id('include_children') ?>"><?php _e('Include Child Categories:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
+			<input type="radio" name="<?php echo $this->get_field_name( 'include_children'); ?>" id="<?php echo $this->get_field_id('include_children') ?>_yes" 
+				value="1" <?php if ($instance['include_children'] == "1") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('include_children') ?>_yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			
+			<input type="radio" name="<?php echo $this->get_field_name( 'include_children'); ?>" id="<?php echo $this->get_field_id('include_children') ?>_no" 
+				value="0" <?php if ($instance['include_children'] == "0") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('include_children') ?>_no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
+			
 		</p>
 
 		<p>
@@ -87,9 +100,9 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 					_e('ASC', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 				<option value="DESC" <?php if ($instance['order'] == "DESC") { echo ' selected="selected" '; }?>><?php 
 					_e('DESC', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-			</select>
-			
+			</select>			
 		</p>
+		
 
 		<?php 
 		if (function_exists('get_blog_avatar')) { 
@@ -124,21 +137,35 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 				value="0" <?php if ($instance['show_more_link'] == "0") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('show_more_link') ?>_no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
 			
 		</p>
+		
+		<p>
+			<label for="<?php echo $this->get_field_id( 'landing_link_label' ); ?>"><?php 
+				_e('Label for link:', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+
+			<input type="text" id="<?php echo $this->get_field_id( 'landing_link_label' ); ?>" value="<?php echo $instance['landing_link_label']; ?>"
+				name="<?php echo $this->get_field_name( 'landing_link_label'); ?>" class="widefat" style="width:100%;" />
+		</p>
+		
+		
 		<?php
 	}
 
 	function update($new_instance, $old_instance) {
 		$instance = $old_instance;
 		
-		$instance['title'] 			= strip_tags($new_instance['title']);
-		$instance['category'] 		= strip_tags($new_instance['category']);
-		$instance['per_page'] 		= strip_tags($new_instance['per_page']);
-		$instance['ordering'] 		= strip_tags($new_instance['ordering']);
-		$instance['order'] 			= strip_tags($new_instance['order']);
-		$instance['show_style'] 	= strip_tags($new_instance['show_style']);
-		$instance['icon_show'] 		= strip_tags($new_instance['icon_show']);
-		$instance['icon_size'] 		= intval($new_instance['icon_size']);
+		$instance['title'] 				= strip_tags($new_instance['title']);
+		$instance['category'] 			= strip_tags($new_instance['category']);
+		$instance['include_children'] 	= intval($new_instance['include_children']);
+		$instance['per_page'] 			= intval($new_instance['per_page']);
+		$instance['ordering'] 			= strip_tags($new_instance['ordering']);
+		$instance['order'] 				= strip_tags($new_instance['order']);
+		$instance['show_style'] 		= strip_tags($new_instance['show_style']);
+		$instance['icon_show'] 			= strip_tags($new_instance['icon_show']);
+		$instance['icon_size'] 			= intval($new_instance['icon_size']);
 		$instance['show_more_link'] 	= intval($new_instance['show_more_link']);
+		$instance['landing_link_label'] = strip_tags($new_instance['landing_link_label']);
+		
+		delete_site_transient( 'site-categories-sites-data-'. $this->number);
 		
 		return $instance;
 	}
@@ -150,54 +177,64 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 
 		extract($args);
 
-		switch_to_blog( 1 );
 
-		//echo "instance<pre>"; print_r($instance); echo "</pre>";
-		
-		$sites = $site_categories->get_taxonomy_sites($instance['category']);
-		//echo "sites<pre>"; print_r($sites); echo "</pre>";
-		
-		if (count($sites) < $instance['per_page']) {
-			$data['sites'] = $sites;
+		$data = get_site_transient( 'site-categories-sites-data-'. $this->number );
+		if (!$data) {
 
-		} else {
+			switch_to_blog( 1 );
 
-			$data['offset'] 		= intval($instance['per_page']) * (intval($data['current_page'])-1); 
-			$data['sites'] 			= array_slice($sites, $data['offset'], $instance['per_page'], true);
-			$data['total_pages'] 	= ceil(count($sites)/intval($instance['per_page']));			
-		}
-		
-		if (intval($instance['show_more_link'])) {
-			if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true)) {
-				$data['landing']['link_url'] = trailingslashit($site_categories->opts['landing_page_slug']);
+			$sites = $site_categories->get_taxonomy_sites($instance['category'], $instance['include_children']);
+			
+			if (count($sites) < $instance['per_page']) {
+				$data['sites'] = $sites;
+
 			} else {
-				$data['landing']['link_url'] = $site_categories->opts['landing_page_slug'];
+
+				$data['offset'] 		= intval($instance['per_page']) * (intval($data['current_page'])-1); 
+				$data['sites'] 			= array_slice($sites, $data['offset'], $instance['per_page'], true);
+				$data['total_pages'] 	= ceil(count($sites)/intval($instance['per_page']));			
 			}
-			$data['landing']['link_label'] = __('More Site Categories', SITE_CATEGORIES_I18N_DOMAIN);								
-		}
 		
-		restore_current_blog();
+			if (intval($instance['show_more_link'])) {
+				if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true)) {
+					$data['landing']['link_url'] = trailingslashit($site_categories->opts['landing_page_slug']);
+				} else {
+					$data['landing']['link_url'] = $site_categories->opts['landing_page_slug'];
+				}
+				if (isset($instance['landing_link_label']))
+					$data['landing']['link_label'] = $instance['landing_link_label'];
+				else
+					$data['landing']['link_label'] = __('More Sites', SITE_CATEGORIES_I18N_DOMAIN);								
+			}
+		
+			restore_current_blog();
 
-		if (!function_exists('get_blog_avatar')) {
-			$instance['icon_show'] = false;
-		} else {
-			$default_icon_src = $site_categories->get_default_category_icon_url();
-		}
 
-		if (count($data['sites'])) {
+			if (!function_exists('get_blog_avatar')) {
+				$instance['icon_show'] = false;
+			} else {
+				$default_icon_src = $site_categories->get_default_category_icon_url();
+			}
 
-			foreach($data['sites'] as $idx => $site) {
+			//echo "data<pre>"; print_r($data); echo "</pre>";
 
-				if ((isset($instance['icon_show'])) && ($instance['icon_show'] == true)) {
-					$icon_image_src = get_blog_avatar($site->blog_id, $instance['icon_size']);
+			if ( (isset($data['sites'])) && (count($data['sites'])) ) {
 
-					if ((!$icon_image_src) || (!strlen($icon_image_src))) {
-						$data['sites'][$idx]->icon_image_src = $default_icon_src;
-					} else {
-						$data['sites'][$idx]->icon_image_src = $icon_image_src;
+				foreach($data['sites'] as $idx => $site) {
+
+					if ((isset($instance['icon_show'])) && ($instance['icon_show'] == true)) {
+						$icon_image_src = get_blog_avatar($site->blog_id, $instance['icon_size']);
+
+						if ((!$icon_image_src) || (!strlen($icon_image_src))) {
+							$data['sites'][$idx]->icon_image_src = $default_icon_src;
+						} else {
+							$data['sites'][$idx]->icon_image_src = $icon_image_src;
+						}
 					}
 				}
 			}
+
+			set_site_transient( 'site-categories-sites-data-'. $this->number, $data, 300);			
 		}
 
 
@@ -224,9 +261,9 @@ function process_categories_widget_list_sites_display($content, $data, $args) {
 
 	if (($data['sites']) && (count($data['sites']))) { 
 
-		if ($args['show_style'] == "ol") { $content .= '<ol class="blog-categories">'; }
-		else if ($args['show_style'] == "select") { $content .= '<select class="blog-categories">'; }
-		else { $content .= '<ul class="blog-categories">'; }
+		if ($args['show_style'] == "ol") { $content .= '<ol class="site-categories site-categories-widget">'; }
+		else if ($args['show_style'] == "select") { $content .= '<select class="site-categories site-categories-widget">'; }
+		else { $content .= '<ul class="site-categories site-categories-widget">'; }
 
 		foreach ($data['sites'] as $site) { 
 
@@ -250,7 +287,7 @@ function process_categories_widget_list_sites_display($content, $data, $args) {
 				$content .=	'<a href="'. $site->siteurl .'" class="site-category-site-url">'. $image_src 
 					.'<span class="site-category-site-title">'. $site->blogname .'</span></a>';
 
-				if (($args['show_description'] == true) && (isset($site->bact_site_description)) && (strlen($site->bact_site_description))) {
+				if ( (isset($args['show_description'])) && ($args['show_description'] == true) && (isset($site->bact_site_description)) && (strlen($site->bact_site_description))) {
 
 					$bact_site_description = apply_filters('the_content', $site->bact_site_description);
 					$bact_site_description = str_replace(']]>', ']]&gt;', $bact_site_description);						
