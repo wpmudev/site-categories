@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.0-v3
+Version: 1.0.0
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -123,7 +123,13 @@ class SiteCategories {
 	}	
 	
 
-		 
+	/**
+	 * Setup scripts and stylsheets
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */
 	function enqueue_scripts_proc()
 	{
 		if (is_admin()) {
@@ -169,7 +175,14 @@ class SiteCategories {
 			
 		}
 	}
-	
+
+	/**
+	 * Initialize our widgets
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */	
 	function widgets_init_proc() {
 		register_widget('Bcat_WidgetCategories');
 		register_widget('Bcat_WidgetCategorySites');		
@@ -195,6 +208,14 @@ class SiteCategories {
 		return $columns_tmp;
 	}
 
+	/**
+	 * On the Primary site under the Site Categories section will be a Taxonomy admin panel. This function adds a column
+	 * to the standard WordPress taxonomy table. 
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */
 	function bcat_taxonomy_column($nothing, $column_name, $term_id) {
 		switch($column_name) {
 			
@@ -254,14 +275,38 @@ class SiteCategories {
 		}
 	}
 	
+	/**
+	 * Gets the URL for the default icon shipped with the plugin
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */
+	
 	function get_default_category_icon_url() {
 		return WP_PLUGIN_URL .'/'. basename(dirname(__FILE__)) .'/img/default.jpg';
 	}
+
+	/**
+	 * Gets the path for the default icon shipped with the plugin 
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */
 
 	function get_default_category_icon_path() {
 		return WP_PLUGIN_DIR .'/'. basename(dirname(__FILE__)) .'/img/default.jpg';
 	}
 	
+
+	/**
+	 * Reads the taxonomy and returns the URL to the taxonomy term icon.
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */
 	function get_category_term_icon_src($term_id, $size) {	
 
 		if ((isset($this->opts['icons_category'][$term_id])) && (intval($this->opts['icons_category'][$term_id]))) {
@@ -295,6 +340,13 @@ class SiteCategories {
 	}
 	
 	
+	/**
+	 * Called when the Site Categories term is edited
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */
 	function bcat_taxonomy_term_edit($tag, $taxonomy) {
 
 		// Should not happen. But just in case.
@@ -339,6 +391,13 @@ class SiteCategories {
 		<?php
 	}
 	
+	/**
+	 * Called when the Site Categories taxonomy term is saved. 
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */
 	function bcat_taxonomy_term_save($term_id, $tt_id) {
 
 		if (isset($_POST['bcat_image_id'])) {
@@ -356,7 +415,13 @@ class SiteCategories {
 		}
 	}
 	
-	/* for a given site category we get an array of the site/blogs associated. */
+	/**
+	 * Reads the Site Taxonomy and returns sites associated with a term
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */	
 	function get_taxonomy_sites($term_id, $include_child = false) {
 		
 		global $wpdb;
@@ -417,7 +482,14 @@ class SiteCategories {
 	function plugin_activation_proc() {
 		
 	}
-	
+
+	/**
+	 * Loads the config data from the primary site options
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */	
 	function load_config() {
 		global $blog_id;
 		
@@ -458,10 +530,24 @@ class SiteCategories {
 		}		
 	}
 	
+	/**
+	 * Save our config information to the primary site options
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */	
 	function save_config() {
 		update_blog_option( 1, $this->_settings['options_key'], $this->opts);		
 	}
 	
+	/**
+	 * Setup the rewrite rules for our Taxonomy terms. 
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */
 	
 	function insert_rewrite_rules ($old) {
 		
@@ -484,6 +570,13 @@ class SiteCategories {
 		return $old;
 	}
 
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */
 	function insert_query_vars ($vars) {
 		$vars[] = 'category_name';
 		$vars[] = 'start_at';
@@ -491,15 +584,20 @@ class SiteCategories {
     	return $vars;
 	}
 
+
+	/**
+	 * For the main site Settings. 
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */
 	function process_actions_main_site() {
 
 		global $wp_rewrite;
 
 		if (isset($_POST['bcat'])) {
 
-			//echo "_POST<pre>"; print_r($_POST); echo "</pre>";
-			//exit;
-			
 			$TRIGGER_UPDATE_REWRITE = false;
 
 			if (isset($_POST['bcat']['categories']))
@@ -533,6 +631,13 @@ class SiteCategories {
 		}
 	}
 	
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return none
+	 */
 	function process_actions_site() {
 
 		global $wpdb;
@@ -603,6 +708,14 @@ class SiteCategories {
 	}
 	
 	
+	/**
+	 * Setup our Taxonomy
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function register_taxonomy_proc() {
 	
 		if (is_multisite()) {
@@ -644,6 +757,14 @@ class SiteCategories {
 		}
 	}
 	
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function bcat_taxonomy_terms_count($terms, $taxonomy) {
 		if ($taxonomy->name != SITE_CATEGORIES_TAXONOMY) return;
 		
@@ -707,7 +828,14 @@ class SiteCategories {
 		add_action('load-'. $this->_pagehooks['site-categories-settings-site'], 		array(&$this, 'on_load_page_site'));
 	}
 
-
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function on_load_page_main_site() {
 		
 		if ( ! current_user_can( 'manage_options' ) )
@@ -727,7 +855,6 @@ class SiteCategories {
 			array('jquery'), '1.0' );
 		wp_enqueue_script('site-categories-admin');
 		
-				
 		// Now add our metaboxes
 		add_meta_box('site-categories-settings-main-admin-display_options-panel', 
 			__('Landing Page Selection', SITE_CATEGORIES_I18N_DOMAIN), 
@@ -750,6 +877,14 @@ class SiteCategories {
 	}
 
 
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function on_load_page_site() {
 		
 		if ( ! current_user_can( 'manage_options' ) )
@@ -781,6 +916,14 @@ class SiteCategories {
 	}
 
 
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function admin_plugin_help() {
 		global $wp_version;
 				
@@ -799,8 +942,6 @@ class SiteCategories {
 
 		$screen_help_text['site-categories-page-settings'] .= '<li><strong>'. __('Landing Page Sites Display Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection controls the output of the Sites on the landing page. Here you can control the style, icons, number of sites per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 		$screen_help_text['site-categories-page-settings'] .= "</ul>";
-
-
 
 		$screen_help_text['site-categories-page-settings-landing'] = '<p>'. __('The Landing Page Selection lets you set the landing page to be used when displaying the Site Categories.', SITE_CATEGORIES_I18N_DOMAIN). '</p>';
 		$screen_help_text['site-categories-page-settings-landing'] .= '<ul>';
@@ -837,7 +978,6 @@ class SiteCategories {
 
 		$screen_help_text['site-categories-page-settings-landing-categories'] .= '</ul>';
 			
-
 		$screen_help_text['site-categories-page-settings-landing-sites'] = '<p>'. __('This Selection controls the output of the Sites on the landing page. Here you can control the style, icons, number of sites per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</p>';
 		$screen_help_text['site-categories-page-settings-landing-sites'] .= '<ul>';
 		$screen_help_text['site-categories-page-settings-landing-sites'] .= '<li><strong>'. __('Display Style', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('The Display style is how the Sites are presented on the page.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
@@ -884,14 +1024,19 @@ class SiteCategories {
 					'content'	=>  $screen_help_text['site-categories-page-settings-landing-sites']
 			    	) 
 				);
-				
-				
-
 			}			
 		} 
 	}
 
 
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function site_plugin_help() {
 		global $wp_version;
 
@@ -916,8 +1061,6 @@ class SiteCategories {
 					'content'	=>  $screen_help_text['site-categories-page-settings']
 			    	) 
 				);
-
-
 			}			
 		} 
 	}
@@ -962,6 +1105,14 @@ class SiteCategories {
 		<?php
 	}
 
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function settings_panel_site() {
 
 		?>
@@ -994,6 +1145,14 @@ class SiteCategories {
 		<?php
 	}
 	
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function settings_main_categories_display_options_panel() {
 
 		?>
@@ -1160,6 +1319,14 @@ class SiteCategories {
 		<?php
 	}
 	
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function settings_main_sites_display_options_panel() {
 		?>
 		<table class="form-table">
@@ -1252,6 +1419,14 @@ class SiteCategories {
 		<?php
 	}
 	
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function settings_main_admin_display_options_panel() {
 		?>
 		<table class="form-table">
@@ -1360,6 +1535,14 @@ class SiteCategories {
 	}
 	
 	
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function settings_site_select_categories_panel() {
 		
 		global $wpdb, $psts;
@@ -1426,6 +1609,14 @@ class SiteCategories {
 		restore_current_blog();
 	}
 	
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function settings_site_description_panel() {
 		
 		$bact_site_description = get_option('bact_site_description');
@@ -1436,6 +1627,14 @@ class SiteCategories {
 		<?php
 	}
 	
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function process_categories_body ($content) {
 
 		global $post;
@@ -1711,6 +1910,14 @@ class SiteCategories {
 		return $content;
 	}
 	
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function process_categories_title ($content, $post_id=0) {
 
 		global $post;
@@ -1755,6 +1962,14 @@ class SiteCategories {
 		return $title_str;
 	}
 	
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function inject_category_signup_proc() {
 		global $wpdb;
 
@@ -1813,6 +2028,14 @@ class SiteCategories {
 	}
 
 	
+	/**
+	 * 
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function wpmu_new_blog_proc($blog_id, $user_id, $domain, $path, $site_id, $meta ) {
 
 		if ((isset($blog_id)) && ($blog_id)) {
