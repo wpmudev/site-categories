@@ -1,664 +1,318 @@
-# Translation of the WordPress plugin Site Categories 1.0.0 by Paul Menard (Incsub).
-# Copyright (C) 2012 Paul Menard (Incsub)
-# This file is distributed under the same license as the Site Categories package.
+# Translation of the WordPress plugin   by .
+# Copyright (C) 2012
+# This file is distributed under the same license as the  package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Site Categories 1.0.0\n"
-"Report-Msgid-Bugs-To: http://wordpress.org/tag/site-categories\n"
-"POT-Creation-Date: 2012-07-03 20:31-0500\n"
-"PO-Revision-Date: 2012-07-03 21:33-0500\n"
+"Project-Id-Version: Site Categories\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/simply-exclude\n"
+"POT-Creation-Date: 2012-03-05 13:54-0600\n"
+"PO-Revision-Date: 2012-08-01 13:53-0500\n"
 "Last-Translator: Paul Menard <paul@codehooligans.com>\n"
-"Language-Team: \n"
+"Language-Team: Incsub <paul@incsub.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Language: English\n"
 
-#: lib/widgets/class_site_categories_widget_categories.php:8
-msgid "Shows a list of all blog categories."
+#: simplyexclude.php:48
+#: simplyexclude.php:660
+#: simplyexclude.php:669
+#: simplyexclude.php:678
+msgid "Simply Exclude"
 msgstr ""
 
-#: lib/widgets/class_site_categories_widget_categories.php:9
-msgid "Blog Categories"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:33
-#: lib/widgets/class_site_categories_widget_category_sites.php:29
-msgid "Title:"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:39
-#: lib/widgets/class_site_categories_widget_category_sites.php:57
-msgid "Display as:"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:43
-#: lib/widgets/class_site_categories_widget_category_sites.php:61
-#: site-categories.php:964
-#: site-categories.php:1123
-msgid "Ordered List (ol)"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:45
-#: lib/widgets/class_site_categories_widget_category_sites.php:63
-#: site-categories.php:962
-#: site-categories.php:1121
-msgid "Unordered List (ul)"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:51
-msgid "Number of Site Categories to show:"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:58
-#: lib/widgets/class_site_categories_widget_category_sites.php:77
-msgid "Ordering:"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:62
-#: lib/widgets/class_site_categories_widget_category_sites.php:81
-#: site-categories.php:1005
-msgid "Name"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:64
-#: lib/widgets/class_site_categories_widget_category_sites.php:83
-msgid "Category ID"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:69
-#: lib/widgets/class_site_categories_widget_category_sites.php:87
-#: site-categories.php:1014
-msgid "ASC"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:71
-#: lib/widgets/class_site_categories_widget_category_sites.php:89
-#: site-categories.php:1016
-msgid "DESC"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:76
-msgid "Hide Empty Site Categories:"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:78
-#: lib/widgets/class_site_categories_widget_categories.php:87
-#: lib/widgets/class_site_categories_widget_categories.php:97
-#: lib/widgets/class_site_categories_widget_categories.php:112
-#: lib/widgets/class_site_categories_widget_category_sites.php:101
-#: lib/widgets/class_site_categories_widget_category_sites.php:121
-#: site-categories.php:1027
-#: site-categories.php:1039
-#: site-categories.php:1051
-#: site-categories.php:1061
-#: site-categories.php:1163
-#: site-categories.php:1176
-msgid "Yes"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:81
-#: lib/widgets/class_site_categories_widget_categories.php:90
-#: lib/widgets/class_site_categories_widget_categories.php:100
-#: lib/widgets/class_site_categories_widget_categories.php:115
-#: lib/widgets/class_site_categories_widget_category_sites.php:105
-#: lib/widgets/class_site_categories_widget_category_sites.php:124
-#: site-categories.php:1028
-#: site-categories.php:1040
-#: site-categories.php:1051
-#: site-categories.php:1062
-#: site-categories.php:1163
-#: site-categories.php:1177
-msgid "No"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:85
-msgid "Show Site Category Count:"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:95
-msgid "Show Site Category icons:"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:104
-#: lib/widgets/class_site_categories_widget_category_sites.php:109
-msgid "Icon size:"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:106
-#: lib/widgets/class_site_categories_widget_category_sites.php:111
-#: site-categories.php:1072
-#: site-categories.php:1193
-msgid "square"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:110
-msgid "Landing Page link below categories list:"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_categories.php:223
-#: lib/widgets/class_site_categories_widget_category_sites.php:176
-msgid "More Site Categories"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_category_sites.php:8
-msgid "Shows a list of all blogs that belong to selected blog category."
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_category_sites.php:9
-msgid "Blogs from a single category"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_category_sites.php:35
-#: site-categories.php:1718
-msgid "Site Category:"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_category_sites.php:44
-#: site-categories.php:1357
-#: site-categories.php:1734
-msgid "None Selected"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_category_sites.php:70
-msgid "Number of Sites to show:"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_category_sites.php:98
-msgid "Show Blog icons:"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_category_sites.php:115
-msgid "<p>Blog Avatar require <a target=\"_blank\" href=\"http://premium.wpmudev.org/project/avatars\">Avatars</a> plugin.</p>"
-msgstr ""
-
-#: lib/widgets/class_site_categories_widget_category_sites.php:119
-msgid "Landing Page link below Sites list:"
-msgstr ""
-
-#. #-#-#-#-#  site-categories.pot (Site Categories 1.0.0)  #-#-#-#-#
-#. Plugin Name of the plugin/theme
-#: site-categories.php:83
-msgid "Site Categories"
-msgstr ""
-
-#: site-categories.php:187
-msgid "Icon"
-msgstr ""
-
-#: site-categories.php:191
-msgid "Sites"
-msgstr ""
-
-#: site-categories.php:310
-msgctxt "Category Image"
-msgid "Image"
-msgstr ""
-
-#: site-categories.php:312
-msgid "The image used for the category icon will be displayed square."
-msgstr ""
-
-#: site-categories.php:314
-#: site-categories.php:1082
-msgid "Select Image"
-msgstr ""
-
-#: site-categories.php:316
-#: site-categories.php:1084
-msgid "Remove Image"
-msgstr ""
-
-#: site-categories.php:571
-msgctxt "taxonomy general name"
-msgid "Site Categories"
-msgstr ""
-
-#: site-categories.php:572
-msgctxt "taxonomy singular name"
-msgid "Site Category"
-msgstr ""
-
-#: site-categories.php:573
-msgid "Search Site Categories"
-msgstr ""
-
-#: site-categories.php:574
-msgid "All Site Categories"
-msgstr ""
-
-#: site-categories.php:575
-msgid "Parent Site Category"
-msgstr ""
-
-#: site-categories.php:576
-msgid "Parent Site Category:"
-msgstr ""
-
-#: site-categories.php:577
-msgid "Edit Site Category"
-msgstr ""
-
-#: site-categories.php:578
-msgid "Update Site Category"
-msgstr ""
-
-#: site-categories.php:579
-msgid "Add New Site Category"
-msgstr ""
-
-#: site-categories.php:580
-msgid "New Site Category Name"
-msgstr ""
-
-#: site-categories.php:581
-msgid "Site Category"
-msgstr ""
-
-#: site-categories.php:630
-#: site-categories.php:648
-#: site-categories.php:660
-msgctxt "page label"
-msgid "Site Categories"
-msgstr ""
-
-#: site-categories.php:631
-#: site-categories.php:649
-#: site-categories.php:661
-msgctxt "menu label"
-msgid "Site Categories"
-msgstr ""
-
-#: site-categories.php:639
-msgctxt "page label"
+#: simplyexclude.php:111
 msgid "Settings"
 msgstr ""
 
-#: site-categories.php:640
-msgctxt "menu label"
-msgid "Settings"
+#: simplyexclude.php:301
+#: simplyexclude.php:344
+#: simplyexclude.php:406
+msgid "Action Name"
 msgstr ""
 
-#: site-categories.php:674
-#: site-categories.php:714
-msgid "Cheatin&#8217; uh?"
+#: simplyexclude.php:302
+#: simplyexclude.php:345
+#: simplyexclude.php:407
+msgid "Description "
 msgstr ""
 
-#: site-categories.php:691
-#: site-categories.php:752
-#: site-categories.php:823
-msgid "Landing Page Selection"
+#: simplyexclude.php:303
+#: simplyexclude.php:346
+#: simplyexclude.php:408
+msgid "Inclusion/Exclusion"
 msgstr ""
 
-#: site-categories.php:697
-#: site-categories.php:754
-msgid "Landing Page Categories Display Options"
+#: simplyexclude.php:319
+#: simplyexclude.php:362
+#: simplyexclude.php:424
+#: simplyexclude.php:2579
+#: simplyexclude.php:2589
+#: simplyexclude.php:2598
+msgid "Include only"
 msgstr ""
 
-#: site-categories.php:703
-#: site-categories.php:756
-msgid "Landing Page Sites Display Options"
+#: simplyexclude.php:321
+#: simplyexclude.php:364
+#: simplyexclude.php:426
+#: simplyexclude.php:2580
+#: simplyexclude.php:2590
+#: simplyexclude.php:2599
+msgid "Exclude"
 msgstr ""
 
-#: site-categories.php:726
-#: site-categories.php:859
-msgid "Select the Categories for this site"
+#: simplyexclude.php:371
+#: simplyexclude.php:380
+msgid "Include All"
 msgstr ""
 
-#: site-categories.php:732
-#: site-categories.php:860
-msgid "Site Description"
+#: simplyexclude.php:458
+#: simplyexclude.php:467
+#: simplyexclude.php:492
+#: simplyexclude.php:501
+#: simplyexclude.php:526
+#: simplyexclude.php:535
+msgid "Active"
 msgstr ""
 
-#: site-categories.php:748
-msgid "This Settings panel controls various display options for the Landing page. This landing page is hosted only on the primary site and from the options on this page you can control the layout of the site categories items."
+#: simplyexclude.php:463
+msgid "Is this Taxonomy active? This is sometimes convenient instead of unsetting all Taxonomy terms."
 msgstr ""
 
-#: site-categories.php:752
-msgid "This Selection lets you set the landing page to be used when displaying the Site Categories."
+#: simplyexclude.php:470
+#: simplyexclude.php:504
+#: simplyexclude.php:538
+msgid "Disabled"
 msgstr ""
 
-#: site-categories.php:754
-#: site-categories.php:774
-msgid "This Selection controls the output of the Site Categories on the landing page. Here you can control the style, icons, number of categories per page, etc."
+#: simplyexclude.php:497
+msgid "Is this Post Type Active? This is sometimes convenient instead of unsetting all Post Type items."
 msgstr ""
 
-#: site-categories.php:756
-#: site-categories.php:795
-msgid "This Selection controls the output of the Sites on the landing page. Here you can control the style, icons, number of sites per page, etc."
+#: simplyexclude.php:531
+msgid "Active?"
 msgstr ""
 
-#: site-categories.php:761
-msgid "The Landing Page Selection lets you set the landing page to be used when displaying the Site Categories."
+#: simplyexclude.php:567
+#: simplyexclude.php:598
+#: simplyexclude.php:629
+msgid "Show/Hide"
 msgstr ""
 
-#: site-categories.php:764
-#: site-categories.php:1207
-msgid "Select Landing Page"
+#: simplyexclude.php:572
+msgid "Show the extra columns on the Taxonomy listing and the Taxonomy edit form?"
 msgstr ""
 
-#: site-categories.php:764
-msgid "Select the page to function as the site categories landing page. The landing page will be inserted automatically at the bottom of the page content."
+#: simplyexclude.php:576
+#: simplyexclude.php:607
+#: simplyexclude.php:638
+msgid "Show"
 msgstr ""
 
-#: site-categories.php:766
-#: site-categories.php:1232
-msgid "Default Category"
+#: simplyexclude.php:579
+#: simplyexclude.php:610
+#: simplyexclude.php:641
+msgid "Hide"
 msgstr ""
 
-#: site-categories.php:766
-msgid "If the site admin does not set the site categories we use this to set a default site category. This works very similar to post categories. If you create a new post and do not mark it into any specific categories the default categories is automatically assigned."
+#: simplyexclude.php:603
+msgid "Show the extra columns on the Post Type listing and the Post Type edit form?"
 msgstr ""
 
-#: site-categories.php:768
-#: site-categories.php:1252
-msgid "Number of categories per site"
+#: simplyexclude.php:634
+msgid "Show the extra columns on the listing and the edit form?"
 msgstr ""
 
-#: site-categories.php:768
-msgid "This controls the number of categories a site can set. Within the site settings panel the admin will see a number of dropdowns for the Site Categories. The admin can set one or more of these to the available site categories."
+#: simplyexclude.php:660
+#: simplyexclude.php:669
+#: simplyexclude.php:678
+msgid "show"
 msgstr ""
 
-#: site-categories.php:770
-#: site-categories.php:1262
-msgid "Pro Sites"
+#: simplyexclude.php:1025
+msgctxt "Simply Exclude"
+msgid "Simply Exclude"
 msgstr ""
 
-#: site-categories.php:770
-msgid "If you have the"
+#: simplyexclude.php:1599
+#: simplyexclude.php:1721
+#: simplyexclude.php:1816
+msgid "Front/Home"
 msgstr ""
 
-#: site-categories.php:770
-msgid "plugins installed you can assign a different number of Site Categories for each level."
+#: simplyexclude.php:1603
+#: simplyexclude.php:1820
+msgid "Visibility on the front/main page."
 msgstr ""
 
-#: site-categories.php:776
-#: site-categories.php:797
-#: site-categories.php:957
-#: site-categories.php:1116
-msgid "Display Style"
+#: simplyexclude.php:1616
+#: simplyexclude.php:1738
+#: simplyexclude.php:1834
+msgid "Archives"
 msgstr ""
 
-#: site-categories.php:776
-msgid "The Display style is how the Site Categories are presented on the page. From the dropdown you can select a simple list or try more advanced display options like Grid or Accordion."
+#: simplyexclude.php:1620
+#: simplyexclude.php:1838
+msgid "Visibility on the archive of categories on the sidebar."
 msgstr ""
 
-#: site-categories.php:778
-#: site-categories.php:975
-msgid "Categories per page"
+#: simplyexclude.php:1634
+#: simplyexclude.php:1772
+#: simplyexclude.php:1852
+msgid "Searches"
 msgstr ""
 
-#: site-categories.php:778
-msgid "This is the number of categories to show on a given page. If you have hundreds of site categories you probably would not want these all to show on a single page. That would be too much information for the user to digest. So you can set the number of categories to something manageable like 20, 50 or 100."
+#: simplyexclude.php:1638
+#: simplyexclude.php:1776
+#: simplyexclude.php:1856
+msgid "Visibility in search results."
 msgstr ""
 
-#: site-categories.php:780
-msgid "Order by"
+#: simplyexclude.php:1652
+#: simplyexclude.php:1755
+#: simplyexclude.php:1870
+msgid "Feeds"
 msgstr ""
 
-#: site-categories.php:780
-msgid "By default the displayed site categories will be ordered by Name. Using this option you can adjust the order to your liking."
+#: simplyexclude.php:1656
+#: simplyexclude.php:1759
+#: simplyexclude.php:1874
+msgid "Visibility in RSS/RSS2/Atom feeds."
 msgstr ""
 
-#: site-categories.php:782
-msgid "Hide empty Categories"
+#: simplyexclude.php:1670
+msgid "Widget: Categories"
 msgstr ""
 
-#: site-categories.php:782
-msgid "If a site categories does not have any sites assigned to it you might want to hide it from the listing."
+#: simplyexclude.php:1674
+msgid "Exclude from WordPress List Category Widget."
 msgstr ""
 
-#: site-categories.php:784
-msgid "Show Counts"
+#: simplyexclude.php:1691
+msgid "Widget: Tag Cloud"
 msgstr ""
 
-#: site-categories.php:784
-msgid "Similar to the hide empty this option lets you show the user just how many sites are associated with each site category."
+#: simplyexclude.php:1695
+msgid "Exclude from WordPress Tag Cloud Widget."
 msgstr ""
 
-#: site-categories.php:786
-#: site-categories.php:1047
-msgid "Show Category Description"
+#: simplyexclude.php:1725
+msgid "Visibility on the front/main page. Set 'Include All' to have this Post Type displayed in addition to the normal Posts."
 msgstr ""
 
-#: site-categories.php:786
-msgid "When you create the site categories you can provide a detailed description. This description can be shown as part of the display output. "
+#: simplyexclude.php:1742
+msgid "Visibility on the Post Type archive."
 msgstr ""
 
-#: site-categories.php:788
-#: site-categories.php:803
-msgid "Show Icons"
+#: simplyexclude.php:1788
+msgid "Widget: Pages"
 msgstr ""
 
-#: site-categories.php:788
-msgid "As part of the site categories setup you can upload or select an image to represent the site category. Using this option will show those icons as part of the display output."
+#: simplyexclude.php:1792
+msgid "Exclude from WordPress Pages Widget. Child pages are automatically excluded if the parent is Excluded."
 msgstr ""
 
-#: site-categories.php:790
-#: site-categories.php:805
-#: site-categories.php:1068
-#: site-categories.php:1189
-msgid "Icon size"
+#: simplyexclude.php:2577
+msgid "Set the checkbox to exclude the User items from the action"
 msgstr ""
 
-#: site-categories.php:790
-msgid "If you chose to display site category icons you can control the size of these icons using this option."
+#: simplyexclude.php:2578
+#: simplyexclude.php:2588
+#: simplyexclude.php:2597
+msgid "So what is the difference between <strong>Include only</strong> and <strong>Exclude</strong>?"
 msgstr ""
 
-#: site-categories.php:797
-msgid "The Display style is how the Sites are presented on the page."
+#: simplyexclude.php:2579
+msgid "For example you have 3 Users but always want to show Posts for only 1  specific User in the Archives. New Users are automatically hidden."
 msgstr ""
 
-#: site-categories.php:799
-#: site-categories.php:1129
-msgid "Sites per page"
+#: simplyexclude.php:2580
+msgid "For example you have 3 Users but want to hide Posts from one User in the Archives. New Users will by visible."
 msgstr ""
 
-#: site-categories.php:799
-msgid "This is the number of site to show on a given page. If you have hundreds of sites in a single category you probably would not want these all to show on a single page. That would be too much information for the user to digest. So you can set the number of sites to something manageable like 20, 50 or 100."
+#: simplyexclude.php:2587
+msgid "Set the checkbox to exclude the Taxonomy items from the action"
 msgstr ""
 
-#: site-categories.php:801
-#: site-categories.php:1159
-msgid "Show Site Description"
+#: simplyexclude.php:2589
+msgid "For example you have 100 tags but only always want 3 to be used on the home page. New tags added are automatically hidden."
 msgstr ""
 
-#: site-categories.php:801
-msgid "On the Site Admin Settings page the admin can enter a description fro the site. This is similar to the Site Category description. If provided by the site is will be displayed as part of the page output."
+#: simplyexclude.php:2590
+msgid "For example you have 100 categories but want to hide 3 from being seen. New tags will be visible."
 msgstr ""
 
-#: site-categories.php:803
-msgid "If the "
+#: simplyexclude.php:2596
+msgid "Set the checkbox to exclude the Post Type items from the action"
 msgstr ""
 
-#: site-categories.php:803
-msgid "Avatars"
+#: simplyexclude.php:2598
+msgid "For example you have 10 Pages but only always want to include only 4 Pages shown in a Search. New Pages are automatically hidden."
 msgstr ""
 
-#: site-categories.php:803
-msgid "plugins is installed you can show the Site icon as part of the display out."
+#: simplyexclude.php:2599
+msgid "For example you have 10 Pages and want to hide 3 specific Pages from Search. New Pages will be visible."
 msgstr ""
 
-#: site-categories.php:805
-msgid "If you chose to display site icons you can control the size of these icons using this option."
+#: simplyexclude.php:2614
+msgctxt "Options Page Title"
+msgid "Simply Exclude Manage Settings"
 msgstr ""
 
-#: site-categories.php:816
-#: site-categories.php:869
-msgid "Settings Overview"
+#: simplyexclude.php:2690
+msgid "Your Simply Excluded has successfully been reloaded."
 msgstr ""
 
-#: site-categories.php:830
-msgid "Categories Display Options"
+#: simplyexclude.php:2693
+msgid ""
+"Version 2.0 and 2.0.1 of the plugins incorrectly converted your previous configuration of excluded items into a new format. You can use this \n"
+"\t\t\toption to force a reload of your Simply Exclude configuration into the new format."
 msgstr ""
 
-#: site-categories.php:837
-msgid "Sites Display Options"
+#: simplyexclude.php:2701
+msgid "Reload Configuration"
 msgstr ""
 
-#: site-categories.php:857
-msgid "This page lets you associate this site with various Site Categories. The Site Categories are global to this Multisite network of sites and stores within the primary site."
+#: simplyexclude.php:2710
+msgid "The Simply Exclude plugin now works with a few other plugins. Check the box for support of the listed third party plugins options below"
 msgstr ""
 
-#: site-categories.php:859
-msgid "Depending on the number of allowed categories by the super admin you will see a number of dropdowns where you can select the site category this site is to be associated."
+#: simplyexclude.php:2711
+msgid "When you update this section you will then also need to go back into the Simply Exclude Category or Pages section and re-save the settings. This re-save will then update the third-party plugin settings with the update excluded values. On the respective Category or Pages sections of Simply Exclude you can use either include or exclude action."
 msgstr ""
 
-#: site-categories.php:860
-msgid "Also on this page you can enter an optional Site Description. The site description is used on the Site Categories landing page of the primary site."
+#: simplyexclude.php:2712
+msgid "Warning: Once enabled it is suggested you make edits to the exclusion/inclusion via Simply Exclude. Any Page or Category exclusion made in the third-party plugins will be over written by changed from Simply Exclude."
 msgstr ""
 
-#: site-categories.php:892
-msgctxt "Site Categories New Page Title"
-msgid "Site Categories Settings"
+#: simplyexclude.php:2717
+msgid "Plugin Name"
 msgstr ""
 
-#: site-categories.php:899
-#: site-categories.php:931
-msgid "Save Settings"
+#: simplyexclude.php:2718
+msgid "Description of Functionality"
 msgstr ""
 
-#: site-categories.php:924
-msgctxt "Site Categories New Page Title"
-msgid "Site Categories"
+#: simplyexclude.php:2719
+msgid "Actions"
 msgstr ""
 
-#: site-categories.php:966
-msgid "Accordion"
+#: simplyexclude.php:2774
+msgid "Plugin Homepage"
 msgstr ""
 
-#: site-categories.php:968
-msgid "Grid"
+#: simplyexclude.php:2780
+msgid "Show your support of this plugin by making a small donation to support future development. No donation amount too small."
 msgstr ""
 
-#: site-categories.php:984
-msgid "Grid Options"
+#: simplyexclude.php:2783
+msgid "Make a donation today"
 msgstr ""
 
-#: site-categories.php:986
-msgid "Number of Columns"
-msgstr ""
-
-#: site-categories.php:988
-msgid "Number of Rows"
-msgstr ""
-
-#: site-categories.php:997
-msgid "Order By"
-msgstr ""
-
-#: site-categories.php:1000
-msgid "This order by option controls how the listed Blog Categories will be ordered on the listing page."
-msgstr ""
-
-#: site-categories.php:1007
-msgid "ID"
-msgstr ""
-
-#: site-categories.php:1009
-msgid "None"
-msgstr ""
-
-#: site-categories.php:1023
-msgid "Hide Empty Categories"
-msgstr ""
-
-#: site-categories.php:1035
-msgid "Show counts"
-msgstr ""
-
-#: site-categories.php:1057
-#: site-categories.php:1169
-msgid "Show icons"
-msgstr ""
-
-#: site-categories.php:1073
-#: site-categories.php:1194
-msgid "default is 32px"
-msgstr ""
-
-#: site-categories.php:1078
-msgctxt "Category Image"
-msgid "Default Category Image"
-msgstr ""
-
-#: site-categories.php:1080
-msgid "Upload or select an image to used as the default category icons. Ensure it is at least as large as the icon size specified above. A square version of this image will be auto generated."
-msgstr ""
-
-#: site-categories.php:1180
-msgid "Site icons requires the install of the"
-msgstr ""
-
-#: site-categories.php:1180
-msgid "Avatara"
-msgstr ""
-
-#: site-categories.php:1180
-msgid "plugins"
-msgstr ""
-
-#: site-categories.php:1217
-msgid "&mdash; Select &mdash;"
-msgstr ""
-
-#: site-categories.php:1223
-msgid "The Blog Categories listing will be appended to the selected page:"
-msgstr ""
-
-#: site-categories.php:1225
-msgid "View Listing"
-msgstr ""
-
-#: site-categories.php:1247
-msgid "When the Site is created if the admin does not select from the available site categories it will automatically be assigned this this default category."
-msgstr ""
-
-#: site-categories.php:1255
-msgid "This options lets you limit the number of Blog Categories available to the blogs. This option add a number of dropdowns elements on the blog Settings General page where the admin can set the categories for their blog."
-msgstr ""
-
-#: site-categories.php:1274
-msgid "You can offer your Pro Sites level more site categories selections"
-msgstr ""
-
-#: site-categories.php:1298
-msgid "If you install <a href=\"http://premium.wpmudev.org/project/pro-sites/\" target=\"_blank\">Pro Sites</a>, you can offer your Pro Sites levels more categories selections."
-msgstr ""
-
-#: site-categories.php:1319
-msgid "Pro Sites Leve:"
-msgstr ""
-
-#: site-categories.php:1379
-msgid "Enter a Site Description to be used on the Landing page."
-msgstr ""
-
-#: site-categories.php:1469
-#: site-categories.php:1581
-msgid "Previous page"
-msgstr ""
-
-#: site-categories.php:1490
-#: site-categories.php:1595
-msgid "Next page"
-msgstr ""
-
-#: site-categories.php:1699
-msgid "Category"
-msgstr ""
-
-#: site-categories.php:1720
-msgid "Site Categories:"
-msgstr ""
-
-#. Author of the plugin/theme
-msgid "Paul Menard (Incsub)"
-msgstr ""
-
-#. Author URI of the plugin/theme
-msgid "http://premium.wpmudev.org/"
+#: simplyexclude.php:2792
+msgctxt "Options Page Title"
+msgid "Simply Exclude Help"
 msgstr ""
 
