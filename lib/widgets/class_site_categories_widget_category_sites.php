@@ -234,7 +234,7 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 				}
 			}
 
-			set_site_transient( 'site-categories-sites-data-'. $this->number, $data, 300);			
+			set_site_transient( 'site-categories-sites-data-'. $this->number, $data, 120);			
 		}
 
 

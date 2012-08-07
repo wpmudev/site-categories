@@ -1,5 +1,14 @@
-Plugin Name: Site Categories
+----------------------------------------------------------------------
+Site Categories
 Author: Paul Menard (Incsub)
+----------------------------------------------------------------------
+
+1.0.1 - 2012-08-07
+----------------------------------------------------------------------
+- Added better logic for New Site Signup form to validate and enforce required fields. On the backend added new metabox where network admin can control required fields and labels for New Site Signup form. 
+- Added link to Landing page on Site Settings page.
+- Added Tag Cloud widget with many options including category selection and font sizes control
+
 
 1.0.0 - 2012-07-30
 ----------------------------------------------------------------------

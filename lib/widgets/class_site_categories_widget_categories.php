@@ -57,7 +57,7 @@ class Bcat_WidgetCategories extends WP_Widget {
 			<label for="<?php echo $this->get_field_id( 'per_page' ); ?>"><?php 
 				_e('Number of Site Categories to show:', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 
-			<input type="text" id="<?php echo $this->get_field_id( 'per_page' ); ?>" value="<?php echo $instance['per_page']; ?>"
+			<input type="text" id="<?php echo $this->get_field_id( 'per_page' ); ?>" value="<?php echo intval($instance['per_page']); ?>"
 				name="<?php echo $this->get_field_name( 'per_page'); ?>" class="widefat" style="width:100%;" />
 		</p>
 
@@ -155,7 +155,6 @@ class Bcat_WidgetCategories extends WP_Widget {
 
 		global $site_categories;		
 		$site_categories->load_config();
-		
 		extract($args);
 
 		$per_page 		= intval($instance['per_page']);
@@ -248,7 +247,7 @@ class Bcat_WidgetCategories extends WP_Widget {
 			}		
 			restore_current_blog();
 			
-			set_site_transient( 'site-categories-categories-data-'. $this->number, $data, 300);			
+			set_site_transient( 'site-categories-categories-data-'. $this->number, $data, 120);			
 		}
 		
 		$categories_content = apply_filters('categories_widget_list_display', '', $data, $instance);
