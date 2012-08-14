@@ -42,7 +42,7 @@ require_once( dirname(__FILE__) . '/lib/display_templates/display_list_categorie
 require_once( dirname(__FILE__) . '/lib/display_templates/display_grid_categories.php');
 require_once( dirname(__FILE__) . '/lib/display_templates/display_accordion_categories.php');
 
-include_once( dirname(__FILE__) . '/lib/dash-notice/wpmudev-dash-notification.php');
+include_once( dirname(__FILE__) . '/lib/dash-notices/wpmudev-dash-notification.php');
 
 
 class SiteCategories {
