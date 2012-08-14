@@ -110,11 +110,17 @@ $(document).ready(function () {
 	// Show/Hide the Categories Grid layout selection
 	$('select#site-categories-show-style').change(function() {
 	  if ($(this).val() == "grid") {
-		$('#site-categories-grid-options').show();
-		$('#site-categories-non-grid-options').hide();
+		$('.site-categories-non-grid-options').hide();
+		$('.site-categories-accordion-options').hide();
+		$('.site-categories-grid-options').show();
+	} else if ($(this).val() == "accordion") {
+		$('.site-categories-non-accordion-options').hide();
+		$('.site-categories-grid-options').hide();
+		$('.site-categories-accordion-options').show();
 	} else {
-		$('#site-categories-grid-options').hide();		
-		$('#site-categories-non-grid-options').show();
+		$('.site-categories-grid-options').hide();		
+		$('.site-categories-accordion-options').hide();
+		$('.site-categories-non-grid-options').show();
 	}
 	});
 })

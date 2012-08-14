@@ -1,8 +1,8 @@
 <?php
 
 function process_site_categories_grid_display($content, $data, $args) {
-	//echo "args<pre>"; print_r($args); echo "</pre>";
-	//echo "data<pre>"; print_r($data); echo "</pre>";
+	echo "args<pre>"; print_r($args); echo "</pre>";
+//	echo "data<pre>"; print_r($data); echo "</pre>";
 
 	if ((isset($data['categories'])) && (count($data['categories']))) {
 
@@ -15,14 +15,19 @@ function process_site_categories_grid_display($content, $data, $args) {
 		foreach ($data['categories'] as $category) { 
 
 			$col_count += 1;
-			if ($col_count == (intval($args['grid_cols']) + 1)) {
-				$col_count = 0;
-				$clear_style .= "clear: both;";
-			} else {
-				$clear_style = '';
+
+			$class_item = " site-categories-grid-column site-categories-grid-column-". $col_count ." ";
+			$clear_style = '';
+
+			if ($col_count == 1) {
+				$class_item 	.= " site-categories-grid-column-first";
+				$clear_style 	.= "clear: both;";
+			} else if ($col_count == (intval($args['grid_cols']) )) {
+				$col_count 		= 0;
+				$class_item 	.= " site-categories-grid-column-last";
 			}
 
-			$content .=	'<li class="site-categories-parent" style="width:'. $cols_width .'%; '. $clear_style .'">';
+			$content .=	'<li class="site-categories-parent '. $class_item .'" style="width:'. $cols_width .'%; '. $clear_style .'">';
 
 			if ($category->count > 0)
 				$content .=	'<a href="'. $category->bcat_url .'">';
@@ -34,9 +39,9 @@ function process_site_categories_grid_display($content, $data, $args) {
 
 			$content .= '<span class="site-category-title">'. $category->name .'</span>';
 
-//			if ($args['show_counts']) {
-//				$content .= '<span class="site-category-count">('. $category->count .')</span>';
-//			}
+			if ($args['show_counts']) {
+				$content .= '<span class="site-category-count">('. $category->count .')</span>';
+			}
 			
 			if ($category->count > 0)
 				$content .= '</a>';
@@ -58,17 +63,32 @@ function process_site_categories_grid_display($content, $data, $args) {
 
 					$content .=	'<li class="site-categories-child" style="width: 100%">';
 
+					if ( ($args['icon_show_children'] == true) && (isset($category_child->icon_image_src))) {
+						$content .= '<img class="site-category-icon" width="'. $args['icon_size_children'] .'" height="'. $args['icon_size_children'] .'"
+						 alt="'. $category_child->name .'" src="'. $category_child->icon_image_src .'" />';
+					} 
+
 					if ($category_child->count > 0)
 						$content .=	'<a href="'. $category_child->bcat_url .'">';
 
 					$content .= '<span class="site-category-title">'. $category_child->name .'</span>';
 
-					if ($args['show_counts']) {
+					if ($args['show_counts_children']) {
 						$content .= '<span class="site-category-count">('. $category_child->count .')</span>';
 					}
 
 					if ($category_child->count > 0)
 						$content .= '</a>';
+
+					if (($args['show_description_children']) && (strlen($category_child->description))) {
+
+						$bact_category_description = apply_filters('the_content', $category_child->description);
+						$bact_category_description = str_replace(']]>', ']]&gt;', $bact_category_description);
+
+						if (strlen($bact_category_description)) {
+							$content .= '<div class="site-category-description">'. $bact_category_description .'</div>';
+						}
+					}
 						
 					$content .= '</li>';
 				}

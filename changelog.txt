@@ -3,6 +3,13 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.2 - 2012-08-12
+----------------------------------------------------------------------
+- Corrected issue counting category items (sites) when viewing landing page.
+- Corrected forced break in Grid display template. 
+- Added options for better handling of hierarchical category display for Grid and Accordion layouts. Allows selection of show icon, show description, show icon and icon size for parent and child categories
+- Add option 'Category parents selectable' to prevent selection of top-level categories. This is handy when using the accordion layout option to. So on the new site registration and the site settings page the dropdown(s) will limit selection to child categories only.
+
 1.0.1 - 2012-08-07
 ----------------------------------------------------------------------
 - Added better logic for New Site Signup form to validate and enforce required fields. On the backend added new metabox where network admin can control required fields and labels for New Site Signup form. 

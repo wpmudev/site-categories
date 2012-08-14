@@ -74,7 +74,8 @@ ul.site-categories-widget li {
 	font-size: 1.0em;
 }
 
-#site-categories-wrapper div.site-category-description {
+#site-categories-wrapper div.site-category-description,
+#site-categories-wrapper div.site-category-description-parent {
 	clear: both;
 	float: left;
 }
@@ -83,7 +84,9 @@ ul.site-categories-widget li {
 	margin-bottom: 10px;
 }
 
-
+#site-categories-wrapper .site-categories-accordion ul.site-categories-children div.site-category-description {
+	width: 90%;
+}
 
 
 #site-categories-wrapper li.site-categories-parent {
@@ -97,7 +100,7 @@ ul.site-categories-widget li {
 	float: left;
 	clear: both;
 	width: 100%;
-	margin: 0;
+	margin: 10px 0 0 0;
 	padding: 0;
 	list-style: none;
 }
@@ -132,7 +135,7 @@ ul.site-categories-widget li {
 #site-categories-wrapper .site-categories-grid span.site-category-title
 {
 	float: left;
-	margin: 0 15px;
+/*	margin: 0 15px; */
 	font-weight: bold;
 	font-size: 1.1em;
 }
