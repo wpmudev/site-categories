@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.2
+Version: 1.0.3
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -502,17 +502,22 @@ class SiteCategories {
 			'landing_page_id'			=>	0,
 			'landing_page_slug'			=>	'',
 
-			'sites'							=>	array(
-				'per_page'					=>	5,
-				'icon_show' 				=> 	1,
-				'icon_size'					=>	32,
-				'orderby' 					=> 	'name',
-				'order'						=>	'ASC',
-				'show_style'				=>	'ul',
-				'show_description'			=>	0,
-				'default_category' 			=> 	0,
-				'category_limit'			=>	10,
-				'signup_category_label'		=>	__('Site Categories', SITE_CATEGORIES_TAXONOMY)
+			'sites'										=>	array(
+				'per_page'								=>	5,
+				'icon_show' 							=> 	1,
+				'icon_size'								=>	32,
+				'orderby' 								=> 	'name',
+				'order'									=>	'ASC',
+				'show_style'							=>	'ul',
+				'show_description'						=>	0,
+				'default_category' 						=> 	0,
+				'category_limit'						=>	10,
+				'signup_category_parent_selectable'		=> 1,
+				'signup_show'							=>	1,
+				'signup_category_required'				=>	1,
+				'signup_category_label'					=>	__('Site Categories', SITE_CATEGORIES_TAXONOMY),
+				'signup_description_required'			=>	1,
+				'signup_description_label'				=>	__('Site Description', SITE_CATEGORIES_TAXONOMY)
 			),
 			
 			'categories'					=>	array(
@@ -966,65 +971,107 @@ class SiteCategories {
 		
 		$screen_help_text = array();
 		
-		$screen_help_text['site-categories-page-settings'] = '<p>' . __( 'This Settings panel controls various display options for the Landing page. This landing page is hosted only on the primary site and from the options on this page you can control the layout of the site categories items.', SITE_CATEGORIES_I18N_DOMAIN ) . '</p>';
+		/**
+		Left navigation list
+		*/
+		$screen_help_text['site-categories-help-overview'] = '<p>' . __( 'This Settings panel controls various display options for the Landing page. This landing page is hosted only on the primary site and from the options on this page you can control the layout of the site categories items.', SITE_CATEGORIES_I18N_DOMAIN ) . '</p>';
 
-		$screen_help_text['site-categories-page-settings'] .= "<ul>";
+		$screen_help_text['site-categories-help-overview'] .= "<ul>";
 
-		$screen_help_text['site-categories-page-settings'] .= '<li><strong>'. __('Landing Page Selection', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection lets you set the landing page to be used when displaying the Site Categories.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		$screen_help_text['site-categories-help-overview'] .= '<li><strong>'. __('Landing Page Selection', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection lets you set the landing page to be used when displaying the Site Categories.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 
-		$screen_help_text['site-categories-page-settings'] .= '<li><strong>'. __('Landing Page Categories Display Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection controls the output of the Site Categories on the landing page. Here you can control the style, icons, number of categories per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		$screen_help_text['site-categories-help-overview'] .= '<li><strong>'. __('Site Categories Selection Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection lets you set the landing page to be used when displaying the Site Categories.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 
-		$screen_help_text['site-categories-page-settings'] .= '<li><strong>'. __('Landing Page Sites Display Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection controls the output of the Sites on the landing page. Here you can control the style, icons, number of sites per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
-		$screen_help_text['site-categories-page-settings'] .= "</ul>";
+		$screen_help_text['site-categories-help-overview'] .= '<li><strong>'. __('Landing Page Categories Display Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection controls the output of the Site Categories on the landing page. Here you can control the style, icons, number of categories per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 
-		$screen_help_text['site-categories-page-settings-landing'] = '<p>'. __('The Landing Page Selection lets you set the landing page to be used when displaying the Site Categories.', SITE_CATEGORIES_I18N_DOMAIN). '</p>';
-		$screen_help_text['site-categories-page-settings-landing'] .= '<ul>';
+		$screen_help_text['site-categories-help-overview'] .= '<li><strong>'. __('Landing Page Sites Display Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection controls the output of the Sites on the landing page. Here you can control the style, icons, number of sites per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 		
-		$screen_help_text['site-categories-page-settings-landing'] .= '<li><strong>'. __('Select Landing Page', SITE_CATEGORIES_I18N_DOMAIN). '</strong> - '. __('Select the page to function as the site categories landing page. The landing page will be inserted automatically at the bottom of the page content.', SITE_CATEGORIES_I18N_DOMAIN). '</li>';
+		$screen_help_text['site-categories-help-overview'] .= '<li><strong>'. __('New Site Signup Form Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection lets you set the landing page to be used when displaying the Site Categories.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 		
-/*
-		$screen_help_text['site-categories-page-settings-landing'] .= '<li><strong>'. __('Default Category', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('If the site admin does not set the site categories we use this to set a default site category. This works very similar to post categories. If you create a new post and do not mark it into any specific categories the default categories is automatically assigned.', SITE_CATEGORIES_I18N_DOMAIN). '</li>';
-*/
+		$screen_help_text['site-categories-help-overview'] .= "</ul>";
 
-		$screen_help_text['site-categories-page-settings-landing'] .= '<li><strong>'. __('Number of categories per site', SITE_CATEGORIES_I18N_DOMAIN). '</strong> - '. __('This controls the number of categories a site can set. Within the site settings panel the admin will see a number of dropdowns for the Site Categories. The admin can set one or more of these to the available site categories.', SITE_CATEGORIES_I18N_DOMAIN). '</li>';
-		
-		$screen_help_text['site-categories-page-settings-landing'] .= '<li><strong>'. __('Pro Sites', SITE_CATEGORIES_I18N_DOMAIN). '</strong> - '. __('If you have the', SITE_CATEGORIES_I18N_DOMAIN). ' <a href="http://premium.wpmudev.org/project/pro-sites/" target="_blank">'. __('Pro Sites', SITE_CATEGORIES_I18N_DOMAIN) .'</a> '. __('plugins installed you can assign a different number of Site Categories for each level.', SITE_CATEGORIES_I18N_DOMAIN). '</li>';
-		$screen_help_text['site-categories-page-settings-landing'] .= '</ul>';
-		
-		
-		$screen_help_text['site-categories-page-settings-landing-categories'] = '<p>'. __('This Selection controls the output of the Site Categories on the landing page. Here you can control the style, icons, number of categories per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</p>';
-		$screen_help_text['site-categories-page-settings-landing-categories'] .= '<ul>';
-		$screen_help_text['site-categories-page-settings-landing-categories'] .= '<li><strong>'. __('Display Style', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('The Display style is how the Site Categories are presented on the page. From the dropdown you can select a simple list or try more advanced display options like Grid or Accordion.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 
-		$screen_help_text['site-categories-page-settings-landing-categories'] .= '<li><strong>'. __('Categories per page', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This is the number of categories to show on a given page. If you have hundreds of site categories you probably would not want these all to show on a single page. That would be too much information for the user to digest. So you can set the number of categories to something manageable like 20, 50 or 100.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
-
-		$screen_help_text['site-categories-page-settings-landing-categories'] .= '<li><strong>'. __('Order by', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('By default the displayed site categories will be ordered by Name. Using this option you can adjust the order to your liking.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
-		
-		$screen_help_text['site-categories-page-settings-landing-categories'] .= '<li><strong>'. __('Hide empty Categories', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('If a site categories does not have any sites assigned to it you might want to hide it from the listing.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
-
-		$screen_help_text['site-categories-page-settings-landing-categories'] .= '<li><strong>'. __('Show Counts', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('Similar to the hide empty this option lets you show the user just how many sites are associated with each site category.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
-		
-		$screen_help_text['site-categories-page-settings-landing-categories'] .= '<li><strong>'. __('Show Category Description', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('When you create the site categories you can provide a detailed description. This description can be shown as part of the display output. ', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
-		
-		$screen_help_text['site-categories-page-settings-landing-categories'] .= '<li><strong>'. __('Show Icons', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('As part of the site categories setup you can upload or select an image to represent the site category. Using this option will show those icons as part of the display output.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
-		
-		$screen_help_text['site-categories-page-settings-landing-categories'] .= '<li><strong>'. __('Icon size', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('If you chose to display site category icons you can control the size of these icons using this option.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
-
-		$screen_help_text['site-categories-page-settings-landing-categories'] .= '</ul>';
+		/**
+		Landing Page Selection
+		*/
+		$screen_help_text['site-categories-help-settings-landing'] = '<p>'. __('The Landing Page Selection lets you set the landing page to be used when displaying the Site Categories.', SITE_CATEGORIES_I18N_DOMAIN). '</p>';
+		$screen_help_text['site-categories-help-settings-landing'] .= '<ul>';
 			
-		$screen_help_text['site-categories-page-settings-landing-sites'] = '<p>'. __('This Selection controls the output of the Sites on the landing page. Here you can control the style, icons, number of sites per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</p>';
-		$screen_help_text['site-categories-page-settings-landing-sites'] .= '<ul>';
-		$screen_help_text['site-categories-page-settings-landing-sites'] .= '<li><strong>'. __('Display Style', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('The Display style is how the Sites are presented on the page.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
-
-		$screen_help_text['site-categories-page-settings-landing-sites'] .= '<li><strong>'. __('Sites per page', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This is the number of site to show on a given page. If you have hundreds of sites in a single category you probably would not want these all to show on a single page. That would be too much information for the user to digest. So you can set the number of sites to something manageable like 20, 50 or 100.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
-
-		$screen_help_text['site-categories-page-settings-landing-sites'] .= '<li><strong>'. __('Show Site Description', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('On the Site Admin Settings page the admin can enter a description fro the site. This is similar to the Site Category description. If provided by the site is will be displayed as part of the page output.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
-
-		$screen_help_text['site-categories-page-settings-landing-sites'] .= '<li><strong>'. __('Show Icons', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('If the ', SITE_CATEGORIES_I18N_DOMAIN). '<a href="http://premium.wpmudev.org/project/avatars/" target="_blank">'. __('Avatars', SITE_CATEGORIES_I18N_DOMAIN) .'</a> '. __('plugins is installed you can show the Site icon as part of the display out.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		$screen_help_text['site-categories-help-settings-landing'] .= '<li><strong>'. __('Select Landing Page', SITE_CATEGORIES_I18N_DOMAIN). '</strong> - '. __('Select the page to function as the site categories landing page. The landing page will be inserted automatically at the bottom of the page content.', SITE_CATEGORIES_I18N_DOMAIN). '</li>';
+		$screen_help_text['site-categories-help-settings-landing'] .= '</ul>';
+	
+	
+		/**
+		Site Categories Selection Options
+		*/	
+		$screen_help_text['site-categories-help-settings-selection'] = '<p>'. '</p>';
+		$screen_help_text['site-categories-help-settings-selection'] = '<ul>';
 		
-		$screen_help_text['site-categories-page-settings-landing-sites'] .= '<li><strong>'. __('Icon size', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('If you chose to display site icons you can control the size of these icons using this option.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		$screen_help_text['site-categories-help-settings-selection'] = '<li><strong>'. __('Number of Categories per site', SITE_CATEGORIES_I18N_DOMAIN). '</strong> - '. __(' This option controls the number of dropdown selectors the site admin will see when creating a new site or under the Site Categories Settings option within an existing site.', SITE_CATEGORIES_I18N_DOMAIN). '</li>';
+
+		$screen_help_text['site-categories-help-settings-selection'] .= '<li><strong>'. __('Number of categories per site', SITE_CATEGORIES_I18N_DOMAIN). '</strong> - '. __('This controls the number of categories a site can set. Within the site settings panel the admin will see a number of dropdowns for the Site Categories. The admin can set one or more of these to the available site categories.', SITE_CATEGORIES_I18N_DOMAIN). '</li>';
 		
-		$screen_help_text['site-categories-page-settings-landing-sites'] .= '</ul>';
+		$screen_help_text['site-categories-help-settings-selection'] .= '<li><strong>'. __('Pro Sites', SITE_CATEGORIES_I18N_DOMAIN). '</strong> - '. sprintf(__('If you have the %1$sPro Sites%2$s plugins installed you can assign a different number of Site Categories for each level', SITE_CATEGORIES_I18N_DOMAIN), '<a href="http://premium.wpmudev.org/project/pro-sites/" target="_blank">', '</a>'). '</li>';
+
+			$screen_help_text['site-categories-help-settings-selection'] .= '<li><strong>'. __('Category parents selectable', SITE_CATEGORIES_I18N_DOMAIN). '</strong> - '. __('With this option to can force the selection of only child categories from the dropdown selectors. This is handy when displaying your Site Categories using the Grid layout.', SITE_CATEGORIES_I18N_DOMAIN) . '</li>';
+			
+		$screen_help_text['site-categories-help-settings-selection'] .= '</ul>';
+		
+		
+		/**
+		Landing Page Categories Display Options 
+		*/		
+		$screen_help_text['site-categories-help-settings-landing-categories'] = '<p>'. __('This Selection controls the output of the Site Categories on the landing page. Here you can control the style, icons, number of categories per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</p>';
+		$screen_help_text['site-categories-help-settings-landing-categories'] .= '<ul>';
+		$screen_help_text['site-categories-help-settings-landing-categories'] .= '<li><strong>'. __('Display Style', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('The Display style is how the Site Categories are presented on the page. From the dropdown you can select a simple list or try more advanced display options like Grid or Accordion.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+
+		$screen_help_text['site-categories-help-settings-landing-categories'] .= '<li><strong>'. __('Categories per page', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This is the number of categories to show on a given page. If you have hundreds of site categories you probably would not want these all to show on a single page. That would be too much information for the user to digest. So you can set the number of categories to something manageable like 20, 50 or 100.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+
+		$screen_help_text['site-categories-help-settings-landing-categories'] .= '<li><strong>'. __('Order by', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('By default the displayed site categories will be ordered by Name. Using this option you can adjust the order to your liking.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		
+		$screen_help_text['site-categories-help-settings-landing-categories'] .= '<li><strong>'. __('Hide empty Categories', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('If a site categories does not have any sites assigned to it you might want to hide it from the listing.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+
+		$screen_help_text['site-categories-help-settings-landing-categories'] .= '<li><strong>'. __('Show Counts', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('Similar to the hide empty this option lets you show the user just how many sites are associated with each site category.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		
+		$screen_help_text['site-categories-help-settings-landing-categories'] .= '<li><strong>'. __('Show Category Description', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('When you create the site categories you can provide a detailed description. This description can be shown as part of the display output. ', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		
+		$screen_help_text['site-categories-help-settings-landing-categories'] .= '<li><strong>'. __('Show Icons', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('As part of the site categories setup you can upload or select an image to represent the site category. Using this option will show those icons as part of the display output.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		
+		$screen_help_text['site-categories-help-settings-landing-categories'] .= '<li><strong>'. __('Icon size', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('If you chose to display site category icons you can control the size of these icons using this option.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+
+		$screen_help_text['site-categories-help-settings-landing-categories'] .= '</ul>';
+
+
+		/**
+		Landing Page Sites Display Options 
+		*/			
+		$screen_help_text['site-categories-help-settings-landing-sites'] = '<p>'. __('This Selection controls the output of the Sites on the landing page. Here you can control the style, icons, number of sites per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</p>';
+		$screen_help_text['site-categories-help-settings-landing-sites'] .= '<ul>';
+		$screen_help_text['site-categories-help-settings-landing-sites'] .= '<li><strong>'. __('Display Style', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('The Display style is how the Sites are presented on the page.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+
+		$screen_help_text['site-categories-help-settings-landing-sites'] .= '<li><strong>'. __('Sites per page', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This is the number of site to show on a given page. If you have hundreds of sites in a single category you probably would not want these all to show on a single page. That would be too much information for the user to digest. So you can set the number of sites to something manageable like 20, 50 or 100.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+
+		$screen_help_text['site-categories-help-settings-landing-sites'] .= '<li><strong>'. __('Show Site Description', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('On the Site Admin Settings page the admin can enter a description for the site. This is similar to the Site Category description. If provided by the site is will be displayed as part of the page output.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+
+		$screen_help_text['site-categories-help-settings-landing-sites'] .= '<li><strong>'. __('Show Icons', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. sprintf(__('If the %1$sAvatars%2$s plugins is installed you can show the Site icon as part of the display output.', SITE_CATEGORIES_I18N_DOMAIN), 
+			'<a href="http://premium.wpmudev.org/project/avatars/" target="_blank">', '</a>'). '</li>';
+		
+		$screen_help_text['site-categories-help-settings-landing-sites'] .= '<li><strong>'. __('Icon size', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('If you chose to display site icons you can control the size of these icons using this option.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		
+		$screen_help_text['site-categories-help-settings-landing-sites'] .= '</ul>';
+
+
+		/**
+		New Site Signup Form Options
+		*/
+		$screen_help_text['site-categories-help-signup-form'] = '<p>'. __('This Selection controls the output of the Site Categories on the landing page. Here you can control the style, icons, number of categories per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</p>';
+		$screen_help_text['site-categories-help-signup-form'] .= '<ul>';
+		$screen_help_text['site-categories-help-signup-form'] .= '<li><strong>'. __('Show Site Categories section', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('With this option you can control the display of the Site Categories dropdowns and description on the New Site Signup Form.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		$screen_help_text['site-categories-help-signup-form'] .= '<li><strong>'. __('Site Categories Selection Required', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('Allows you to force the new site admin to select Site Categories options. If set the admin is required to set ', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		$screen_help_text['site-categories-help-signup-form'] .= '<li><strong>'. __('Label for Site Categories Dropdowns', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This option lets you use an alternate form label for the Site Categories dropdown selector. Maybe something more descriptive to the user.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		$screen_help_text['site-categories-help-signup-form'] .= '<li><strong>'. __('Description is Required', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This option control if the Site Description textarea field is required on the form.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		$screen_help_text['site-categories-help-signup-form'] .= '<li><strong>'. __('Label for Site Categories Description', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This option lets you use an alternate form label for the Site Description field.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		$screen_help_text['site-categories-help-signup-form'] .= '</ul>';
 
 
 		if ( version_compare( $wp_version, '3.3.0', '>' ) ) {
@@ -1032,32 +1079,47 @@ class SiteCategories {
 			if ((isset($_REQUEST['page'])) && ($_REQUEST['page'] == "bcat_settings")) {
 		
 				$screen->add_help_tab( array(
-					'id'		=> 'site-categories-page-settings',
+					'id'		=> 'site-categories-help-overview',
 					'title'		=> __('Settings Overview', SITE_CATEGORIES_I18N_DOMAIN ),
-					'content'	=>  $screen_help_text['site-categories-page-settings']
+					'content'	=>  $screen_help_text['site-categories-help-overview']
 			    	) 
 				);
 
 				$screen->add_help_tab( array(
-					'id'		=> 'site-categories-page-settings-landing',
+					'id'		=> 'site-categories-help-settings-landing',
 					'title'		=> __('Landing Page Selection', SITE_CATEGORIES_I18N_DOMAIN ),
-					'content'	=>  $screen_help_text['site-categories-page-settings-landing']
+					'content'	=>  $screen_help_text['site-categories-help-settings-landing']
+			    	) 
+				);
+
+				$screen->add_help_tab( array(
+					'id'		=> 'site-categories-help-settings-selection',
+					'title'		=> __('Site Categories Selection Options', SITE_CATEGORIES_I18N_DOMAIN ),
+					'content'	=>  $screen_help_text['site-categories-help-settings-selection']
 			    	) 
 				);
 				
 				$screen->add_help_tab( array(
-					'id'		=> 'site-categories-page-settings-landing-categories',
+					'id'		=> 'site-categories-help-settings-landing-categories',
 					'title'		=> __('Categories Display Options', SITE_CATEGORIES_I18N_DOMAIN ),
-					'content'	=>  $screen_help_text['site-categories-page-settings-landing-categories']
+					'content'	=>  $screen_help_text['site-categories-help-settings-landing-categories']
 			    	) 
 				);
 
 				$screen->add_help_tab( array(
-					'id'		=> 'site-categories-page-settings-landing-sites',
+					'id'		=> 'site-categories-help-settings-landing-sites',
 					'title'		=> __('Sites Display Options', SITE_CATEGORIES_I18N_DOMAIN ),
-					'content'	=>  $screen_help_text['site-categories-page-settings-landing-sites']
+					'content'	=>  $screen_help_text['site-categories-help-settings-landing-sites']
 			    	) 
 				);
+
+				$screen->add_help_tab( array(
+					'id'		=> 'site-categories-help-signup-form',
+					'title'		=> __('New Site Signup Form Options', SITE_CATEGORIES_I18N_DOMAIN ),
+					'content'	=>  $screen_help_text['site-categories-help-signup-form']
+			    	) 
+				);
+				
 			}			
 		} 
 	}
@@ -1543,8 +1605,10 @@ class SiteCategories {
 							for="site-categories-show-sites-icons-show-no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label>						
 						<?php
 					} else {
-						?><p><?php echo __('Site icons requires the install of the', SITE_CATEGORIES_I18N_DOMAIN) .' <a href="http://premium.wpmudev.org/project/avatars/" target="_blank">'. __('Avatars', SITE_CATEGORIES_I18N_DOMAIN) .'</a> '. __('plugins', SITE_CATEGORIES_I18N_DOMAIN) ?></p><?php
-					}				
+						?><p><?php echo sprintf(__('Install the %1$sAvatars%2$s plugin to show Site icons.', SITE_CATEGORIES_I18N_DOMAIN),  
+							'<a href="http://premium.wpmudev.org/project/avatars/" target="_blank">', 
+							'</a>'); ?></p><?php
+					}
 				?>
 
 			</td>
@@ -1576,20 +1640,6 @@ class SiteCategories {
 	function settings_main_sites_signup_form_options_panel() {
 
 		//echo "opts<pre>"; print_r($this->opts); echo "</pre>";
-
-		if (!isset($this->opts['sites']['signup_category_label']))
-			$this->opts['sites']['signup_category_label'] = __('Site Categories', SITE_CATEGORIES_I18N_DOMAIN);
-
-		if (!isset($this->opts['sites']['signup_category_minimum'])) {
-			$this->opts['sites']['signup_category_minimum'] = 1;
-		}
-
-		if (!isset($this->opts['sites']['signup_description_label']))
-			$this->opts['sites']['signup_description_label'] = __('Site Description ', SITE_CATEGORIES_I18N_DOMAIN);
-
-		if (!isset($this->opts['sites']['signup_category_required'])) {
-			$this->opts['sites']['signup_category_required'] = 0;
-		}			
 
 		?>
 		<p><?php _e('These options let you control the Site Categories information displayed on the front-end New Site form.', SITE_CATEGORIES_I18N_DOMAIN); ?></p>
@@ -1767,7 +1817,8 @@ class SiteCategories {
 							}
 						}
 					} else {
-						?><p class=""><?php _e('If you install <a href="http://premium.wpmudev.org/project/pro-sites/" target="_blank">Pro Sites</a>, you can offer your Pro Sites levels more categories selections.', SITE_CATEGORIES_I18N_DOMAIN); ?></p><?php
+						?><p class=""><?php echo sprintf(__('If you install the %1$sPro Sites%2$s plugin, you can offer your Pro Sites levels more categories selections.', SITE_CATEGORIES_I18N_DOMAIN),
+						'<a href="http://premium.wpmudev.org/project/pro-sites/" target="_blank">', '</a>'); ?></p><?php
 					}
 				?>
 			</td>

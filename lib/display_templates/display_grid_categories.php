@@ -1,7 +1,7 @@
 <?php
 
 function process_site_categories_grid_display($content, $data, $args) {
-	echo "args<pre>"; print_r($args); echo "</pre>";
+//	echo "args<pre>"; print_r($args); echo "</pre>";
 //	echo "data<pre>"; print_r($data); echo "</pre>";
 
 	if ((isset($data['categories'])) && (count($data['categories']))) {
