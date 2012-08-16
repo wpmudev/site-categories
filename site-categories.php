@@ -980,13 +980,13 @@ class SiteCategories {
 
 		$screen_help_text['site-categories-help-overview'] .= '<li><strong>'. __('Landing Page Selection', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection lets you set the landing page to be used when displaying the Site Categories.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 
-		$screen_help_text['site-categories-help-overview'] .= '<li><strong>'. __('Site Categories Selection Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection lets you set the landing page to be used when displaying the Site Categories.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		$screen_help_text['site-categories-help-overview'] .= '<li><strong>'. __('Site Categories Selection Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection lets control how the Site Categories will be seen and selected by other site admin users.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 
 		$screen_help_text['site-categories-help-overview'] .= '<li><strong>'. __('Landing Page Categories Display Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection controls the output of the Site Categories on the landing page. Here you can control the style, icons, number of categories per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 
 		$screen_help_text['site-categories-help-overview'] .= '<li><strong>'. __('Landing Page Sites Display Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection controls the output of the Sites on the landing page. Here you can control the style, icons, number of sites per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 		
-		$screen_help_text['site-categories-help-overview'] .= '<li><strong>'. __('New Site Signup Form Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection lets you set the landing page to be used when displaying the Site Categories.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
+		$screen_help_text['site-categories-help-overview'] .= '<li><strong>'. __('New Site Signup Form Options', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('This Selection controls how the Site Categories options are display on the New Site Signup Form.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 		
 		$screen_help_text['site-categories-help-overview'] .= "</ul>";
 
@@ -1004,10 +1004,10 @@ class SiteCategories {
 		/**
 		Site Categories Selection Options
 		*/	
-		$screen_help_text['site-categories-help-settings-selection'] = '<p>'. '</p>';
-		$screen_help_text['site-categories-help-settings-selection'] = '<ul>';
+		$screen_help_text['site-categories-help-settings-selection'] = '<p>'. __('This Selection lets control how the Site Categories will be seen and selected by other site admin users.', SITE_CATEGORIES_I18N_DOMAIN).'</p>';
+		$screen_help_text['site-categories-help-settings-selection'] .= '<ul>';
 		
-		$screen_help_text['site-categories-help-settings-selection'] = '<li><strong>'. __('Number of Categories per site', SITE_CATEGORIES_I18N_DOMAIN). '</strong> - '. __(' This option controls the number of dropdown selectors the site admin will see when creating a new site or under the Site Categories Settings option within an existing site.', SITE_CATEGORIES_I18N_DOMAIN). '</li>';
+		$screen_help_text['site-categories-help-settings-selection'] .= '<li><strong>'. __('Number of Categories per site', SITE_CATEGORIES_I18N_DOMAIN). '</strong> - '. __(' This option controls the number of dropdown selectors the site admin will see when creating a new site or under the Site Categories Settings option within an existing site.', SITE_CATEGORIES_I18N_DOMAIN). '</li>';
 
 		$screen_help_text['site-categories-help-settings-selection'] .= '<li><strong>'. __('Number of categories per site', SITE_CATEGORIES_I18N_DOMAIN). '</strong> - '. __('This controls the number of categories a site can set. Within the site settings panel the admin will see a number of dropdowns for the Site Categories. The admin can set one or more of these to the available site categories.', SITE_CATEGORIES_I18N_DOMAIN). '</li>';
 		
@@ -1064,7 +1064,7 @@ class SiteCategories {
 		/**
 		New Site Signup Form Options
 		*/
-		$screen_help_text['site-categories-help-signup-form'] = '<p>'. __('This Selection controls the output of the Site Categories on the landing page. Here you can control the style, icons, number of categories per page, etc.', SITE_CATEGORIES_I18N_DOMAIN) .'</p>';
+		$screen_help_text['site-categories-help-signup-form'] = '<p>'. __('This Selection controls how the Site Categories options are display on the New Site Signup Form.', SITE_CATEGORIES_I18N_DOMAIN) .'</p>';
 		$screen_help_text['site-categories-help-signup-form'] .= '<ul>';
 		$screen_help_text['site-categories-help-signup-form'] .= '<li><strong>'. __('Show Site Categories section', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('With this option you can control the display of the Site Categories dropdowns and description on the New Site Signup Form.', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
 		$screen_help_text['site-categories-help-signup-form'] .= '<li><strong>'. __('Site Categories Selection Required', SITE_CATEGORIES_I18N_DOMAIN) .'</strong> - '. __('Allows you to force the new site admin to select Site Categories options. If set the admin is required to set ', SITE_CATEGORIES_I18N_DOMAIN) .'</li>';
