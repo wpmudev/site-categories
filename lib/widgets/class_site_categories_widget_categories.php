@@ -153,7 +153,8 @@ class Bcat_WidgetCategories extends WP_Widget {
 
 	function widget($args, $instance) {
 
-		global $site_categories;		
+		global $site_categories, $current_site;		
+		
 		$site_categories->load_config();
 		extract($args);
 
@@ -193,7 +194,7 @@ class Bcat_WidgetCategories extends WP_Widget {
 		$data = get_site_transient( 'site-categories-categories-data-'. $this->number );
 		if (!$data) {
 			
-			switch_to_blog( 1 );
+			switch_to_blog( $current_site->blog_id );
 		
 			$get_terms_args = array();
 			$get_terms_args['hide_empty']	=	$instance['hide_empty'];

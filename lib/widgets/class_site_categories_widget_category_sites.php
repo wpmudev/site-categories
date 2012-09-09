@@ -11,6 +11,8 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 
 	function form($instance) {
 		
+		global $current_site; 
+		
 		$defaults	=	array(
 			'title'					=>	'',
 			'category'				=>	0,
@@ -38,7 +40,7 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 		<p>
 			<label for="<?php echo $this->get_field_id('category'); ?>"><?php _e('Site Category:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
 			<?php
-				switch_to_blog( 1 );
+				switch_to_blog( $current_site->blog_id );
 			
 				$bcat_args = array(
 					'taxonomy'			=> 	SITE_CATEGORIES_TAXONOMY,
@@ -171,7 +173,7 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 	}
 
 	function widget($args, $instance) {
-		global $site_categories;
+		global $site_categories, $current_site;
 		
 		$site_categories->load_config();
 
@@ -181,7 +183,7 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 		$data = get_site_transient( 'site-categories-sites-data-'. $this->number );
 		if (!$data) {
 
-			switch_to_blog( 1 );
+			switch_to_blog( $current_site->blog_id );
 
 			$sites = $site_categories->get_taxonomy_sites($instance['category'], $instance['include_children']);
 			
@@ -289,7 +291,9 @@ function process_categories_widget_list_sites_display($content, $data, $args) {
 
 				if ( (isset($args['show_description'])) && ($args['show_description'] == true) && (isset($site->bact_site_description)) && (strlen($site->bact_site_description))) {
 
-					$bact_site_description = apply_filters('the_content', $site->bact_site_description);
+					//$bact_site_description = apply_filters('the_content', $site->bact_site_description);
+					$bact_category_description = wpautop($category->description);
+					
 					$bact_site_description = str_replace(']]>', ']]&gt;', $bact_site_description);						
 
 					if (strlen($bact_site_description)) {

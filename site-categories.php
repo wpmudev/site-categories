@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.3
+Version: 1.0.4
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -52,6 +52,7 @@ class SiteCategories {
 	private $_settings	= array();	// These are global dynamic settings NOT stores as part of the config options
 	
 	private $_admin_header_error;	// Set during processing will contain processing errors to display back to the user
+	private $bcat_signup_meta = array();	// Used to store the signup meta information related to Site Categories during the processing. 
 
 	/**
 	 * The old-style PHP Class constructor. Used when an instance of this class 
@@ -79,7 +80,7 @@ class SiteCategories {
 	 */
 	function __construct() {
 		
-		$this->_settings['VERSION'] 				= '1.0.2';
+		$this->_settings['VERSION'] 				= '1.0.4';
 		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
 		$this->_settings['PLUGIN_URL']				= WP_CONTENT_URL . "/plugins/". basename( dirname(__FILE__) );
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
@@ -111,13 +112,15 @@ class SiteCategories {
 		add_action( "edit_bcat", 					array(&$this, 'bcat_taxonomy_term_save'), 99, 2 );
 		
 		// Adds our Site Categories to the Site signup form. 
-		add_action( 'signup_blogform', 				array($this, 'inject_category_signup_proc') );
+		add_action( 'signup_blogform', 				array($this, 'bcat_signup_blogform') );
 		add_action( 'wpmu_new_blog', 				array($this, 'wpmu_new_blog_proc'), 99, 6 );
 		add_filter( 'wpmu_validate_blog_signup', 	array($this, 'bcat_wpmu_validate_blog_signup'));
+		add_filter( 'add_signup_meta', 				array($this, 'bcat_add_signup_meta'));
 
 		// Output for the Title and Content of the Site Category listing page
 		add_filter( 'the_title', 					array($this, 'process_categories_title'), 99, 2 );
 		add_filter( 'the_content', 					array($this, 'process_categories_body'), 99 );
+		//add_filter( 'the_content', 					array($this, 'dummy_body') );
 				
 		// Rewrite rules logic
 		add_filter( 'rewrite_rules_array', 			array($this, 'insert_rewrite_rules') );
@@ -147,7 +150,7 @@ class SiteCategories {
 					add_thickbox();
 
 					wp_register_script('site-categories-admin', WP_PLUGIN_URL .'/'. basename(dirname(__FILE__)) .'/js/jquery.site-categories-admin.js', 
-						array('jquery'), '1.0' );
+						array('jquery'), $this->_settings['VERSION']  );
 					wp_enqueue_script('site-categories-admin');
 					
 					
@@ -155,7 +158,7 @@ class SiteCategories {
 					add_thickbox();
 
 					wp_register_script('site-categories-admin', WP_PLUGIN_URL .'/'. basename(dirname(__FILE__)) .'/js/jquery.site-categories-admin.js', 
-						array('jquery'), '1.0' );
+						array('jquery'), $this->_settings['VERSION']  );
 					wp_enqueue_script('site-categories-admin');
 				}
 			}
@@ -166,7 +169,7 @@ class SiteCategories {
 				wp_enqueue_script('jquery-ui-accordion');
 
 				wp_register_script('site-categories', WP_PLUGIN_URL .'/'. basename(dirname(__FILE__)) .'/js/jquery.site-categories.js', 
-					array('jquery', 'jquery-ui-accordion'), '1.0' );
+					array('jquery', 'jquery-ui-accordion'), $this->_settings['VERSION']  );
 				wp_enqueue_script('site-categories');
 			}
 			
@@ -495,7 +498,7 @@ class SiteCategories {
 	 * @return none
 	 */	
 	function load_config() {
-		global $blog_id;
+		global $blog_id, $current_site; 
 		
 
 		$defaults = array(
@@ -539,7 +542,7 @@ class SiteCategories {
 			)
 		);
 
-		$this->opts = get_blog_option( 1, $this->_settings['options_key'], false);
+		$this->opts = get_blog_option( $current_site->blog_id, $this->_settings['options_key'], false);
 		if (!$this->opts) {
 			$this->opts = $defaults;
 		} else {
@@ -565,7 +568,8 @@ class SiteCategories {
 	 * @return none
 	 */	
 	function save_config() {
-		update_blog_option( 1, $this->_settings['options_key'], $this->opts);		
+		global $current_site;
+		update_blog_option( $current_site->blog_id, $this->_settings['options_key'], $this->opts);		
 	}
 	
 	/**
@@ -667,13 +671,13 @@ class SiteCategories {
 	 */
 	function process_actions_site() {
 
-		global $wpdb;
+		global $wpdb, $current_site, $current_blog;
 		
 		$CONFIG_CHANGED = false;
 		if (isset($_POST['bcat_site_categories'])) {
 			
-			$current_site = $wpdb->blogid;
-			switch_to_blog( 1 );
+			//$current_site = $wpdb->blogid;
+			switch_to_blog( $current_site->blog_id );
 
 			$bcat_site_categories = array();
 			if (count($_POST['bcat_site_categories'])) {
@@ -690,7 +694,7 @@ class SiteCategories {
 					}
 				}
 			}
-			$bcat_set = wp_set_object_terms($current_site, $bcat_site_categories, SITE_CATEGORIES_TAXONOMY);
+			$bcat_set = wp_set_object_terms($current_blog->blog_id, $bcat_site_categories, SITE_CATEGORIES_TAXONOMY);
 
 			restore_current_blog();
 			$CONFIG_CHANGED = true;
@@ -793,9 +797,11 @@ class SiteCategories {
 	 * @return none
 	 */
 	function bcat_taxonomy_terms_count($terms, $taxonomy) {
+		global $current_site, $current_blog; 
+		
 		if ($taxonomy->name != SITE_CATEGORIES_TAXONOMY) return;
 		
-		switch_to_blog( 1 );
+		switch_to_blog( $current_site->blog_id );
 		_update_generic_term_count( $terms, SITE_CATEGORIES_TAXONOMY );
 		restore_current_blog();
 		
@@ -879,7 +885,7 @@ class SiteCategories {
 		wp_enqueue_script('postbox');
 		
 		wp_register_script('site-categories-admin', WP_PLUGIN_URL .'/'. basename(dirname(__FILE__)) .'/js/jquery.site-categories-admin.js', 
-			array('jquery'), '1.0' );
+			array('jquery'), $this->_settings['VERSION']  );
 		wp_enqueue_script('site-categories-admin');
 		
 		// Now add our metaboxes
@@ -1868,7 +1874,7 @@ class SiteCategories {
 	 */
 	function settings_site_select_categories_panel() {
 		
-		global $wpdb, $psts;
+		global $wpdb, $psts, $current_site, $current_blog;
 		
 		if (function_exists('is_pro_user')) {
 			$site_level = $psts->get_level($wpdb->blogid);
@@ -1895,11 +1901,16 @@ class SiteCategories {
 		if (($blog_category_limit > 100)	|| ($blog_category_limit < 1))
 			$blog_category_limit = 1;
 
-		$current_site = $wpdb->blogid;
-
-		switch_to_blog( 1 );
+		//$current_site = $wpdb->blogid;
+		//echo "current_site<pre>"; print_r($current_site); echo "</pre>";
+		//echo "current_blog<pre>"; print_r($current_blog); echo "</pre>";
 		
-		$site_categories = wp_get_object_terms($current_site, SITE_CATEGORIES_TAXONOMY);
+		//echo "wpdb->prefix=[". $wpdb->prefix ."]<br />";
+		
+		switch_to_blog( $current_site->blog_id );
+		
+		$site_categories = wp_get_object_terms($current_blog->blog_id, SITE_CATEGORIES_TAXONOMY);
+		//echo "site_categories<pre>"; print_r($site_categories); echo "</pre>";
 		
 		$cat_counter = 0;
 		?><ol><?php
@@ -1955,6 +1966,11 @@ class SiteCategories {
 		<?php
 	}
 	
+	function dummy_body($content) {
+		$content .= "This is a dummy line of text.";
+		return $content;
+	}
+	
 	/**
 	 * 
 	 *
@@ -1967,6 +1983,9 @@ class SiteCategories {
 
 		global $post;
 
+		if (is_admin()) return $content;
+		if (!in_the_loop()) return $content;
+		
 		$this->load_config();
 		//echo "opts<pre>"; print_r($this->opts); echo "</pre>";
 
@@ -1979,7 +1998,7 @@ class SiteCategories {
 		if ($post->ID != intval($this->opts['landing_page_id'])) return $content;
 		
 		// Remove our own filter. Since we are here we should not need it. Plus in case other process call the content filters. 
-		remove_filter('the_content', array($this, 'process_categories_body'), 99);
+		//remove_filter('the_content', array($this, 'process_categories_body'), 99);
 		
 		$category = get_query_var('category_name');		
 		if ($category) {
@@ -2096,7 +2115,7 @@ class SiteCategories {
 			}
 			
 			$categories_string = apply_filters('site_categories_landing_list_sites_display', $content, $data, $args);
-			return $content . $categories_string;
+			return $categories_string;
 				
 		} else {
 
@@ -2229,7 +2248,7 @@ class SiteCategories {
 						}
 					}
 				}
-				
+
 				if (($args['show_style'] == "ul") || ($args['show_style'] == "ol")) {
 					$categories_string = apply_filters('site_categories_landing_list_display', $content, $data, $args);
 				} else if ($args['show_style'] == "grid") {
@@ -2237,7 +2256,7 @@ class SiteCategories {
 				} else if ($args['show_style'] == "accordion") {
 					$categories_string = apply_filters('site_categories_landing_accordion_display', $content, $data, $args);
 				}
-				return $content . $categories_string;
+				return $categories_string;
 			}
 		}
 		
@@ -2256,6 +2275,7 @@ class SiteCategories {
 
 		global $post;
 
+		if (is_admin()) return $content;
 		if (!in_the_loop()) return $content;
 
 		$this->load_config();
@@ -2304,7 +2324,7 @@ class SiteCategories {
 	 * @param none
 	 * @return none
 	 */
-	function inject_category_signup_proc($errors) {
+	function bcat_signup_blogform($errors) {
 		global $wpdb;
 
 		$this->load_config();
@@ -2410,42 +2430,36 @@ class SiteCategories {
 	/**
 	 * 
 	 *
-	 * @since 1.0.0
+	 * @since 1.0.2
 	 *
 	 * @param none
 	 * @return none
 	 */
 	function wpmu_new_blog_proc($blog_id, $user_id, $domain, $path, $site_id, $meta ) {
+		global $current_site;
 
 		if ((isset($blog_id)) && ($blog_id)) {
-		
-			if (isset($_POST['bcat_site_categories'])) {
 
-				$bcat_site_categories = array();
-				if (count($_POST['bcat_site_categories'])) {
-					foreach($_POST['bcat_site_categories'] as $bcat_id) {
+			if (isset($meta['bcat_signup_meta']['bcat_site_categories'])) {
 
-						// Double check the selected site categories in case the admin didn't select all items. 
-						$bcat_id = intval($bcat_id);
-						if ($bcat_id > 0) {
-					
-							$bcat_term = get_term($bcat_id, SITE_CATEGORIES_TAXONOMY);
-							if ( !is_wp_error($bcat_term)) {
-								$bcat_site_categories[] = $bcat_term->slug;
-							}
-						}
-					}
-				}
-				$bcat_set = wp_set_object_terms($blog_id, $bcat_site_categories, SITE_CATEGORIES_TAXONOMY);
+				$bcat_set = wp_set_object_terms($blog_id, $meta['bcat_signup_meta']['bcat_site_categories'], SITE_CATEGORIES_TAXONOMY);
 			}
-		
-			if (isset($_POST['bcat_site_description'])) {
-				$bcat_site_description = esc_attr($_POST['bcat_site_description']);
-				update_blog_option($blog_id, 'bact_site_description', $bcat_site_description);
+
+			if (isset($meta['bcat_signup_meta']['bcat_site_description'])) {
+				update_blog_option($blog_id, 'bact_site_description', $meta['bcat_signup_meta']['bcat_site_description']);
 			}
 		}
 	}
 	
+	/**
+	 * Validates the new blog signup form on the front-end of the website. If the fields are not valid we set the WP_Error object and return the errors
+	 * to be displayed on the form. If valid then we store the form var into a class array which will be used in the 'wpmu_new_blog_proc' function.
+	 *
+	 * @since 1.0.2
+	 *
+	 * @param none
+	 * @return none
+	 */
 	function bcat_wpmu_validate_blog_signup($result) {
 		
 		$this->load_config();
@@ -2476,7 +2490,10 @@ class SiteCategories {
 			if (count($bcat_site_categories) < $this->opts['sites']['signup_category_minimum']) {
 					$format = __('You must select at least %d unique categories', SITE_CATEGORIES_I18N_DOMAIN);
 				$result['errors']->add( 'bcat_site_categories', sprintf($format, $this->opts['sites']['signup_category_minimum'] ));
-			}			
+			} else {
+				$this->bcat_signup_meta['bcat_site_categories'] = $bcat_site_categories;
+				
+			}
 		} 
 
 		if ((isset($this->opts['sites']['signup_description_required'])) && ($this->opts['sites']['signup_description_required'] == 1)) {
@@ -2486,11 +2503,36 @@ class SiteCategories {
 			}
 			
 			if (!strlen($bcat_site_description)) {
-				$result['errors']->add( 'bcat_site_description', __('Please provide a value', SITE_CATEGORIES_I18N_DOMAIN) );
+				$result['errors']->add( 'bcat_site_description', __('Please provide a site description', SITE_CATEGORIES_I18N_DOMAIN) );
+			} else {
+				$this->bcat_signup_meta['bcat_site_description'] = $bcat_site_description;
 			}
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Once the new blog form submits we capture and validate the form information via the function 'bcat_wpmu_validate_blog_signup'. Via
+	 * that function we store the bcat related fields into a class array. Via this 'bcat_add_signup_meta' function we store the class array
+	 * as part of the signup meta information. 
+	 *
+	 * This is needed because there are two scenarios for signup. One is an anonymous user creates a new site. During this processing the form information
+	 * needs to be stored until the new user is confirmed. So this does not take place all at once. The second scenario is when an authenticated user 
+	 * creates a new blog. In this case the form processing is all at once. The meta will still be stored and processed but is only needed for a short 
+	 * period of time
+	 *
+	 * @since 1.0.4
+	 *
+	 * @param none
+	 * @return none
+	 */
+
+	function bcat_add_signup_meta($meta) {
+		if (isset($this->bcat_signup_meta)) {
+			$meta['bcat_signup_meta'] = $this->bcat_signup_meta;
+		}
+		return $meta;
 	}
 	
 	function wp_dropdown_categories( $args = '' ) {

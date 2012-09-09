@@ -19,9 +19,15 @@ function process_site_categories_list_display($content, $data, $args) {
 					if ($category->count > 0)
 						$content .= '<a href="'. $category->bcat_url .'">';
 				
-					if ( ($args['icon_show'] == true) && (isset($category->icon_image_src))) {
+					if ( ($args['icon_show'] == true) && (isset($category->icon_image_src)) && (strlen($category->icon_image_src)) ) {
+						if (is_ssl()) {						
+							$image_src = str_replace('http://', 'https://', $category->icon_image_src);
+						} else {
+							$image_src = $category->icon_image_src;
+						}
+						
 						$content .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'"
-						 alt="'. $category->name .'" src="'. $category->icon_image_src .'" />';
+						 alt="'. $category->name .'" src="'. $image_src .'" />';
 					} 
 					$content .= '<span class="site-category-title">'. $category->name .'</span>';
 					if ($args['show_counts']) {
@@ -32,7 +38,10 @@ function process_site_categories_list_display($content, $data, $args) {
 						$content .= '</a>';
 					
 					if (($args['show_description']) && (strlen($category->description))) {
-						$bact_category_description = apply_filters('the_content', $category->description);
+						//$bact_category_description = apply_filters('the_content', $category->description);
+						//$bact_category_description = wpautop($category->description);
+						$bact_category_description = $category->description;
+						
 						$bact_category_description = str_replace(']]>', ']]&gt;', $bact_category_description);
 						if (strlen($bact_category_description)) {
 							$content .= '<div class="site-category-description">'. $bact_category_description .'</div>';

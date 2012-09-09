@@ -194,14 +194,15 @@ class Bcat_WidgetCloud extends WP_Widget {
 
 	function widget($args, $instance) {
 
-		global $site_categories;		
+		global $site_categories, $current_site;		
+		
 		$site_categories->load_config();
 		extract($args);
 
 		$data = get_site_transient( 'site-categories-cloud-data-'. $this->number );
 		if (!$data) {
 			
-			switch_to_blog( 1 );
+			switch_to_blog( $current_site->blog_id );
 
 			$defaults = array(
 				'smallest' => 8, 'largest' => 22, 'unit' => 'pt', 'number' => 45,

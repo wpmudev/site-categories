@@ -36,7 +36,9 @@ function process_site_categories_landing_list_sites_display($content, $data, $ar
 
 				if (($args['show_description'] == true) && (isset($site->bact_site_description)) && (strlen($site->bact_site_description))) {
 
-					$bact_site_description = apply_filters('the_content', $site->bact_site_description);
+					//$bact_site_description = apply_filters('the_content', $site->bact_site_description);
+					$bact_category_description = wpautop($category->description);
+					
 					$bact_site_description = str_replace(']]>', ']]&gt;', $bact_site_description);						
 
 					if (strlen($bact_site_description)) {
