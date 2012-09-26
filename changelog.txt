@@ -3,6 +3,11 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.5 - 2012-09-26
+----------------------------------------------------------------------
+- Corrected issue on displaying Site description http://premium.wpmudev.org/forums/topic/site-description-field-is-not-displaying
+- Corrected issue reported with loosing settings on plugin upgrade. 
+
 1.0.4 - 2012-09-09
 ----------------------------------------------------------------------
 - Corrected code for Multi-Network support of Categories.

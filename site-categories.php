@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.4
+Version: 1.0.5
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -80,13 +80,13 @@ class SiteCategories {
 	 */
 	function __construct() {
 		
-		$this->_settings['VERSION'] 				= '1.0.4';
+		$this->_settings['VERSION'] 				= '1.0.5';
 		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
 		$this->_settings['PLUGIN_URL']				= WP_CONTENT_URL . "/plugins/". basename( dirname(__FILE__) );
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
 		$this->_settings['admin_menu_label']		= __( "Site Categories", SITE_CATEGORIES_I18N_DOMAIN ); 
 		
-		$this->_settings['options_key']				= "site-categories-". $this->_settings['VERSION']; 
+		$this->_settings['options_key']				= "wpmudev-site-categories"; 
 		
 		$this->_admin_header_error 					= "";		
 		
@@ -542,10 +542,33 @@ class SiteCategories {
 			)
 		);
 
+
+		//$this->_settings['options_key']				= "site-categories-". $this->_settings['VERSION']; 
+
 		$this->opts = get_blog_option( $current_site->blog_id, $this->_settings['options_key'], false);
 		if (!$this->opts) {
-			$this->opts = $defaults;
+			
+			$legacy_versions = array('1.0.4', '1.0.3', '1.0.2', '1.0.1', '1.0.0');
+			
+			foreach($legacy_versions as $legacy_version) {
+				$options_key = "site-categories-". $legacy_version;
+				$this->opts = get_blog_option( $wpdb->blogid, $options_key );
+
+				if (!empty($this->opts)) {
+					$this->opts['version'] = $legacy_version;
+					break;
+				}
+			}
+			
+			if (empty($this->opts)) {
+				$this->opts = $defaults;
+			}
+			
+			// Now that we have loaded the legacy or default options save it. 
+			$this->save_config();
+				
 		} else {
+			
 			if (!isset($this->opts['sites']))
 				$this->opts['sites'] = $defaults['sites'];
 			else
@@ -569,6 +592,9 @@ class SiteCategories {
 	 */	
 	function save_config() {
 		global $current_site;
+		
+		$this->opts['version'] = $this->_settings['VERSION'];
+		
 		update_blog_option( $current_site->blog_id, $this->_settings['options_key'], $this->opts);		
 	}
 	
