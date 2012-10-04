@@ -215,24 +215,24 @@ class Bcat_WidgetCategories extends WP_Widget {
 
 					$data['offset'] 		= intval($instance['per_page']) * (intval($data['current_page'])-1); 
 					$data['categories'] 	= array_slice($categories, $data['offset'], $instance['per_page'], true);
-
-					if (count($data['categories'])) {
-
-						foreach($data['categories'] as $idx => $data_category) {
-
-							$data['categories'][$idx]->icon_image_src = $site_categories->get_category_term_icon_src($data_category->term_id,
-							 	$instance['icon_size']);
-
-							if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true)) {
-								$data['categories'][$idx]->bcat_url = trailingslashit($site_categories->opts['landing_page_slug']) . $data_category->slug;
-							} else {
-								$data['categories'][$idx]->bcat_url = $site_categories->opts['landing_page_slug'] .'&amp;category_name=' . $data_category->slug;
-							}
-						}
-					}
-
 					$data['total_pages'] 	= ceil(count($categories)/intval($instance['per_page']));
 				}
+				
+				if (count($data['categories'])) {
+
+					foreach($data['categories'] as $idx => $data_category) {
+
+						$data['categories'][$idx]->icon_image_src = $site_categories->get_category_term_icon_src($data_category->term_id,
+						 	$instance['icon_size']);
+
+						if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true)) {
+							$data['categories'][$idx]->bcat_url = trailingslashit($site_categories->opts['landing_page_slug']) . $data_category->slug;
+						} else {
+							$data['categories'][$idx]->bcat_url = $site_categories->opts['landing_page_slug'] .'&amp;category_name=' . $data_category->slug;
+						}
+					}
+				}
+
 
 				if (intval($instance['show_more_link'])) {
 					if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true)) {

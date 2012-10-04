@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.5
+Version: 1.0.6
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories

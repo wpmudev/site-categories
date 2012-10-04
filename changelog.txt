@@ -3,6 +3,11 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.6 - 2012-10-04
+----------------------------------------------------------------------
+- Corrected category widget where the site category slug and avatar were not being set if the number of categories were less than the per page amount. 
+
+
 1.0.5 - 2012-09-26
 ----------------------------------------------------------------------
 - Corrected issue on displaying Site description http://premium.wpmudev.org/forums/topic/site-description-field-is-not-displaying
