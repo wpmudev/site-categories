@@ -46,7 +46,7 @@ function process_site_categories_accorion_display($content, $data, $args) {
 			if (($args['show_description']) && (strlen($category->description))) {
 
 				//$bact_category_description = apply_filters('the_content', $category->description);
-				$bact_category_description = wpautop($category->description);
+				$bact_category_description = wpautop(stripslashes($category->description));
 				$bact_category_description = str_replace(']]>', ']]&gt;', $bact_category_description);
 			
 				if (strlen($bact_category_description)) {

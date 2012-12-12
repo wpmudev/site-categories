@@ -3,6 +3,10 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.7 - 2012-12-12
+----------------------------------------------------------------------
+- Fixed issue with strip slashes on site descriptions per http://premium.wpmudev.org/forums/topic/stripslash-in-site-description
+
 1.0.6 - 2012-10-04
 ----------------------------------------------------------------------
 - Corrected category widget where the site category slug and avatar were not being set if the number of categories were less than the per page amount. 

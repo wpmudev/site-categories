@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.6
+Version: 1.0.7
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -80,7 +80,7 @@ class SiteCategories {
 	 */
 	function __construct() {
 		
-		$this->_settings['VERSION'] 				= '1.0.5';
+		$this->_settings['VERSION'] 				= '1.0.7';
 		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
 		$this->_settings['PLUGIN_URL']				= WP_CONTENT_URL . "/plugins/". basename( dirname(__FILE__) );
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
@@ -498,7 +498,7 @@ class SiteCategories {
 	 * @return none
 	 */	
 	function load_config() {
-		global $blog_id, $current_site; 
+		global $wpdb, $blog_id, $current_site; 
 		
 
 		$defaults = array(
@@ -727,7 +727,7 @@ class SiteCategories {
 		}
 
 		if (isset($_POST['bcat_site_description'])) {
-			$bcat_site_description = esc_attr($_POST['bcat_site_description']);
+			$bcat_site_description = esc_attr(stripslashes($_POST['bcat_site_description']));
 			update_option('bact_site_description', $bcat_site_description);
 			$CONFIG_CHANGED = true;
 		}
@@ -1715,7 +1715,7 @@ class SiteCategories {
 			</th>
 			<td>
 				<input type="text" class='widefat' id="site-categories-signup-category-label" name="bcat[sites][signup_category_label]" 
-					value="<?php echo $this->opts['sites']['signup_category_label']; ?>" />
+					value="<?php echo stripslashes($this->opts['sites']['signup_category_label']); ?>" />
 					<p class="description"><?php _e("The label is shown above the number of category dropdowns", SITE_CATEGORIES_I18N_DOMAIN); ?></p>					
 			</td>
 		</tr>
@@ -1741,7 +1741,7 @@ class SiteCategories {
 			</th>
 			<td>
 				<input type="text" class='widefat' id="site-categories-signup-description-label" name="bcat[sites][signup_description_label]" 
-					value="<?php echo $this->opts['sites']['signup_description_label']; ?>" />
+					value="<?php echo stripslashes($this->opts['sites']['signup_description_label']); ?>" />
 					<p class="description"><?php _e("The label is shown above the site description", SITE_CATEGORIES_I18N_DOMAIN); ?></p>					
 			</td>
 		</tr>
@@ -1988,7 +1988,8 @@ class SiteCategories {
 
 		?>
 		<label for="bcat_site_description"><?php _e('Enter a Site Description to be used on the Landing page.', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
-		<textarea name="bcat_site_description" style="width:100%;" cols="30" rows="10" id="bcat_site_description"><?php echo $bact_site_description; ?></textarea>
+		<textarea name="bcat_site_description" style="width:100%;" cols="30" rows="10" id="bcat_site_description"><?php 
+			echo stripslashes($bact_site_description); ?></textarea>
 		<?php
 	}
 	
@@ -2384,7 +2385,7 @@ class SiteCategories {
 			$blog_category_limit = 1;
 
 		//echo '<label for="">' . apply_filters('add_site_page_site_categories_label', $this->opts['sites']['signup_category_label'] ) . '</label>';
-		?><label for=""><?php echo $this->opts['sites']['signup_category_label'] ?></label><?php
+		?><label for=""><?php echo stripslashes($this->opts['sites']['signup_category_label']) ?></label><?php
 
 		if ( $errmsg = $errors->get_error_message('bcat_site_categories') ) { ?>
 			<p class="error"><?php echo $errmsg ?></p>
@@ -2428,7 +2429,7 @@ class SiteCategories {
 		?></ol><?php
 		
 		?>
-		<label for="bcat_site_description"><?php echo $this->opts['sites']['signup_description_label'] ?> <?php 
+		<label for="bcat_site_description"><?php echo stripslashes($this->opts['sites']['signup_description_label']) ?> <?php 
 			if (isset($this->opts['sites']['signup_description_required'])) { 
 				?><span class="site-categories-required"><?php _e('(* required)', SITE_CATEGORIES_I18N_DOMAIN); ?></span><?php 
 			} ?></label>

@@ -37,9 +37,8 @@ function process_site_categories_list_display($content, $data, $args) {
 					if ($category->count > 0)
 						$content .= '</a>';
 					
-					if (($args['show_description']) && (strlen($category->description))) {
-						$bact_category_description = $category->description;
-						
+					if (($args['show_description']) && (strlen($category->description))) {						
+						$bact_category_description = wpautop(stripslashes($category->description));						
 						$bact_category_description = str_replace(']]>', ']]&gt;', $bact_category_description);
 						if (strlen($bact_category_description)) {
 							$content .= '<div class="site-category-description">'. $bact_category_description .'</div>';
