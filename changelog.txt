@@ -3,6 +3,11 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.7.1 - 2012-12-14
+----------------------------------------------------------------------
+- Added site category exclude input field to form settings. This will allow super admins to exclude categories from new signup and blog settings. Only super admins can assigns site to these excluded categories. 
+
+
 1.0.7 - 2012-12-12
 ----------------------------------------------------------------------
 - Fixed issue with strip slashes on site descriptions per http://premium.wpmudev.org/forums/topic/stripslash-in-site-description

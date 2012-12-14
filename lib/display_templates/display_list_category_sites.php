@@ -35,7 +35,7 @@ function process_site_categories_landing_list_sites_display($content, $data, $ar
 					.'<span class="site-category-site-title">'. $site->blogname .'</span></a>';
 
 				if (($args['show_description'] == true) && (isset($site->bact_site_description)) && (strlen($site->bact_site_description))) {
-					echo "here<br />";
+					//echo "here<br />";
 					$bact_site_description = wpautop(stripslashes($site->bact_site_description));
 					$bact_site_description = str_replace(']]>', ']]&gt;', $bact_site_description);						
 

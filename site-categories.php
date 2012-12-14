@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.7
+Version: 1.0.7.1
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -364,6 +364,19 @@ class SiteCategories {
 		}
 		?>
 		<tr>
+			<th scope="row" valign="top"><label for="bcat_category_type"><?php _ex('Category Type', 'Category Type', SITE_CATEGORIES_I18N_DOMAIN); ?></label></th>
+<?php /* ?>			
+			<td>
+				<ul>
+					<li><input type="radio" name="bcat_category_type" id="bcat_category_type_regular" value="" /> <label 
+						for="bcat_category_type_regular"><?php _e('Regular', SITE_CATEGORIES_I18N_DOMAIN); ?></label></li>
+					<li><input type="radio" name="bcat_category_type" id="bcat_category_type_network_admin" value="" /> <label 
+						for="bcat_category_type_network_admin"><?php _e('Network Admin Assigned', SITE_CATEGORIES_I18N_DOMAIN); ?></label></li>
+			</td>
+<?php */ ?>
+		</tr>	
+
+		<tr>
 			<th scope="row" valign="top"><label for="upload_image"><?php _ex('Image', 'Category Image', SITE_CATEGORIES_I18N_DOMAIN); ?></label></th>
 			<td>
 				<p class="description"><?php _e('The image used for the category icon will be displayed square.', SITE_CATEGORIES_I18N_DOMAIN) ?></p>
@@ -515,7 +528,8 @@ class SiteCategories {
 				'show_description'						=>	0,
 				'default_category' 						=> 	0,
 				'category_limit'						=>	10,
-				'signup_category_parent_selectable'		=> 1,
+				'category_excludes'						=>	array(),
+				'signup_category_parent_selectable'		=> 	1,
 				'signup_show'							=>	1,
 				'signup_category_required'				=>	1,
 				'signup_category_label'					=>	__('Site Categories', SITE_CATEGORIES_TAXONOMY),
@@ -580,6 +594,8 @@ class SiteCategories {
 				$this->opts['categories'] = wp_parse_args( (array) $this->opts['categories'], $defaults['categories'] );
 				
 			$this->opts = wp_parse_args( (array) $this->opts, $defaults ); 			
+			
+			//echo "opts<pre>"; print_r($this->opts); echo "</pre>";
 		}
 	}
 	
@@ -655,13 +671,31 @@ class SiteCategories {
 
 		if (isset($_POST['bcat'])) {
 
+			//echo "bcat<pre>"; print_r($_POST['bcat']); echo "</pre>";
+			//die();
+
 			$TRIGGER_UPDATE_REWRITE = false;
 
 			if (isset($_POST['bcat']['categories']))
 				$this->opts['categories'] = $_POST['bcat']['categories'];
 			
-			if (isset($_POST['bcat']['sites']))
+			if (isset($_POST['bcat']['sites'])) {
 				$this->opts['sites'] = $_POST['bcat']['sites'];
+
+				if ((isset($this->opts['sites']['category_excludes'])) && (!empty($this->opts['sites']['category_excludes']))) {
+					$cat_excludes = explode(',', $this->opts['sites']['category_excludes']);
+					if (($cat_excludes) && (count($cat_excludes))) {
+						foreach($cat_excludes as $_idx => $_val) {
+							$cat_excludes[$_idx] = trim($_val);
+							if (empty($cat_excludes[$_idx]))
+								unset($cat_excludes[$_idx]);
+						}
+						$cat_excludes = array_values($cat_excludes);
+					}
+					$this->opts['sites']['category_excludes'] = $cat_excludes;
+				}
+			}
+			
 
 			if ((isset($_POST['bcat']['landing_page_id'])) && (intval($_POST['bcat']['landing_page_id']))) {
 
@@ -677,6 +711,7 @@ class SiteCategories {
 				$this->opts['landing_page_id'] = 0;
 				$this->opts['landing_page_slug'] = '';
 			}
+						
 			$this->save_config();
 			$wp_rewrite->flush_rules();			
 			
@@ -1766,16 +1801,24 @@ class SiteCategories {
 				<label for="site-categories-landing-page"><?php _e('Select Landing Page', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			</th>
 			<td>
+				<?php
+					if (isset($this->opts['landing_page_id'])) {
+						$landing_page_id = intval($this->opts['landing_page_id']);
+					} else {
+						$landing_page_id = 0;
+					}
+				?>
 				<input type="hidden" name="bcat[landing_page_id_org]" id="landing_page_id_org" value="<?php echo $landing_page_id ?>" />
 				<?php	
 
 					wp_dropdown_pages( array( 
-						'name' 				=> 'bcat[landing_page_id]', 
-						'id'				=> 'site-categories-landing-page',
-						'echo' 				=> 1, 
-						'show_option_none' 	=> __( '&mdash; Select &mdash;' ), 
-						'option_none_value' => '0', 
-						'selected' 			=> @$this->opts['landing_page_id'] )
+							'name' 				=> 'bcat[landing_page_id]', 
+							'id'				=> 'site-categories-landing-page',
+							'echo' 				=> 1, 
+							'show_option_none' 	=> __( '&mdash; Select &mdash;' ), 
+							'option_none_value' => '0', 
+							'selected' 			=>  $landing_page_id
+						)
 					);
 
 					if ($this->opts['landing_page_id']) {
@@ -1855,6 +1898,25 @@ class SiteCategories {
 				?>
 			</td>
 		</tr>
+
+		<?php
+			if ((isset($this->opts['sites']['category_excludes'])) && (count($this->opts['sites']['category_excludes']))) {
+				$cat_excludes = implode(', ', $this->opts['sites']['category_excludes']);
+			} else {
+				$cat_excludes = '';
+			}
+		?>
+		<tr>
+			<th scope="row">
+				<label for="site-categories-sites-category-exclude"><?php _e('Excluded Categories', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			</th>		
+			<td>
+				<p class="description"><?php _e('Enter a comma separated list of category IDs. These categories will be excluded dropdown selection on the new site signup page as well as the blog Settings > Site Categories page.', SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+				<input type="text" class='widefat' id="site-categories-sites-category-excludes" name="bcat[sites][category_excludes]" 
+					value="<?php echo $cat_excludes; ?>" />
+			</td>
+		</tr>
+		
 <?php /* ?>
 		<tr>
 			<th scope="row">
@@ -1938,6 +2000,17 @@ class SiteCategories {
 		$site_categories = wp_get_object_terms($current_blog->blog_id, SITE_CATEGORIES_TAXONOMY);
 		//echo "site_categories<pre>"; print_r($site_categories); echo "</pre>";
 		
+		//echo "cate_exclude<pre>"; print_r($this->opts['sites']['category_excludes']); echo "</pre>";
+		$cat_excludes = '';
+		
+		if ((is_multisite()) && (!is_super_admin())) {
+			if ((isset($this->opts['sites']['category_excludes'])) && (count($this->opts['sites']['category_excludes']))) {
+				$cat_excludes = implode(', ', $this->opts['sites']['category_excludes']);
+			} else {
+				$this->opts['sites']['category_excludes'] = array();
+			}
+		}
+		
 		$cat_counter = 0;
 		?><ol><?php
 		while(true) {
@@ -1947,22 +2020,34 @@ class SiteCategories {
 			} else {
 				$cat_selected = -1;
 			}
-			
-			$bcat_args = array(
-				'taxonomy'			=> 	SITE_CATEGORIES_TAXONOMY,
-				'hierarchical'		=>	true,
-				'hide_empty'		=>	false,
-				'show_option_none'	=>	__('None Selected', SITE_CATEGORIES_I18N_DOMAIN), 
-				'name'				=>	'bcat_site_categories['. $cat_counter .']',
-				'class'				=>	'bcat_category',
-				'selected'			=>	$cat_selected
-			);
-			
+									
 			?><li><?php 
-				if ($this->opts['sites']['signup_category_parent_selectable'] == 1)
-					wp_dropdown_categories( $bcat_args );
-				else
-					$this->wp_dropdown_categories( $bcat_args );
+				$cat_ecluded = false;
+				if ((is_multisite()) && (!is_super_admin())) {
+					if (array_search($cat_selected, $this->opts['sites']['category_excludes']) !== false) {
+						echo $site_categories[$cat_counter]->name ." - Managed by Super Admin";
+						$cat_ecluded = true;
+						?><input type="hidden" name="bcat_site_categories[<?php echo $cat_counter; ?>]" 
+							value="<?php echo $site_categories[$cat_counter]->term_id; ?>" /><?php
+					}
+				} 
+				if ($cat_ecluded == false) {
+					$bcat_args = array(
+						'taxonomy'			=> 	SITE_CATEGORIES_TAXONOMY,
+						'hierarchical'		=>	true,
+						'hide_empty'		=>	false,
+						'exclude'			=>	$cat_excludes,
+						'show_option_none'	=>	__('None Selected', SITE_CATEGORIES_I18N_DOMAIN), 
+						'name'				=>	'bcat_site_categories['. $cat_counter .']',
+						'class'				=>	'bcat_category',
+						'selected'			=>	$cat_selected
+					);
+			
+					if ($this->opts['sites']['signup_category_parent_selectable'] == 1)
+						wp_dropdown_categories( $bcat_args );
+					else
+						$this->wp_dropdown_categories( $bcat_args );
+				}
 			?></li><?php
 		
 			$cat_counter += 1;
@@ -2400,10 +2485,18 @@ class SiteCategories {
 		?><ol><?php
 		while(true) {
 
+			$cat_excludes = '';
+			if ((is_multisite()) && (!is_super_admin())) {
+				if ((isset($this->opts['sites']['category_excludes'])) && (count($this->opts['sites']['category_excludes']))) {
+					$cat_excludes = implode(', ', $this->opts['sites']['category_excludes']);
+				} 
+			}
+
 			$bcat_args = array(
 				'taxonomy'			=> 	SITE_CATEGORIES_TAXONOMY,
 				'hierarchical'		=>	true,
 				'hide_empty'		=>	false,
+				'exclude'			=>	$cat_excludes,
 				'show_option_none'	=>	__('None Selected', SITE_CATEGORIES_I18N_DOMAIN), 
 				'name'				=>	'bcat_site_categories['. $cat_counter .']',
 				'class'				=>	'bcat_category',
