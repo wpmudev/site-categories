@@ -179,12 +179,11 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 
 		extract($args);
 
-
 		$data = get_site_transient( 'site-categories-sites-data-'. $this->number );
 		if (!$data) {
 
 			switch_to_blog( $current_site->blog_id );
-
+			$bcat_term = get_term($instance['category'], SITE_CATEGORIES_TAXONOMY);			
 			$sites = $site_categories->get_taxonomy_sites($instance['category'], $instance['include_children']);
 			
 			if (count($sites) < $instance['per_page']) {
@@ -199,9 +198,9 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 		
 			if (intval($instance['show_more_link'])) {
 				if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true)) {
-					$data['landing']['link_url'] = trailingslashit($site_categories->opts['landing_page_slug']);
+					$data['landing']['link_url'] = trailingslashit($site_categories->opts['landing_page_slug']) . $bcat_term->slug;
 				} else {
-					$data['landing']['link_url'] = $site_categories->opts['landing_page_slug'];
+					$data['landing']['link_url'] = trailingslashit($site_categories->opts['landing_page_slug']) ."&category_name=". $bcat_term->slug;
 				}
 				if (isset($instance['landing_link_label']))
 					$data['landing']['link_label'] = $instance['landing_link_label'];
@@ -217,8 +216,6 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 			} else {
 				$default_icon_src = $site_categories->get_default_category_icon_url();
 			}
-
-			//echo "data<pre>"; print_r($data); echo "</pre>";
 
 			if ( (isset($data['sites'])) && (count($data['sites'])) ) {
 
@@ -239,9 +236,6 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 			set_site_transient( 'site-categories-sites-data-'. $this->number, $data, 120);			
 		}
 
-
-		//echo "data<pre>"; print_r($data); echo "</pre>";
-		//echo "instance<pre>"; print_r($instance); echo "</pre>";
 		$categories_content = apply_filters('categories_widget_list_sites_display', '', $data, $instance);
 		if (strlen($categories_content)) {
 			echo $before_widget;
@@ -251,8 +245,7 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 		
 			echo $categories_content;
 		
-			echo $after_widget;
-			
+			echo $after_widget;			
 		}
 	}
 }

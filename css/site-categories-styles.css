@@ -54,7 +54,7 @@ ul.site-categories-widget li {
 #site-categories-wrapper  img.site-category-icon,
 .site-categories-widget li img.site-category-icon {
 	float: left;
-	padding-right: 10px;
+	margin-right: 10px;
 }
 
 #site-categories-wrapper span.site-category-title,
