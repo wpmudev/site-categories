@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.7.1
+Version: 1.0.7.2
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -80,7 +80,7 @@ class SiteCategories {
 	 */
 	function __construct() {
 		
-		$this->_settings['VERSION'] 				= '1.0.7';
+		$this->_settings['VERSION'] 				= '1.0.7.2';
 		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
 		$this->_settings['PLUGIN_URL']				= WP_CONTENT_URL . "/plugins/". basename( dirname(__FILE__) );
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
@@ -107,6 +107,10 @@ class SiteCategories {
 		add_filter( "manage_edit-bcat_columns", 	array(&$this, 'bcat_taxonomy_column_headers') );	
 		add_filter( 'manage_bcat_custom_column', 	array(&$this, 'bcat_taxonomy_column'), 10, 3 );
 
+		add_filter( 'wpmu_blogs_columns', 			array(&$this, 'bcat_sites_column_headers') );	
+		add_action( 'manage_sites_custom_column',	array(&$this, 'bcat_sites_column_row'), 10, 2 );
+
+
 		// Add/Edit Taxonomy term form fields. 
 		add_action( 'bcat_edit_form_fields', 		array(&$this, 'bcat_taxonomy_term_edit'), 99, 2 );		
 		add_action( "edit_bcat", 					array(&$this, 'bcat_taxonomy_term_save'), 99, 2 );
@@ -120,11 +124,20 @@ class SiteCategories {
 		// Output for the Title and Content of the Site Category listing page
 		add_filter( 'the_title', 					array($this, 'process_categories_title'), 99, 2 );
 		add_filter( 'the_content', 					array($this, 'process_categories_body'), 99 );
-		//add_filter( 'the_content', 					array($this, 'dummy_body') );
 				
 		// Rewrite rules logic
 		add_filter( 'rewrite_rules_array', 			array($this, 'insert_rewrite_rules') );
 		add_filter( 'query_vars', 					array($this, 'insert_query_vars') );
+		
+		add_action( 'delete_blog', 					array($this, 'blog_change_status_count') );
+		add_action( 'make_spam_blog', 				array($this, 'blog_change_status_count') );
+		add_action( 'make_ham_blog', 				array($this, 'blog_change_status_count') );
+		add_action( 'mature_blog', 					array($this, 'blog_change_status_count') );
+		add_action( 'unmature_blog', 				array($this, 'blog_change_status_count') );		
+		add_action( 'archive_blog', 				array($this, 'blog_change_status_count') );
+		add_action( 'unarchive_blog', 				array($this, 'blog_change_status_count') );		
+		add_action( 'activate_blog', 				array($this, 'blog_change_status_count') );
+		add_action( 'deactivate_blog', 				array($this, 'blog_change_status_count') );		
 	}	
 	
 
@@ -271,6 +284,54 @@ class SiteCategories {
 
 				?><img src="<?php echo $bcat_image_src; ?>" alt="" width="50" /><?php
 
+				break;
+			
+			default:
+				break;
+		}
+	}
+	
+	function bcat_sites_column_headers($columns) {
+		if (!isset($columns['site-categories']))
+			$columns['site-categories'] = __('Site Categories', SITE_CATEGORIES_I18N_DOMAIN); 
+		return $columns;
+	}
+	function bcat_sites_column_row($column_name, $blog_id) {
+		switch($column_name) {
+			case 'site-categories':
+				$terms = wp_get_object_terms( $blog_id, SITE_CATEGORIES_TAXONOMY);
+				if ((!$terms) || (!is_array($terms))) 
+					$terms = array();
+					
+				$this->load_config();
+				//echo "this->opts<pre>"; print_r($this->opts); echo "</pre>";
+				$column_output = '';	
+				foreach($terms as $bcat_term) {
+					
+					if ((isset($this->opts['landing_page_slug'])) && (strlen($this->opts['landing_page_slug']))) {
+						if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true)) {
+							$bcat_url = trailingslashit($this->opts['landing_page_slug']) . $bcat_term->slug;
+						} else {
+							$bcat_url = $this->opts['landing_page_slug'] .'&amp;category_name=' . $bcat_term->slug;
+						}
+
+						if (strlen($bcat_url)) {
+							if (strlen($column_output)) $column_output .= ", ";
+							$column_output .= '<a target="_blank" href="'. $bcat_url .'">'. $bcat_term->name .'</a>';
+						} else {
+							if (strlen($column_output)) $column_output .= ", ";
+							$column_output .= $bcat_term->count;
+						}						
+
+					} else {
+						if (strlen($column_output)) $column_output .= ", ";
+						$column_output .= $bcat_term->name;
+					}
+				}
+				if (strlen($column_output))
+					echo $column_output;
+				
+				
 				break;
 			
 			default:
@@ -429,6 +490,10 @@ class SiteCategories {
 			
 			$this->save_config();
 		}
+		
+		//echo "term_id=[". $term_id ."]<br />";
+		//echo "tt_id=[". $tt_id ."]<br />";
+		$this->bcat_taxonomy_terms_count(array($term_id), get_taxonomy(SITE_CATEGORIES_TAXONOMY));
 	}
 	
 	/**
@@ -462,25 +527,16 @@ class SiteCategories {
 			$terms = array($term_id);
 		}
 
-		//$sql_str = "SELECT object_id FROM ". $wpdb->prefix ."term_relationships WHERE term_taxonomy_id IN ( ". implode(',', $terms) ." )" ;
-		//echo "sql_str=[". $sql_str ."]<br />";
-		//$term_sites = $wpdb->get_col( $wpdb->prepare( $sql_str ) );
-		//echo "term_sites<pre>"; print_r($term_sites); echo "</pre>";
-		
 		$term_sites = get_objects_in_term( $terms, SITE_CATEGORIES_TAXONOMY);
-		//echo "term_sites<pre>"; print_r($term_sites); echo "</pre>";
-		
 		
 		if ($term_sites) {
 			$sites = array();
 			foreach($term_sites as $site_id) {
 				$blog = get_blog_details($site_id);
-				if ($blog) {
+				if (($blog) && ($blog->public == 1) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
 					$sites[$site_id] = $blog;
 				}
 			}
-			
-			//echo "sites<pre>"; print_r($sites); echo "</pre>";
 			return $sites;
 		} else {
 			return array();
@@ -528,7 +584,7 @@ class SiteCategories {
 				'show_description'						=>	0,
 				'default_category' 						=> 	0,
 				'category_limit'						=>	10,
-				'category_excludes'						=>	array(),
+				'category_excludes'						=>	'',
 				'signup_category_parent_selectable'		=> 	1,
 				'signup_show'							=>	1,
 				'signup_category_required'				=>	1,
@@ -671,9 +727,6 @@ class SiteCategories {
 
 		if (isset($_POST['bcat'])) {
 
-			//echo "bcat<pre>"; print_r($_POST['bcat']); echo "</pre>";
-			//die();
-
 			$TRIGGER_UPDATE_REWRITE = false;
 
 			if (isset($_POST['bcat']['categories']))
@@ -682,7 +735,8 @@ class SiteCategories {
 			if (isset($_POST['bcat']['sites'])) {
 				$this->opts['sites'] = $_POST['bcat']['sites'];
 
-				if ((isset($this->opts['sites']['category_excludes'])) && (!empty($this->opts['sites']['category_excludes']))) {
+				if ((isset($this->opts['sites']['category_excludes'])) 
+				 && (!empty($this->opts['sites']['category_excludes']))) {
 					$cat_excludes = explode(',', $this->opts['sites']['category_excludes']);
 					if (($cat_excludes) && (count($cat_excludes))) {
 						foreach($cat_excludes as $_idx => $_val) {
@@ -693,6 +747,8 @@ class SiteCategories {
 						$cat_excludes = array_values($cat_excludes);
 					}
 					$this->opts['sites']['category_excludes'] = $cat_excludes;
+				} else {
+					$this->opts['sites']['category_excludes'] = array();
 				}
 			}
 			
@@ -857,16 +913,99 @@ class SiteCategories {
 	 * @param none
 	 * @return none
 	 */
-	function bcat_taxonomy_terms_count($terms, $taxonomy) {
-		global $current_site, $current_blog; 
+	function bcat_taxonomy_terms_count($term_ids, $taxonomy) {
+		global $wpdb, $current_site, $current_blog; 
 		
 		if ($taxonomy->name != SITE_CATEGORIES_TAXONOMY) return;
 		
 		switch_to_blog( $current_site->blog_id );
-		_update_generic_term_count( $terms, SITE_CATEGORIES_TAXONOMY );
-		restore_current_blog();
+
+		//echo "term_ids<pre>"; print_r($term_ids); echo "</pre>";
 		
+		foreach($term_ids as $term_id) {
+			$term_sites = $this->get_taxonomy_sites($term_id);			
+			if ((!$term_sites) || (!is_array($term_sites)))
+				$term_sites = array();
+
+			$terms_count = count($term_sites);
+			$wpdb->update( $wpdb->term_taxonomy, array('count' => $terms_count ), array( 'term_taxonomy_id' => $term_id ) );
+		}
+		restore_current_blog();		
 	}
+	
+	/**
+	 * Handled the delete blog actions (archive, delete, Deactivate, Spam). Remove the blog site categories. 
+	 *
+	 * @since 1.0.7.2
+	 *
+	 * @param none
+	 * @return none
+	 */
+	function blog_change_status_count($blog_id) {
+		global $wpdb, $current_site;
+
+		if (!$blog_id) return;
+		if (!(isset($_GET['action']))) return;
+		
+		$blog_state_action = esc_attr($_GET['action']);
+
+		switch_to_blog( $current_site->blog_id );
+
+		switch($blog_state_action) {
+			case 'deleteblog':
+				wp_delete_object_term_relationships($blog_id, SITE_CATEGORIES_TAXONOMY);
+				break;
+			
+			case 'spamblog':
+			case 'mature_blog':
+			case 'archiveblog':
+			case 'deactivateblog':
+				$terms = wp_get_object_terms( $blog_id, SITE_CATEGORIES_TAXONOMY);
+				if ( (!is_wp_error($terms)) && ($terms) && (is_array($terms)) && (count($terms))) {
+					foreach($terms as $term) {
+
+						$term_sites = $this->get_taxonomy_sites($term->term_id);
+						if ((!$term_sites) || (!is_array($term_sites)))
+							$term_sites = array();
+
+						if (isset($term_sites[$blog_id]))
+							unset($term_sites[$blog_id]);
+								
+						$terms_count = count($term_sites);
+						$wpdb->update( $wpdb->term_taxonomy, array('count' => $terms_count ), array( 'term_taxonomy_id' => $term->term_id ) );						
+					}
+				}
+				break;
+				
+			case 'unspamblog':
+			case 'unarchiveblog':
+			case 'activateblog':
+				$terms = wp_get_object_terms( $blog_id, SITE_CATEGORIES_TAXONOMY);
+				if ( (!is_wp_error($terms)) && ($terms) && (is_array($terms)) && (count($terms))) {
+					foreach($terms as $term) {
+
+						$term_sites = $this->get_taxonomy_sites($term->term_id);
+						if ((!$term_sites) || (!is_array($term_sites)))
+							$term_sites = array();
+
+						if (isset($term_sites[$blog_id]))
+							unset($term_sites[$blog_id]);
+
+						$terms_count = count($term_sites);
+
+						$blog = get_blog_details($blog_id);
+						if (($blog) && ($blog->public == 1) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
+							$terms_count += 1;
+						}
+						$wpdb->update( $wpdb->term_taxonomy, array('count' => $terms_count ), array( 'term_taxonomy_id' => $term->term_id ) );						
+					}
+				}
+				break;
+		}
+
+		restore_current_blog();
+	}
+	
 	
 	/**
 	 * Add the new Menu to the Tools section in the WordPress main nav
@@ -1900,7 +2039,9 @@ class SiteCategories {
 		</tr>
 
 		<?php
-			if ((isset($this->opts['sites']['category_excludes'])) && (count($this->opts['sites']['category_excludes']))) {
+			if ((isset($this->opts['sites']['category_excludes'])) 
+			 && (!empty($this->opts['sites']['category_excludes'])) 
+			 && (count($this->opts['sites']['category_excludes']))) {
 				$cat_excludes = implode(', ', $this->opts['sites']['category_excludes']);
 			} else {
 				$cat_excludes = '';
@@ -1998,13 +2139,12 @@ class SiteCategories {
 		switch_to_blog( $current_site->blog_id );
 		
 		$site_categories = wp_get_object_terms($current_blog->blog_id, SITE_CATEGORIES_TAXONOMY);
-		//echo "site_categories<pre>"; print_r($site_categories); echo "</pre>";
-		
-		//echo "cate_exclude<pre>"; print_r($this->opts['sites']['category_excludes']); echo "</pre>";
 		$cat_excludes = '';
 		
 		if ((is_multisite()) && (!is_super_admin())) {
-			if ((isset($this->opts['sites']['category_excludes'])) && (count($this->opts['sites']['category_excludes']))) {
+			if ((isset($this->opts['sites']['category_excludes'])) 
+			 && (!empty($this->opts['sites']['category_excludes']))
+			 && (count($this->opts['sites']['category_excludes']))) {
 				$cat_excludes = implode(', ', $this->opts['sites']['category_excludes']);
 			} else {
 				$this->opts['sites']['category_excludes'] = array();
@@ -2427,7 +2567,7 @@ class SiteCategories {
 
 		return $title_str;
 	}
-	
+		
 	/**
 	 * 
 	 *
