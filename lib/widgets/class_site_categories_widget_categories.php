@@ -248,7 +248,7 @@ class Bcat_WidgetCategories extends WP_Widget {
 			}		
 			restore_current_blog();
 			
-			set_site_transient( 'site-categories-categories-data-'. $this->number, $data, 120);			
+			set_site_transient( 'site-categories-categories-data-'. $this->number, $data, 30);
 		}
 		
 		$categories_content = apply_filters('categories_widget_list_display', '', $data, $instance);

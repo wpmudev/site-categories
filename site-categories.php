@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.7.2
+Version: 1.0.7.3
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -493,7 +493,7 @@ class SiteCategories {
 		
 		//echo "term_id=[". $term_id ."]<br />";
 		//echo "tt_id=[". $tt_id ."]<br />";
-		$this->bcat_taxonomy_terms_count(array($term_id), get_taxonomy(SITE_CATEGORIES_TAXONOMY));
+		$this->bcat_taxonomy_terms_count(array($tt_id), get_taxonomy(SITE_CATEGORIES_TAXONOMY));
 	}
 	
 	/**
@@ -793,11 +793,19 @@ class SiteCategories {
 		$CONFIG_CHANGED = false;
 		if (isset($_POST['bcat_site_categories'])) {
 			
-			//$current_site = $wpdb->blogid;
 			switch_to_blog( $current_site->blog_id );
 
 			$bcat_site_categories = array();
 			if (count($_POST['bcat_site_categories'])) {
+
+				$site_all_categories = array();
+				$_cats = wp_get_object_terms($current_blog->blog_id, SITE_CATEGORIES_TAXONOMY);
+				if (($_cats) && (is_array($_cats)) && (count($_cats))) {
+					foreach($_cats as $_cat) {
+						$site_all_categories[$_cat->term_taxonomy_id] = $_cat;
+					}
+				}
+
 				foreach($_POST['bcat_site_categories'] as $bcat_id) {
 
 					// Double check the selected site categories in case the admin didn't select all items. 
@@ -807,11 +815,16 @@ class SiteCategories {
 						$bcat_term = get_term($bcat_id, SITE_CATEGORIES_TAXONOMY);
 						if ( !is_wp_error($bcat_term)) {
 							$bcat_site_categories[] = $bcat_term->slug;
+							$site_all_categories[$bcat_term->term_taxonomy_id] = $bcat_term;
 						}
 					}
 				}
 			}
 			$bcat_set = wp_set_object_terms($current_blog->blog_id, $bcat_site_categories, SITE_CATEGORIES_TAXONOMY);
+
+			if (count($site_all_categories)) {
+				$this->bcat_taxonomy_terms_count(array_keys($site_all_categories), get_taxonomy(SITE_CATEGORIES_TAXONOMY));
+			}
 
 			restore_current_blog();
 			$CONFIG_CHANGED = true;
@@ -913,22 +926,24 @@ class SiteCategories {
 	 * @param none
 	 * @return none
 	 */
-	function bcat_taxonomy_terms_count($term_ids, $taxonomy) {
+	function bcat_taxonomy_terms_count($tt_ids, $taxonomy) {
 		global $wpdb, $current_site, $current_blog; 
 		
 		if ($taxonomy->name != SITE_CATEGORIES_TAXONOMY) return;
 		
 		switch_to_blog( $current_site->blog_id );
 
-		//echo "term_ids<pre>"; print_r($term_ids); echo "</pre>";
-		
-		foreach($term_ids as $term_id) {
-			$term_sites = $this->get_taxonomy_sites($term_id);			
-			if ((!$term_sites) || (!is_array($term_sites)))
-				$term_sites = array();
+		foreach($tt_ids as $tt_id) {
+			//$sql_str = $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->term_relationships WHERE term_taxonomy_id = %d", $tt_id );
+			$sql_str = $wpdb->prepare( "SELECT COUNT( $wpdb->blogs.blog_id ) as count FROM $wpdb->term_relationships LEFT JOIN $wpdb->blogs ON $wpdb->term_relationships.object_id = $wpdb->blogs.blog_id WHERE $wpdb->term_relationships.term_taxonomy_id =%d AND $wpdb->blogs.blog_id IS NOT NULL AND $wpdb->blogs.public = 1 AND $wpdb->blogs.archived = '0' AND $wpdb->blogs.mature = 0 AND $wpdb->blogs.spam = 0 AND $wpdb->blogs.deleted = 0", $tt_id );
+			
+			
+			//echo "sql_str=[". $sql_str ."]<br />";
+			$count = $wpdb->get_var( $sql_str );
+			//echo "count=[". $count ."]<br />";
+			//die();
 
-			$terms_count = count($term_sites);
-			$wpdb->update( $wpdb->term_taxonomy, array('count' => $terms_count ), array( 'term_taxonomy_id' => $term_id ) );
+			$wpdb->update( $wpdb->term_taxonomy, array('count' => $count ), array( 'term_taxonomy_id' => $tt_id ) );
 		}
 		restore_current_blog();		
 	}
@@ -972,7 +987,7 @@ class SiteCategories {
 							unset($term_sites[$blog_id]);
 								
 						$terms_count = count($term_sites);
-						$wpdb->update( $wpdb->term_taxonomy, array('count' => $terms_count ), array( 'term_taxonomy_id' => $term->term_id ) );						
+						$wpdb->update( $wpdb->term_taxonomy, array('count' => $terms_count ), array( 'term_taxonomy_id' => $term->term_taxonomy_id ) );
 					}
 				}
 				break;
@@ -997,7 +1012,7 @@ class SiteCategories {
 						if (($blog) && ($blog->public == 1) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
 							$terms_count += 1;
 						}
-						$wpdb->update( $wpdb->term_taxonomy, array('count' => $terms_count ), array( 'term_taxonomy_id' => $term->term_id ) );						
+						$wpdb->update( $wpdb->term_taxonomy, array('count' => $terms_count ), array( 'term_taxonomy_id' => $term->term_taxonomy_id ) );
 					}
 				}
 				break;
@@ -2180,7 +2195,9 @@ class SiteCategories {
 						'show_option_none'	=>	__('None Selected', SITE_CATEGORIES_I18N_DOMAIN), 
 						'name'				=>	'bcat_site_categories['. $cat_counter .']',
 						'class'				=>	'bcat_category',
-						'selected'			=>	$cat_selected
+						'selected'			=>	$cat_selected,
+						'orderby'			=>	'name',
+						'order'				=>	'ASC'
 					);
 			
 					if ($this->opts['sites']['signup_category_parent_selectable'] == 1)

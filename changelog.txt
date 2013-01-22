@@ -3,6 +3,11 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.7.3 - 2013-01-22
+----------------------------------------------------------------------
+- Changes to correct category counts.
+- Lowered timeout on widgets caching from 120 seconds to 30 seconds. 
+
 1.0.7.2 - 2012-12-20
 ----------------------------------------------------------------------
 - Fixed issue where Deleted, Archive, Deactivated blog was not properly decrementing Site Category counter. http://premium.wpmudev.org/forums/topic/counter-not-incrementing-properly

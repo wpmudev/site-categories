@@ -240,7 +240,7 @@ class Bcat_WidgetCloud extends WP_Widget {
 
 			restore_current_blog();
 			
-			set_site_transient( 'site-categories-cloud-data-'. $this->number, $data, 120);
+			set_site_transient( 'site-categories-cloud-data-'. $this->number, $data, 30);
 		}
 		
 		if ($data) {
