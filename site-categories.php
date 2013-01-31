@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.7.3
+Version: 1.0.7.4
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -80,7 +80,7 @@ class SiteCategories {
 	 */
 	function __construct() {
 		
-		$this->_settings['VERSION'] 				= '1.0.7.2';
+		$this->_settings['VERSION'] 				= '1.0.7.4';
 		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
 		$this->_settings['PLUGIN_URL']				= WP_CONTENT_URL . "/plugins/". basename( dirname(__FILE__) );
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
@@ -2626,8 +2626,9 @@ class SiteCategories {
 		if (($blog_category_limit > 100)	|| ($blog_category_limit < 1))
 			$blog_category_limit = 1;
 
-		//echo '<label for="">' . apply_filters('add_site_page_site_categories_label', $this->opts['sites']['signup_category_label'] ) . '</label>';
-		?><label for=""><?php echo stripslashes($this->opts['sites']['signup_category_label']) ?></label><?php
+		?>
+		<div id="bcat_site_categories_section">
+		<label for=""><?php echo stripslashes($this->opts['sites']['signup_category_label']) ?></label><?php
 
 		if ( $errmsg = $errors->get_error_message('bcat_site_categories') ) { ?>
 			<p class="error"><?php echo $errmsg ?></p>
@@ -2667,8 +2668,10 @@ class SiteCategories {
 				else
 					$this->wp_dropdown_categories( $bcat_args ); 
 				?> <?php
-				if ($cat_counter <= $this->opts['sites']['signup_category_minimum']) {
-					?><span class="site-categories-required"><?php _e('(* required)', SITE_CATEGORIES_I18N_DOMAIN); ?></span><?php
+				if ((isset($this->opts['sites']['signup_category_required'])) && ($this->opts['sites']['signup_category_required'] == 1)) { 
+					if ($cat_counter <= $this->opts['sites']['signup_category_minimum']) {
+						?><span class="site-categories-required"><?php _e('(* required)', SITE_CATEGORIES_I18N_DOMAIN); ?></span><?php
+					}
 				}
 			?></li><?php
 
@@ -2676,30 +2679,32 @@ class SiteCategories {
 			if ($cat_counter > $blog_category_limit) 
 				break;
 		}			
-		?></ol><?php
+		?></ol></div><?php
 		
 		?>
-		<label for="bcat_site_description"><?php echo stripslashes($this->opts['sites']['signup_description_label']) ?> <?php 
-			if (isset($this->opts['sites']['signup_description_required'])) { 
-				?><span class="site-categories-required"><?php _e('(* required)', SITE_CATEGORIES_I18N_DOMAIN); ?></span><?php 
-			} ?></label>
-		<?php
-			//$site_description = apply_filters('new_site_page_site_categories_site_description', '');
-			//if (!empty($site_description)) {
-			//	echo $site_description;
-			//}
-		?>
-		<?php
-			if ( $errmsg = $errors->get_error_message('bcat_site_description') ) { ?>
-				<p class="error"><?php echo $errmsg ?></p>
-			<?php }
+		<div id="bcat_site_description_section">
+			<label for="bcat_site_description"><?php echo stripslashes($this->opts['sites']['signup_description_label']) ?> <?php 
+				if ((isset($this->opts['sites']['signup_description_required'])) && ($this->opts['sites']['signup_description_required'] == 1)) { 
+					?><span class="site-categories-required"><?php _e('(* required)', SITE_CATEGORIES_I18N_DOMAIN); ?></span><?php 
+				} ?></label>
+			<?php
+				//$site_description = apply_filters('new_site_page_site_categories_site_description', '');
+				//if (!empty($site_description)) {
+				//	echo $site_description;
+				//}
+			?>
+			<?php
+				if ( $errmsg = $errors->get_error_message('bcat_site_description') ) { ?>
+					<p class="error"><?php echo $errmsg ?></p>
+				<?php }
 		
-		?>
-		<textarea name="bcat_site_description" style="width:100%;" cols="30" rows="10" id="bcat_site_description"><?php
-			if (isset($_POST['bcat_site_description'])) {
-				echo $_POST['bcat_site_description'];
-			}
-		?></textarea><br />
+			?>
+			<textarea name="bcat_site_description" style="width:100%;" cols="30" rows="10" id="bcat_site_description"><?php
+				if (isset($_POST['bcat_site_description'])) {
+					echo $_POST['bcat_site_description'];
+				}
+			?></textarea><br />
+		</div>
 		<?php
 	}
 

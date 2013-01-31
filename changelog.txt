@@ -3,6 +3,11 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.7.4 - 2013-01-31 
+----------------------------------------------------------------------
+- Corrected logic on new site signup form to required labels on categories and labels. 
+- Added div wrapper around new site signup form site categories elements to allow hiding these via theme CSS.
+
 1.0.7.3 - 2013-01-22
 ----------------------------------------------------------------------
 - Changes to correct category counts.
