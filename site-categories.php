@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.7.4
+Version: 1.0.7.5
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -735,18 +735,22 @@ class SiteCategories {
 			if (isset($_POST['bcat']['sites'])) {
 				$this->opts['sites'] = $_POST['bcat']['sites'];
 
+				// Convert the category_excludes from comma-seperated to array (easier to work with)
 				if ((isset($this->opts['sites']['category_excludes'])) 
 				 && (!empty($this->opts['sites']['category_excludes']))) {
+
 					$cat_excludes = explode(',', $this->opts['sites']['category_excludes']);
+
 					if (($cat_excludes) && (count($cat_excludes))) {
 						foreach($cat_excludes as $_idx => $_val) {
 							$cat_excludes[$_idx] = trim($_val);
 							if (empty($cat_excludes[$_idx]))
 								unset($cat_excludes[$_idx]);
 						}
-						$cat_excludes = array_values($cat_excludes);
+						$this->opts['sites']['category_excludes'] = array_values($cat_excludes);
+					} else {
+						$this->opts['sites']['category_excludes'] = array();
 					}
-					$this->opts['sites']['category_excludes'] = $cat_excludes;
 				} else {
 					$this->opts['sites']['category_excludes'] = array();
 				}
@@ -2055,9 +2059,9 @@ class SiteCategories {
 
 		<?php
 			if ((isset($this->opts['sites']['category_excludes'])) 
-			 && (!empty($this->opts['sites']['category_excludes'])) 
+			 && (is_array($this->opts['sites']['category_excludes'])) 
 			 && (count($this->opts['sites']['category_excludes']))) {
-				$cat_excludes = implode(', ', $this->opts['sites']['category_excludes']);
+				$cat_excludes = implode(',', $this->opts['sites']['category_excludes']);
 			} else {
 				$cat_excludes = '';
 			}
@@ -2155,12 +2159,12 @@ class SiteCategories {
 		
 		$site_categories = wp_get_object_terms($current_blog->blog_id, SITE_CATEGORIES_TAXONOMY);
 		$cat_excludes = '';
-		
+
 		if ((is_multisite()) && (!is_super_admin())) {
 			if ((isset($this->opts['sites']['category_excludes'])) 
-			 && (!empty($this->opts['sites']['category_excludes']))
+			 && (is_Array($this->opts['sites']['category_excludes']))
 			 && (count($this->opts['sites']['category_excludes']))) {
-				$cat_excludes = implode(', ', $this->opts['sites']['category_excludes']);
+				$cat_excludes = implode(',', $this->opts['sites']['category_excludes']);
 			} else {
 				$this->opts['sites']['category_excludes'] = array();
 			}
@@ -2645,8 +2649,10 @@ class SiteCategories {
 
 			$cat_excludes = '';
 			if ((is_multisite()) && (!is_super_admin())) {
-				if ((isset($this->opts['sites']['category_excludes'])) && (count($this->opts['sites']['category_excludes']))) {
-					$cat_excludes = implode(', ', $this->opts['sites']['category_excludes']);
+				if ((isset($this->opts['sites']['category_excludes'])) 
+				 && (is_array($this->opts['sites']['category_excludes']))
+				 && (count($this->opts['sites']['category_excludes']))) {
+					$cat_excludes = implode(',', $this->opts['sites']['category_excludes']);
 				} 
 			}
 

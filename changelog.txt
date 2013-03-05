@@ -3,6 +3,11 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.7.5 - 2013-03-05 
+----------------------------------------------------------------------
+- Changes to double-check excluded categories variable type on signup page. Was throwing a warning. 
+
+
 1.0.7.4 - 2013-01-31 
 ----------------------------------------------------------------------
 - Corrected logic on new site signup form to required labels on categories and labels. 
