@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.7.5
+Version: 1.0.7.6
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -575,6 +575,7 @@ class SiteCategories {
 			'landing_page_slug'			=>	'',
 
 			'sites'										=>	array(
+				'header_prefix'							=>	__('Category', SITE_CATEGORIES_TAXONOMY),
 				'per_page'								=>	5,
 				'icon_show' 							=> 	1,
 				'icon_size'								=>	32,
@@ -1768,6 +1769,17 @@ class SiteCategories {
 				</select>
 			</td>
 		</tr>
+				
+		<tr class="form-field" >
+			<th scope="row">
+				<label for="site-categories-sites-header-prefix"><?php _e('Prefix before Site Category Name', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			</th>
+			<td>
+				<input type="text" id="site-categories-sites-header-prefix" name="bcat[sites][header_prefix]" 
+				value="<?php echo $this->opts['sites']['header_prefix']; ?>" />
+			</td>
+		</tr>
+		
 		<tr class="form-field" >
 			<th scope="row">
 				<label for="site-categories-sites-per-page"><?php _e('Sites per page', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
@@ -2584,8 +2596,15 @@ class SiteCategories {
 					width="'. $this->opts['categories']['icon_size'] .'" height="'. $this->opts['categories']['icon_size'] .'" />';
 			}
 		} 
-		$title_str .= '<span class="site-category-title">' .__('Category', SITE_CATEGORIES_I18N_DOMAIN) ." ". $bcat_term->name .'</span>';
-
+		
+		$title_str .= '<span class="site-category-title">';
+			if ((isset($this->opts['sites']['header_prefix'])) && (strlen($this->opts['sites']['header_prefix']))) {
+				$title_str .= '<span class="site-category-header-prefix">'. $this->opts['sites']['header_prefix'] .'</span>';
+			}
+			
+			$title_str .= '<span class="site-category-header-category-name">' ." ". $bcat_term->name .'</span>';
+		$title_str .= '</span>';
+		
 		return $title_str;
 	}
 		

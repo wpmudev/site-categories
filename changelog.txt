@@ -3,10 +3,13 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.7.6 - 2013-03-19 
+----------------------------------------------------------------------
+- Added field to control of selected site category title prefix
+
 1.0.7.5 - 2013-03-05 
 ----------------------------------------------------------------------
 - Changes to double-check excluded categories variable type on signup page. Was throwing a warning. 
-
 
 1.0.7.4 - 2013-01-31 
 ----------------------------------------------------------------------
