@@ -28,7 +28,7 @@
 			qs_parms = '';
 		
 		// On Click
-		$('input#bcat_image_upload').live("click", function () {
+		$('input#bcat_image_upload').on("click", function () {
 	
 			if (!qs_parms)
 				qs_parms = getUrlParams();
@@ -47,7 +47,7 @@
 	        return false;
 		});
 
-		$('input#bcat_image_remove').live("click", function () {
+		$('input#bcat_image_remove').on("click", function () {
 			$('input#bcat_image_upload').show();
 			$('input#bcat_image_remove').hide();
 			$('input#bcat_image_id').val('');
