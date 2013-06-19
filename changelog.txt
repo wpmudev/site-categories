@@ -3,6 +3,10 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.7.8 - 2013-06-19
+----------------------------------------------------------------------
+- Update media selection from using Thickbox to newer Media popup from WP 3.5
+
 1.0.7.7 - 2013-04-09
 ----------------------------------------------------------------------
 - Updated plugin JavaScript for upcoming WordPress 3.6/jQuery 1.9 changes. 

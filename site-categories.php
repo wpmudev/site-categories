@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.7.7
+Version: 1.0.7.8
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -150,17 +150,34 @@ class SiteCategories {
 	 */
 	function enqueue_scripts_proc()
 	{
+		global $wp_version; 
 		if (is_admin()) {
 
 			wp_register_style( 'site-categories-admin-styles', plugins_url('css/site-categories-admin-styles.css', __FILE__) );
 			wp_enqueue_style( 'site-categories-admin-styles' );
 
+			$site_categories_data = array();
+			$site_categories_data['wp_version'] = $wp_version;
+						
 			if ((is_multisite()) && (is_main_site()) && (is_super_admin())) {
+				
 				if ((isset($_GET['action'])) && ($_GET['action'] == "edit")
 				 && (isset($_GET['taxonomy'])) && ($_GET['taxonomy'] == "bcat")
 				 && (isset($_GET['tag_ID']))) {
-			
-					add_thickbox();
+					if ( version_compare( $wp_version, '3.5', '>=' )) {
+						if (function_exists('wp_enqueue_media')) {
+							wp_enqueue_media();
+							$site_categories_data['image_view'] = 'new_media';
+							$site_categories_data['image_view_title_text'] = __('Select image for Site Category', SITE_CATEGORIES_I18N_DOMAIN);
+							$site_categories_data['image_view_button_text'] = __('Use image', SITE_CATEGORIES_I18N_DOMAIN);
+						} else {
+							add_thickbox();
+							$site_categories_data['image_view'] = 'thickbox';
+						}
+					} else {
+						add_thickbox();
+						$site_categories_data['image_view'] = 'thickbox';
+					}
 
 					wp_register_script('site-categories-admin', WP_PLUGIN_URL .'/'. basename(dirname(__FILE__)) .'/js/jquery.site-categories-admin.js', 
 						array('jquery'), $this->_settings['VERSION']  );
@@ -168,12 +185,26 @@ class SiteCategories {
 					
 					
 				} else if ((isset($_GET['page'])) && ($_GET['page'] == "bcat_settings")) {
-					add_thickbox();
+					if (version_compare('3.5', $wp_version) >= 0) {	
+						if (function_exists('wp_enqueue_media')) {
+							wp_enqueue_media();
+							$site_categories_data['image_view'] = 'new_media';
+							$site_categories_data['image_view_title_text'] = __('Select image for Site Category', SITE_CATEGORIES_I18N_DOMAIN);
+							$site_categories_data['image_view_button_text'] = __('Use image', SITE_CATEGORIES_I18N_DOMAIN);
+						} else {
+							add_thickbox();
+							$site_categories_data['image_view'] = 'thickbox';
+						}						
+					} else {
+						add_thickbox();
+						$site_categories_data['image_view'] = 'thickbox';						
+					}
 
 					wp_register_script('site-categories-admin', WP_PLUGIN_URL .'/'. basename(dirname(__FILE__)) .'/js/jquery.site-categories-admin.js', 
 						array('jquery'), $this->_settings['VERSION']  );
 					wp_enqueue_script('site-categories-admin');
 				}
+				wp_localize_script('site-categories-admin', 'site_categories_data', $site_categories_data);
 			}
 		} else {
 			$this->load_config();

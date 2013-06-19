@@ -28,22 +28,64 @@
 			qs_parms = '';
 		
 		// On Click
-		$('input#bcat_image_upload').on("click", function () {
-	
-			if (!qs_parms)
-				qs_parms = getUrlParams();
-			
-			if (qs_parms['post'])
-				postID = qs_parms['post'];
+		$('input#bcat_image_upload').on("click", function (event) {
+			if (site_categories_data['image_view'] == "thickbox") {
 
-			dest_field_number 	= $(this).attr('rel');		
+				if (!qs_parms)
+					qs_parms = getUrlParams();
 
-			//dest_field_src 		= 'bcat_image_src';	// This is when the image <img src="" /> will be sent
+				if (qs_parms['post'])
+					postID = qs_parms['post'];
+
+				dest_field_number 	= $(this).attr('rel');		
+				dest_field_src 		= 'bcat_image_src';	// This is when the image <img src="" /> will be sent
 		
-			//http://inc331mu.com/wp-admin/media-upload.php?post_id=5&TB_iframe=1&width=640&height=698
-			tb_show('', 'media-upload.php?type=image&amp;post_id=0&amp;TB_iframe=1&amp;width=640&amp;height=698');
+				//http://inc331mu.com/wp-admin/media-upload.php?post_id=5&TB_iframe=1&width=640&height=698
+				tb_show('', 'media-upload.php?type=image&amp;post_id=0&amp;TB_iframe=1&amp;width=640&amp;height=698');
+	        	tbframe_interval = setInterval(function() { jQuery('#TB_iframeContent').contents().find('.savesend .button').val('Use this image'); }, 2000);
+	
+			} else if (site_categories_data['image_view'] == "new_media") {
+				var file_frame;
 
-	        tbframe_interval = setInterval(function() { jQuery('#TB_iframeContent').contents().find('.savesend .button').val('Use this image'); }, 2000);
+				event.preventDefault();
+
+				// If the media frame already exists, reopen it.
+				//if ( file_frame ) {
+				//	file_frame.open();
+				//	return;
+				//}
+
+				// Create the media frame.
+				file_frame = wp.media.frames.file_frame = wp.media({
+					title: site_categories_data['image_view_title_text'],
+					button: {
+						text: site_categories_data['image_view_button_text'], 
+					},
+					multiple: false  // Set to true to allow multiple files to be selected
+				});
+				file_frame.on( 'select', function() {
+					attachment = file_frame.state().get('selection').first().toJSON();
+					
+					$('input#bcat_image_id').val(attachment['id']);
+					
+					var image_url = '';
+					
+					if ((attachment['sizes']['full'] != undefined) && (attachment['sizes']['thumbnail'] == undefined))
+						attachment['sizes']['thumbnail'] = attachment['sizes']['full'];
+					
+					image_url = attachment['sizes']['thumbnail']['url'];					
+					if (image_url.length > 0) {
+						$('img#bcat_image_src').attr('src', image_url);
+						$('img#bcat_image_src').show();
+						$('input#bcat_image_upload').hide();
+						$('input#bcat_image_remove'). show();
+					}					
+		    	});
+
+				// Finally, open the modal
+				file_frame.open();
+			}
+			
 	        return false;
 		});
 
