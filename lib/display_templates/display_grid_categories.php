@@ -39,8 +39,7 @@ function process_site_categories_grid_display($content, $data, $args) {
 					$image_src = $category->icon_image_src;
 				}
 				
-				$content .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'"
-				 alt="'. $category->name .'" src="'. $image_src .'" />';
+				$content .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'" alt="'. $category->name .'" src="'. $image_src .'" />';
 			} 
 
 			$content .= '<span class="site-category-title">'. $category->name .'</span>';
@@ -72,8 +71,7 @@ function process_site_categories_grid_display($content, $data, $args) {
 					$content .=	'<li class="site-categories-child" style="width: 100%">';
 
 					if ( ($args['icon_show_children'] == true) && (isset($category_child->icon_image_src))) {
-						$content .= '<img class="site-category-icon" width="'. $args['icon_size_children'] .'" height="'. $args['icon_size_children'] .'"
-						 alt="'. $category_child->name .'" src="'. $category_child->icon_image_src .'" />';
+						$content .= '<img class="site-category-icon" width="'. $args['icon_size_children'] .'" height="'. $args['icon_size_children'] .'" alt="'. $category_child->name .'" src="'. $category_child->icon_image_src .'" />';
 					} 
 
 					if ($category_child->count > 0)

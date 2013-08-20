@@ -26,8 +26,7 @@ function process_site_categories_list_display($content, $data, $args) {
 							$image_src = $category->icon_image_src;
 						}
 						
-						$content .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'"
-						 alt="'. $category->name .'" src="'. $image_src .'" />';
+						$content .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'" alt="'. $category->name .'" src="'. $image_src .'" />';
 					} 
 					$content .= '<span class="site-category-title">'. $category->name .'</span>';
 					if ($args['show_counts']) {
