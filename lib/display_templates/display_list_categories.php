@@ -13,6 +13,7 @@ function process_site_categories_list_display($content, $data, $args) {
 		else { $content .= '<ul class="site-categories site-categories-list">'; }
 
 		foreach ($data['categories'] as $category) { 
+			//echo "category<pre>"; print_r($category); echo "</pre>";
 			if ($args['show_style'] != "select") { 
 
 				$content .=	'<li>';

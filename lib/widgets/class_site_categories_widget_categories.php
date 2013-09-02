@@ -225,17 +225,18 @@ class Bcat_WidgetCategories extends WP_Widget {
 						$data['categories'][$idx]->icon_image_src = $site_categories->get_category_term_icon_src($data_category->term_id,
 						 	$instance['icon_size']);
 
-						if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true)) {
+						if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true) && ($site_categories->opts['landing_page_use_rewrite'] == "yes")) {
 							$data['categories'][$idx]->bcat_url = trailingslashit($site_categories->opts['landing_page_slug']) . $data_category->slug;
 						} else {
-							$data['categories'][$idx]->bcat_url = $site_categories->opts['landing_page_slug'] .'&amp;category_name=' . $data_category->slug;
+							//$data['categories'][$idx]->bcat_url = $site_categories->opts['landing_page_slug'] .'&amp;category_name=' . $data_category->slug;
+							$data['categories'][$idx]->bcat_url = add_query_arg(array('category' => $data_category->slug), $site_categories->opts['landing_page_slug']);
 						}
 					}
 				}
 
 
 				if (intval($instance['show_more_link'])) {
-					if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true)) {
+					if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true) && ($site_categories->opts['landing_page_use_rewrite'] == "yes")) {
 						$data['landing']['link_url'] = trailingslashit($site_categories->opts['landing_page_slug']);
 					} else {
 						$data['landing']['link_url'] = $site_categories->opts['landing_page_slug'];
@@ -282,8 +283,7 @@ function process_categories_widget_list_display($content, $data, $args) {
 				$content .=	'<li><a href="'. $category->bcat_url .'">';
 				
 					if ( ($args['icon_show'] == true) && (isset($category->icon_image_src))) {
-						$content .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'"
-						 alt="'. $category->name .'" src="'. $category->icon_image_src .'" />';
+						$content .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'" alt="'. $category->name .'" src="'. $category->icon_image_src .'" />';
 					} 
 					$content .= '<span class="site-category-title">'. $category->name .'</span>';
 					if ($args['show_counts']) {

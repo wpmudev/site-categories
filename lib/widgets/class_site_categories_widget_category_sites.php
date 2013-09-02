@@ -95,7 +95,11 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 				<option value="name" <?php if ($instance['ordering'] == "name") { echo ' selected="selected" '; }?>><?php 
 					_e('Name', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 				<option value="id" <?php if ($instance['ordering'] == "id") { echo ' selected="selected" '; }?>><?php 
-					_e('Category ID', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					_e('Site ID', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				<option value="registered" <?php if ($instance['ordering'] == "registered") { echo ' selected="selected" '; }?>><?php 
+					_e('Registered Date', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				<option value="last_updated" <?php if ($instance['ordering'] == "last_updated") { echo ' selected="selected" '; }?>><?php 
+					_e('Last Updated Date', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 			</select> <select id="<?php echo $this->get_field_id( 'order' ); ?>" 
 				name="<?php echo $this->get_field_name( 'order'); ?>" class="widefat" style="width:25%;">
 				<option value="ASC" <?php if ($instance['order'] == "ASC") { echo ' selected="selected" '; }?>><?php 
@@ -184,7 +188,7 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 
 			switch_to_blog( $current_site->blog_id );
 			$bcat_term = get_term($instance['category'], SITE_CATEGORIES_TAXONOMY);			
-			$sites = $site_categories->get_taxonomy_sites($instance['category'], $instance['include_children']);
+			$sites = $site_categories->get_taxonomy_sites($instance['category'], $instance['include_children'], $instance['ordering'], $instance['order']);
 			
 			if (count($sites) < $instance['per_page']) {
 				$data['sites'] = $sites;
@@ -197,10 +201,12 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 			}
 		
 			if (intval($instance['show_more_link'])) {
-				if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true)) {
+				if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true) && ($site_categories->opts['landing_page_use_rewrite'] == "yes")) {
 					$data['landing']['link_url'] = trailingslashit($site_categories->opts['landing_page_slug']) . $bcat_term->slug;
 				} else {
-					$data['landing']['link_url'] = trailingslashit($site_categories->opts['landing_page_slug']) ."&category_name=". $bcat_term->slug;
+					//$data['landing']['link_url'] = trailingslashit($site_categories->opts['landing_page_slug']) ."&category_name=". $bcat_term->slug;
+					$data['landing']['link_url'] = add_query_arg( array( 'category' => $bcat_term->slug), 
+						$site_categories->opts['landing_page_slug']);
 				}
 				if (isset($instance['landing_link_label']))
 					$data['landing']['link_label'] = $instance['landing_link_label'];

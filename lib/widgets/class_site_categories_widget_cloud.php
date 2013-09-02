@@ -230,10 +230,11 @@ class Bcat_WidgetCloud extends WP_Widget {
 			foreach ( $tags as $key => $tag ) {
 				
 				$tags[ $key ]->id = $tag->term_id;
-				if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true)) {
+				if ((isset($site_categories->opts['landing_page_rewrite'])) && ($site_categories->opts['landing_page_rewrite'] == true) && ($site_categories->opts['landing_page_use_rewrite'] == "yes")) {
 					$tags[ $key ]->link = trailingslashit($site_categories->opts['landing_page_slug']) . $tag->slug;
 				} else {
-					$tags[ $key ]->link = $site_categories->opts['landing_page_slug'] .'&amp;category_name=' . $tag->slug;
+					//$tags[ $key ]->link = $site_categories->opts['landing_page_slug'] .'&amp;category_name=' . $tag->slug;
+					$tags[ $key ]->link = add_query_arg(array('category' => $tag->slug), $site_categories->opts['landing_page_slug']); 
 				}
 			}
 			$data = wp_generate_tag_cloud( $tags, $instance ); // Here's where those top tags get sorted according to $args

@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.7.9
+Version: 1.0.8
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -158,12 +158,12 @@ class SiteCategories {
 
 			$site_categories_data = array();
 			$site_categories_data['wp_version'] = $wp_version;
-						
 			if ((is_multisite()) && (is_main_site()) && (is_super_admin())) {
 				
 				if ((isset($_GET['action'])) && ($_GET['action'] == "edit")
 				 && (isset($_GET['taxonomy'])) && ($_GET['taxonomy'] == "bcat")
 				 && (isset($_GET['tag_ID']))) {
+					//echo "wp_version[". $wp_version ."]<br />";
 					//if ( version_compare( $wp_version, '3.5', '>=' )) {
 					//	if (function_exists('wp_enqueue_media')) {
 					//		wp_enqueue_media();
@@ -186,15 +186,15 @@ class SiteCategories {
 					
 				} else if ((isset($_GET['page'])) && ($_GET['page'] == "bcat_settings")) {
 					if (version_compare('3.5', $wp_version) >= 0) {	
-						if (function_exists('wp_enqueue_media')) {
-							wp_enqueue_media();
-							$site_categories_data['image_view'] = 'new_media';
-							$site_categories_data['image_view_title_text'] = __('Select image for Site Category', SITE_CATEGORIES_I18N_DOMAIN);
-							$site_categories_data['image_view_button_text'] = __('Use image', SITE_CATEGORIES_I18N_DOMAIN);
-						} else {
+						//if (function_exists('wp_enqueue_media')) {
+						//	wp_enqueue_media();
+						//	$site_categories_data['image_view'] = 'new_media';
+						//	$site_categories_data['image_view_title_text'] = __('Select image for Site Category', SITE_CATEGORIES_I18N_DOMAIN);
+						//	$site_categories_data['image_view_button_text'] = __('Use image', SITE_CATEGORIES_I18N_DOMAIN);
+						//} else {
 							add_thickbox();
 							$site_categories_data['image_view'] = 'thickbox';
-						}						
+						//}						
 					} else {
 						add_thickbox();
 						$site_categories_data['image_view'] = 'thickbox';						
@@ -275,7 +275,8 @@ class SiteCategories {
 						echo $bcat_term->count;
 					} else {
 						if ((isset($this->opts['landing_page_slug'])) && (strlen($this->opts['landing_page_slug']))) {
-							if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true)) {
+
+							if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
 								$bcat_url = trailingslashit($this->opts['landing_page_slug']) . $bcat_term->slug;
 							} else {
 								$bcat_url = $this->opts['landing_page_slug'] .'&amp;category_name=' . $bcat_term->slug;
@@ -340,7 +341,8 @@ class SiteCategories {
 				foreach($terms as $bcat_term) {
 					
 					if ((isset($this->opts['landing_page_slug'])) && (strlen($this->opts['landing_page_slug']))) {
-						if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true)) {
+
+						if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
 							$bcat_url = trailingslashit($this->opts['landing_page_slug']) . $bcat_term->slug;
 						} else {
 							$bcat_url = $this->opts['landing_page_slug'] .'&amp;category_name=' . $bcat_term->slug;
@@ -455,9 +457,9 @@ class SiteCategories {
 			$bcat_image_id = 0;
 		}
 		?>
+<?php /* ?>			
 		<tr>
 			<th scope="row" valign="top"><label for="bcat_category_type"><?php _ex('Category Type', 'Category Type', SITE_CATEGORIES_I18N_DOMAIN); ?></label></th>
-<?php /* ?>			
 			<td>
 				<ul>
 					<li><input type="radio" name="bcat_category_type" id="bcat_category_type_regular" value="" /> <label 
@@ -465,8 +467,8 @@ class SiteCategories {
 					<li><input type="radio" name="bcat_category_type" id="bcat_category_type_network_admin" value="" /> <label 
 						for="bcat_category_type_network_admin"><?php _e('Network Admin Assigned', SITE_CATEGORIES_I18N_DOMAIN); ?></label></li>
 			</td>
-<?php */ ?>
 		</tr>	
+<?php */ ?>
 
 		<tr>
 			<th scope="row" valign="top"><label for="upload_image"><?php _ex('Image', 'Category Image', SITE_CATEGORIES_I18N_DOMAIN); ?></label></th>
@@ -534,9 +536,19 @@ class SiteCategories {
 	 * @param none
 	 * @return none
 	 */	
-	function get_taxonomy_sites($term_id, $include_child = false) {
+	function get_taxonomy_sites($term_id, $include_child = false, $orderby = '', $order = '') {
 		
 		global $wpdb;
+
+		//echo "term_id=[". $term_id ."]<br />";
+
+		if (empty($orderby))
+			$orderby = $this->opts['sites']['orderby'];
+
+		if (empty($order))
+			$order = $this->opts['sites']['order'];
+
+		//echo "orderby[". $orderby ."] order[". $order ."]<br />";
 
 		if ($include_child == true) {
 
@@ -557,15 +569,50 @@ class SiteCategories {
 		} else {
 			$terms = array($term_id);
 		}
-
+		
 		$term_sites = get_objects_in_term( $terms, SITE_CATEGORIES_TAXONOMY);
+
+		if ($term_id == $this->opts['sites']['category_default']) {
+			$sites = $this->get_unassigned_sites();
+			if (($sites) && (is_array($sites))) {
+				$term_sites = array_unique(array_merge($term_sites, $sites));				
+			}
+		}
 		
 		if ($term_sites) {
 			$sites = array();
 			foreach($term_sites as $site_id) {
 				$blog = get_blog_details($site_id);
 				if (($blog) && ($blog->public == 1) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
-					$sites[$site_id] = $blog;
+					
+					switch($orderby) {
+						case 'id':
+							$sites[$blog->blog_id] = $blog;
+							break;
+													
+						case 'registered':
+							$sites[$blog->registered] = $blog;
+							break;
+
+						case 'last_updated':
+							$sites[$blog->last_updated] = $blog;
+							break;
+
+						case 'name':
+						default:
+							$sites[$blog->blogname] = $blog;
+							break;
+
+					}
+					if ($order == "ASC") {
+						krsort($sites);
+						ksort($sites);
+						
+					} else if ($order == "DESC") {
+						ksort($sites);
+						krsort($sites);
+					}
+					
 				}
 			}
 			return $sites;
@@ -604,7 +651,7 @@ class SiteCategories {
 		$defaults = array(
 			'landing_page_id'			=>	0,
 			'landing_page_slug'			=>	'',
-
+			'landing_page_use_rewrite'	=>	'yes',
 			'sites'										=>	array(
 				'header_prefix'							=>	__('Category', SITE_CATEGORIES_TAXONOMY),
 				'per_page'								=>	5,
@@ -614,8 +661,9 @@ class SiteCategories {
 				'order'									=>	'ASC',
 				'show_style'							=>	'ul',
 				'show_description'						=>	0,
-				'default_category' 						=> 	0,
 				'category_limit'						=>	10,
+				'signup_category_minimum'				=>	1,
+				'category_default'						=>	0,
 				'category_excludes'						=>	'',
 				'signup_category_parent_selectable'		=> 	1,
 				'signup_show'							=>	1,
@@ -625,22 +673,22 @@ class SiteCategories {
 				'signup_description_label'				=>	__('Site Description', SITE_CATEGORIES_TAXONOMY)
 			),
 			
-			'categories'					=>	array(
-				'per_page'					=>	5,
-				'hide_empty'				=>	0,
-				'show_description'			=>	0,
-				'show_description_children'	=>	0,
-				'show_counts'				=>	0,
-				'show_counts_children'		=>	0,
-				'icon_show'					=>	0,
-				'icon_show_children'		=>	0,
-				'icon_size'					=>	32,
-				'icon_size_children'		=>	32,
-				'show_style'				=>	'ul',
-				'grid_cols'					=>	3,
-				'grid_rows'					=>	3,
-				'orderby'					=>	'name',
-				'order'						=>	'ASC',
+			'categories'								=>	array(
+				'per_page'								=>	5,
+				'hide_empty'							=>	0,
+				'show_description'						=>	0,
+				'show_description_children'				=>	0,
+				'show_counts'							=>	0,
+				'show_counts_children'					=>	0,
+				'icon_show'								=>	0,
+				'icon_show_children'					=>	0,
+				'icon_size'								=>	32,
+				'icon_size_children'					=>	32,
+				'show_style'							=>	'ul',
+				'grid_cols'								=>	3,
+				'grid_rows'								=>	3,
+				'orderby'								=>	'name',
+				'order'									=>	'ASC',
 			)
 		);
 
@@ -711,9 +759,11 @@ class SiteCategories {
 	 */
 	
 	function insert_rewrite_rules ($old) {
+		global $wp_rewrite;
 		
 		$this->load_config();
-		if ((isset($this->opts['landing_page_slug'])) && (strlen($this->opts['landing_page_slug']))) {
+
+		if ( (isset($wp_rewrite)) && ($wp_rewrite->using_permalinks()) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
 		
 			$site_url = get_site_url();
 			$landing_page_slug = str_replace(trailingslashit($site_url), '', $this->opts['landing_page_slug']);
@@ -724,7 +774,7 @@ class SiteCategories {
 					'(' . $landing_page_slug . ')/([^/]*)/?$' => 'index.php?pagename=$matches[1]&category_name=$matches[2]',
 					'(' . $landing_page_slug . ')/([^/]*)/(\d+)/?$' => 'index.php?pagename=$matches[1]&category_name=$matches[2]&start_at=$matches[3]',
 					);
-			
+				//echo "new<pre>"; print_r($new); echo "</pre>";
 				return $new + $old;
 			}
 		} 	
@@ -739,9 +789,17 @@ class SiteCategories {
 	 * @return none
 	 */
 	function insert_query_vars ($vars) {
-		$vars[] = 'category_name';
-		$vars[] = 'start_at';
-
+		global $wp_rewrite;
+				
+		$this->load_config();
+		if ( (isset($wp_rewrite)) && ($wp_rewrite->using_permalinks()) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
+			//echo "wp_rewrite<pre>"; print_r($wp_rewrite); echo "</pre>";
+			
+			$vars[] = 'category_name';
+			$vars[] = 'start_at';
+			
+			//echo "vars<pre>"; print_r($vars); echo "</pre>";
+		}
     	return $vars;
 	}
 
@@ -793,8 +851,20 @@ class SiteCategories {
 
 				$this->opts['landing_page_id'] = $_POST['bcat']['landing_page_id'];
 				$this->opts['landing_page_slug'] = get_permalink(intval($this->opts['landing_page_id']));
+
+				if (isset($_POST['bcat']['landing_page_use_rewrite'])) {
+					if ($_POST['bcat']['landing_page_use_rewrite'] == "yes")
+						$this->opts['landing_page_use_rewrite']	= "yes";
+					else
+						$this->opts['landing_page_use_rewrite']	= "no";
+				}
+
+				// If the landing page is a static home then we set the use rewrite to no.
+				if ($this->opts['landing_page_id'] == get_option('page_on_front')) {
+					$this->opts['landing_page_use_rewrite']	= "no";
+				}
 				
-				if ( isset($wp_rewrite) && $wp_rewrite->using_permalinks() )
+				if ( (isset($wp_rewrite)) && ($wp_rewrite->using_permalinks()) )
 					$this->opts['landing_page_rewrite'] = true;						
 				else
 					$this->opts['landing_page_rewrite'] = false;					
@@ -803,6 +873,9 @@ class SiteCategories {
 				$this->opts['landing_page_id'] = 0;
 				$this->opts['landing_page_slug'] = '';
 			}
+
+			//echo "_POST<pre>"; print_r($_POST); echo "</pre>";
+			//die();
 						
 			$this->save_config();
 			$wp_rewrite->flush_rules();			
@@ -1577,7 +1650,7 @@ class SiteCategories {
 					<option value="name" <?php if ($this->opts['categories']['orderby'] == "name") { 
 						echo 'selected="selected" '; } ?>><?php _e('Name', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 					<option value="id" <?php if ($this->opts['categories']['orderby'] == "id") { 
-						echo 'selected="selected" '; } ?>><?php _e('ID', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						echo 'selected="selected" '; } ?>><?php _e('Category ID', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 					<option value="none" <?php if ($this->opts['categories']['orderby'] == "none") { 
 						echo 'selected="selected" '; } ?>><?php _e('None', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 				</select>
@@ -1821,7 +1894,7 @@ class SiteCategories {
 			</td>
 		</tr>
 
-<?php /* ?>
+<?php  ?>
 		<tr>
 			<th scope="row">
 				<label for="site-categories-site-orderby"><?php _e('Order By', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
@@ -1833,13 +1906,22 @@ class SiteCategories {
 					<option value="name" <?php if ($this->opts['sites']['orderby'] == "name") { 
 						echo 'selected="selected" '; } ?>><?php _e('Name', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 					<option value="id" <?php if ($this->opts['sites']['orderby'] == "id") { 
-						echo 'selected="selected" '; } ?>><?php _e('ID', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-					<option value="none" <?php if ($this->opts['sites']['orderby'] == "none") { 
-						echo 'selected="selected" '; } ?>><?php _e('None', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						echo 'selected="selected" '; } ?>><?php _e('Site ID', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					<option value="registered" <?php if ($this->opts['sites']['orderby'] == "registered") { 
+						echo 'selected="selected" '; } ?>><?php _e('Registered Date', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					<option value="last_updated" <?php if ($this->opts['sites']['orderby'] == "last_updated") { 
+						echo 'selected="selected" '; } ?>><?php _e('Last Updated Date', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 				</select>
+				<select id="site-categories-site-order" name="bcat[sites][order]">
+					<option value="ASC" <?php if ($this->opts['sites']['order'] == "ASC") { 
+						echo 'selected="selected" '; } ?>><?php _e('ASC', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					<option value="DESC" <?php if ($this->opts['sites']['order'] == "DESC") { 
+						echo 'selected="selected" '; } ?>><?php _e('DESC', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				</select>
+				
 			</td>
 		</tr>
-<?php */ ?>
+<?php  ?>
 
 		<tr>
 			<th scope="row">
@@ -2030,6 +2112,20 @@ class SiteCategories {
 				?>
 			</td>
 		</tr>
+		<tr class="form-field" >
+			<th scope="row">
+				<label for="site-categories-use_rewrite"><?php _e('Pretty URLs for Categories', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			</th>
+			<td>
+				<select id="site-categories-use_rewrite" name="bcat[landing_page_use_rewrite]">
+					<option value="yes" <?php if ($this->opts['landing_page_use_rewrite'] == "yes") { 
+						echo 'selected="selected" '; } ?>><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					<option value="no" <?php if ($this->opts['landing_page_use_rewrite'] == "no") { 
+						echo 'selected="selected" '; } ?>><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				</select>
+				<p class="description"><?php _e('Use pretty URLs when displaying sites from a selected category. If the Landing page is set to the home page, Pretty URLs will automatically be set to No', SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+			</td>
+		</tr>
 		</table>
 		<?php		
 	}
@@ -2045,9 +2141,20 @@ class SiteCategories {
 	function settings_main_admin_display_selection_options_panel() {
 		?>
 		<table class="form-table">
+			<tr>
+				<th scope="row">
+					<label for="site-categories-signup-category-minimum"><?php _e('Minimum Site Categories', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+				</th>
+				<td>
+					<input type="text" class='widefat' id="site-categories-signup-category-minimum" name="bcat[sites][signup_category_minimum]" 
+						value="<?php echo intval($this->opts['sites']['signup_category_minimum']); ?>" />
+						<p class="description"><?php _e("The minimum number of site categories to be set. Can be blank for no minimum. This value should be less than the the value of the 'Maximum Site Categories' below", SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+
+				</td>
+			</tr>
 		<tr>
 			<th scope="row">
-				<label for="site-categories-sites-category-limit"><?php _e('Number of categories per site', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+				<label for="site-categories-sites-category-limit"><?php _e('Maximum Site Categories', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			</th>
 			<td>
 				<p class="description"><?php _e('This option lets you limit the number of Site Categories available to the site. This option adds a number of dropdown form elements on the Settings General page where the admin can set the categories for their site.', SITE_CATEGORIES_I18N_DOMAIN); ?></p>
@@ -2114,25 +2221,36 @@ class SiteCategories {
 				<label for="site-categories-sites-category-exclude"><?php _e('Excluded Categories', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			</th>		
 			<td>
-				<p class="description"><?php _e('Enter a comma separated list of category IDs. These categories will be excluded dropdown selection on the new site signup page as well as the blog Settings > Site Categories page.', SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+				<p class="description"><?php _e('Enter a comma separated list of category IDs. These categories will be excluded from the dropdown selection on the new site signup page as well as the blog Settings > Site Categories page.', SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 				<input type="text" class='widefat' id="site-categories-sites-category-excludes" name="bcat[sites][category_excludes]" 
 					value="<?php echo $cat_excludes; ?>" />
 			</td>
 		</tr>
-		
-<?php /* ?>
 		<tr>
 			<th scope="row">
-				<label for="site-categories-signup-category-minimum"><?php _e('Minimum Selected Site Categories', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
-			</th>
+				<label for="site-categories-sites-category-default"><?php _e('Default Category', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			</th>		
 			<td>
-				<input type="text" class='widefat' id="site-categories-signup-category-minimum" name="bcat[sites][signup_category_minimum]" 
-					value="<?php echo intval($this->opts['sites']['signup_category_minimum']); ?>" />
-					<p class="description"><?php _e("The minimum number of site categories to be set. This value should be between 1 and the value of the 'Number of categories per site' item", SITE_CATEGORIES_I18N_DOMAIN); ?></p>
-
+				<p class="description"><?php _e('Set the default category for when the site admin does not select a site category.', SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+				<?php
+					$bcat_args = array(
+						'taxonomy'			=> 	SITE_CATEGORIES_TAXONOMY,
+						'hierarchical'		=>	true,
+						'hide_empty'		=>	false,
+						'exclude'			=>	$cat_excludes,
+						'show_count'		=>	1,
+						'show_option_none'	=>	__('None Selected', SITE_CATEGORIES_I18N_DOMAIN), 
+						'name'				=>	'bcat[sites][category_default]',
+						'class'				=>	'bcat_category',
+					);
+					if (isset($this->opts['sites']['category_default'])) {
+						$bcat_args['selected'] = intval($this->opts['sites']['category_default']);
+					}
+					wp_dropdown_categories( $bcat_args ); 
+					?> 
 			</td>
 		</tr>
-<?php */ ?>
+		
 		<tr>
 			<th scope="row">
 				<label for="site-categories-signup-category-parent-selectable-yes"><?php _e('Category parents selectable', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
@@ -2282,11 +2400,6 @@ class SiteCategories {
 		<?php
 	}
 	
-	function dummy_body($content) {
-		$content .= "This is a dummy line of text.";
-		return $content;
-	}
-	
 	/**
 	 * 
 	 *
@@ -2298,6 +2411,8 @@ class SiteCategories {
 	function process_categories_body ($content) {
 
 		global $post;
+		
+		//echo "content=[". $content ."]<br />";
 
 		if (is_admin()) return $content;
 		if (!in_the_loop()) return $content;
@@ -2311,12 +2426,28 @@ class SiteCategories {
 		if ((!isset($this->opts['landing_page_id'])) || (!intval($this->opts['landing_page_id'])))
 			$opts['landing_page_id'] = 0; 
 		
+		//echo "post->ID[". $post->ID ."][". $this->opts['landing_page_id'] ."]<br />";
+		
 		if ($post->ID != intval($this->opts['landing_page_id'])) return $content;
 		
 		// Remove our own filter. Since we are here we should not need it. Plus in case other process call the content filters. 
 		//remove_filter('the_content', array($this, 'process_categories_body'), 99);
 		
-		$category = get_query_var('category_name');		
+		$category = '';
+		$start_at = 1;
+		
+		if ($this->opts['landing_page_use_rewrite'] == "yes") {
+			$category = get_query_var('category_name');
+			$start_at = get_query_var('start_at');
+		} else {
+			if (isset($_GET['category'])) {
+				$category = esc_attr($_GET['category']);
+				//echo "category<pre>"; print_r($category); echo "</pre>";
+			}
+			if (isset($_GET['start_at'])) {
+				$data['current_page'] = intval($_GET['start_at']);
+			}				
+		}
 		if ($category) {
 
 			$data['term'] = get_term_by('slug', $category, SITE_CATEGORIES_TAXONOMY);
@@ -2356,6 +2487,7 @@ class SiteCategories {
 			$data['category']	= $category;
 
 			$sites = $this->get_taxonomy_sites($data['term']->term_id);
+			//echo "sites<pre>"; print_r($sites); echo "</pre>";
 			if (count($sites) < $args['per_page']) {
 				$data['sites'] = $sites;
 
@@ -2370,16 +2502,16 @@ class SiteCategories {
 					$data['prev'] = array();
 					$data['prev']['page_number'] = intval($data['current_page']) - 1;
 
-					if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true)) {
+					if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
 
 						$data['prev']['link_url'] = trailingslashit($this->opts['landing_page_slug']) . $data['term']->slug 
 							. '/' . $data['prev']['page_number'];
 
 					} else {
 
-						$data['prev']['link_url'] = $this->opts['landing_page_slug'] . '&amp;category_name='. $data['term']->slug 
-							.'&amp;start_at=' . $data['prev']['page_number'];			
-
+						//$data['prev']['link_url'] = $this->opts['landing_page_slug'] . '&amp;category_name='. $data['term']->slug 
+						//	.'&amp;start_at=' . $data['prev']['page_number'];			
+						$data['prev']['link_url'] = add_query_arg(array('category' => $data['term']->slug, 'start_at' => $data['prev']['page_number']), $this->opts['landing_page_slug']); 
 					}
 
 					$data['prev']['link_label'] = __('Previous page', SITE_CATEGORIES_I18N_DOMAIN);
@@ -2391,15 +2523,16 @@ class SiteCategories {
 					
 					$data['next']['page_number'] = $data['current_page'] + 1;
 					
-					if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true)) {
+					if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
 
 						$data['next']['link_url'] = trailingslashit($this->opts['landing_page_slug']) . $data['term']->slug 
 							. '/' . $data['next']['page_number'];
 
 					} else {
 
-						$data['next']['link_url'] = $this->opts['landing_page_slug'] .'&amp;category_name='. $data['term']->slug 
-							.'&amp;start_at=' . $data['next']['page_number'];			
+						//$data['next']['link_url'] = $this->opts['landing_page_slug'] .'&amp;category_name='. $data['term']->slug 
+						//	.'&amp;start_at=' . $data['next']['page_number'];			
+						$data['next']['link_url'] = add_query_arg(array('category' => $data['term']->slug, 'start_at' => $data['next']['page_number']), $this->opts['landing_page_slug']); 
 
 					}
 
@@ -2434,11 +2567,14 @@ class SiteCategories {
 			return $categories_string;
 				
 		} else {
-
 			$args = $this->opts['categories'];
 			
 			$get_terms_args = array();
-			$get_terms_args['hide_empty']	=	$args['hide_empty'];
+			
+			// For processing default category logic we need to include empty categories in our initial query. Then remove when we are done before the display.
+			//$get_terms_args['hide_empty']	=	$args['hide_empty'];
+			$get_terms_args['hide_empty']	=	0;
+
 			$get_terms_args['orderby']		=	$args['orderby'];
 			$get_terms_args['order']		=	$args['order'];
 			$get_terms_args['pad_counts'] 	= 	true;
@@ -2467,6 +2603,9 @@ class SiteCategories {
 			//echo "args<pre>"; print_r($args); echo "</pre>";
 			//echo "get_terms_args<pre>"; print_r($get_terms_args); echo "</pre>";
 			
+			$unassigned_sites = $this->get_unassigned_sites();
+			//echo "unassigned_sites<pre>"; print_r($unassigned_sites); echo "</pre>";
+			
 			$categories = get_terms( SITE_CATEGORIES_TAXONOMY, $get_terms_args );
 			//echo "categories<pre>"; print_r($categories); echo "</pre>";
 			
@@ -2487,13 +2626,16 @@ class SiteCategories {
 
 						$data['prev'] = array();
 						$data['prev']['page_number'] = intval($data['current_page']) - 1;
-						
-						if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true)) {
-							$data['prev']['link_url'] = trailingslashit($this->opts['landing_page_slug']) . $data['prev']['page_number'];
+
+						if ($data['prev']['page_number'] > 1) {
+							if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
+								$data['prev']['link_url'] = trailingslashit($this->opts['landing_page_slug']) . $data['prev']['page_number'];
+							} else {
+								$data['prev']['link_url'] = add_query_arg(array('start_at' => $data['prev']['page_number']), $this->opts['landing_page_slug']); 
+							}
 						} else {
-							$data['prev']['link_url'] = $this->opts['landing_page_slug'] .'&amp;start_at=' . $data['prev']['page_number'];
+							$data['prev']['link_url'] = $this->opts['landing_page_slug'];
 						}
-						
 						$data['prev']['link_label'] = __('Previous page', SITE_CATEGORIES_I18N_DOMAIN);						
 					}
 					
@@ -2503,16 +2645,21 @@ class SiteCategories {
 
 						$data['next']['page_number'] = $data['current_page'] + 1;
 
-						if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true)) {
+						if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
 							$data['next']['link_url'] = trailingslashit($this->opts['landing_page_slug']) . $data['next']['page_number'];
 						} else {
-							$data['next']['link_url'] = $this->opts['landing_page_slug'] .'&amp;start_at=' . $data['next']['page_number'];
+							//$data['next']['link_url'] = $this->opts['landing_page_slug'] .'&amp;start_at=' . $data['next']['page_number'];
+							$data['next']['link_url'] = add_query_arg(array('start_at' => $data['next']['page_number']), $this->opts['landing_page_slug']);
 						}
 						$data['next']['link_label'] = __('Next page', SITE_CATEGORIES_I18N_DOMAIN);
 					}
 				}
 				
 				if (count($data['categories'])) {
+					//echo "data<pre>"; print_r($data); echo "</pre>";
+
+					$unassigned_sites = $this->get_unassigned_sites();
+					//echo "unassigned_sites<pre>"; print_r($unassigned_sites); echo "</pre>";
 
 					foreach($data['categories'] as $idx => $data_category) {
 
@@ -2520,15 +2667,27 @@ class SiteCategories {
 							$data['categories'][$idx]->icon_image_src = $this->get_category_term_icon_src($data_category->term_id, $args['icon_size']);
 						}
 						
-						if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true)) {
+						if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
 							$data['categories'][$idx]->bcat_url = trailingslashit($this->opts['landing_page_slug']) . $data_category->slug;
 						} else {
-							$data['categories'][$idx]->bcat_url = $this->opts['landing_page_slug'] .'&amp;category_name=' . $data_category->slug;
+							//$data['categories'][$idx]->bcat_url = $this->opts['landing_page_slug'] .'&amp;category_name=' . $data_category->slug;
+							$data['categories'][$idx]->bcat_url = add_query_arg(array('category' => $data_category->slug), $this->opts['landing_page_slug']);
+						}
+						//echo "opts<pre>"; print_r($this->opts); echo "</pre>";
+						
+						//echo "default cat id[". $this->opts['sites']['category_default'] ."] term_id[". $data_category->term_id ."]<br />";
+						if ($data_category->term_id == $this->opts['sites']['category_default']) {
+							if (($unassigned_sites) && (is_array($unassigned_sites))) {
+								$data['categories'][$idx]->count += count($unassigned_sites);
+							}
 						}
 						
 						if (($args['show_style'] == "grid") || ($args['show_style'] == "accordion")) {
 							$get_terms_args = array();
-							$get_terms_args['hide_empty']	=	$args['hide_empty'];
+							
+							//$get_terms_args['hide_empty']	=	$args['hide_empty'];
+							$get_terms_args['hide_empty']	=	0;
+
 							$get_terms_args['orderby']		=	$args['orderby'];
 							$get_terms_args['order']		=	$args['order'];
 
@@ -2543,12 +2702,21 @@ class SiteCategories {
 								// We tally the count of the children to make sure the parent count shows correctly. 
 								$children_count = 0;
 								foreach($child_categories as $child_category) {
+									//echo "default cat id[". $this->opts['sites']['category_default'] ."] term_id[". $child_category->term_id ."]<br />";
+									
+									if ($child_category->term_id == $this->opts['sites']['category_default']) {
+										if (($unassigned_sites) && (is_array($unassigned_sites))) {
+											$child_category->count += count($unassigned_sites);
+										}
+									}
+
 									$children_count += $child_category->count;
 									
-									if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true)) {
+									if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
 										$child_category->bcat_url = trailingslashit($this->opts['landing_page_slug']) . $child_category->slug;
 									} else {
-										$child_category->bcat_url = $this->opts['landing_page_slug'] .'&amp;category_name=' . $child_category->slug;
+										//$child_category->bcat_url = $this->opts['landing_page_slug'] .'&amp;category=' . $child_category->slug;
+										$child_category->bcat_url = add_query_arg(array('category' => $child_category->slug), $this->opts['landing_page_slug']);
 									}									
 									
 									if ((isset($args['icon_show_children'])) && ($args['icon_show_children'] == true)) {
@@ -2560,6 +2728,23 @@ class SiteCategories {
 									$data['categories'][$idx]->count = $children_count;
 								
 								$data['categories'][$idx]->children = $child_categories;
+							}
+						}
+					}
+				}
+
+				if ($args['hide_empty']) {
+					foreach($data['categories'] as $cat_parent_idx => $cat_parent) {
+						if ((isset($cat_parent->children)) && (count($cat_parent->children))) {
+							foreach($cat_parent->children as $cat_child_idx => $cat_child) {
+								if ($cat_child->count == 0) {
+									unset($data['categories'][$cat_parent_idx]->children[$cat_child_idx]);
+								}
+							}							
+						}
+						if ($cat_parent->count == 0) {
+							if ( (!isset($cat_parent->children)) || (!count($cat_parent->children)) ) {
+								unset($data['categories'][$cat_parent_idx]);
 							}
 						}
 					}
@@ -2602,15 +2787,26 @@ class SiteCategories {
 		
 		if ($post->ID != intval($this->opts['landing_page_id'])) return $content;
 
-		$category = get_query_var('category_name');
-		$category_int = intval($category);
+		$category = '';
+		if ($this->opts['landing_page_use_rewrite'] == "yes") {
+			$category = get_query_var('category_name');
+			$category_int = intval($category);
 
-		// Here is some fuzzy logic. The query_var 'category_name' is the first item off the page slug as in /page-slug/category-name/page-number/
-		// So we need to check if it is a real intval (3, 6, 12, etc.) then we assume we don't have a category and we are viewing the top-level page
-		// list of blog categories. IF we do have a valid category-name then the next query_var is the page-number
-		if (($category == $category_int) && ($category_int != 0)) {
-			$category = '';
+
+
+			// Here is some fuzzy logic. The query_var 'category_name' is the first item off the page slug as in /page-slug/category-name/page-number/
+			// So we need to check if it is a real intval (3, 6, 12, etc.) then we assume we don't have a category and we are viewing the top-level page
+			// list of blog categories. IF we do have a valid category-name then the next query_var is the page-number
+			if (($category == $category_int) && ($category_int != 0)) {
+				$category = '';
+			}
+		} else {
+			if (isset($_GET['category'])) {
+				$category = esc_attr($_GET['category']);
+				//echo "category<pre>"; print_r($category); echo "</pre>";
+			}
 		}
+
 
 		if (!$category) return $content;
 
@@ -2725,7 +2921,7 @@ class SiteCategories {
 					$this->wp_dropdown_categories( $bcat_args ); 
 				?> <?php
 				if ((isset($this->opts['sites']['signup_category_required'])) && ($this->opts['sites']['signup_category_required'] == 1)) { 
-					if ($cat_counter <= $this->opts['sites']['signup_category_minimum']) {
+					if ($cat_counter <= intval($this->opts['sites']['signup_category_minimum'])) {
 						?><span class="site-categories-required"><?php _e('(* required)', SITE_CATEGORIES_I18N_DOMAIN); ?></span><?php
 					}
 				}
@@ -2967,7 +3163,19 @@ class SiteCategories {
 		return call_user_func_array(array( &$walker, 'walk' ), $args );
 	}
 	
-	
+	function get_unassigned_sites() {
+		global $wpdb;
+		
+		$sql_str = "SELECT $wpdb->blogs.blog_id FROM $wpdb->blogs WHERE $wpdb->blogs.blog_id NOT IN (SELECT DISTINCT $wpdb->term_relationships.object_id
+		FROM $wpdb->term_taxonomy LEFT JOIN $wpdb->term_relationships ON $wpdb->term_relationships.term_taxonomy_id=$wpdb->term_taxonomy.term_taxonomy_id 
+		WHERE $wpdb->term_relationships.object_id IS NOT NULL AND $wpdb->term_taxonomy.taxonomy='". SITE_CATEGORIES_TAXONOMY ."')";
+
+		//echo "sql_str=[". $sql_str ."]<br />";
+		$non_assigned_site_ids = $wpdb->get_col( $sql_str );
+		//echo "non_assigned_site_ids<pre>"; print_r($non_assigned_site_ids); echo "</pre>";
+		//die();
+		return $non_assigned_site_ids;
+	}
 }
 
 class BCat_Walker_CategoryDropdown extends Walker {

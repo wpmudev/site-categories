@@ -2,11 +2,17 @@
 Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
+
+1.0.8 - 2013-09-02
+----------------------------------------------------------------------
+- Added option to disable rewrite rules (Pretty URLs) for Category display. Needed if landing page set to home.
+- Corrected/Added options to order category site listings.
+- Added support for a default virtual category to display all non-assigned sites to help with initial install of plugin. 
+
 1.0.7.9 - 2013-08-20
 ----------------------------------------------------------------------
 - Added filter to remove inner html from images used. 
 - Reverted back to using thickbox for category icon selection. Until issues can be resolved with WP new media selector.
-
 
 1.0.7.8 - 2013-06-19
 ----------------------------------------------------------------------
