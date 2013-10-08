@@ -3,6 +3,14 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.8.1 - 2013-10-08
+----------------------------------------------------------------------
+- Added options for Widget Site Categories to display output as select.
+- Added options for Widget Site Categories Sites to display output as select.
+- Added support for BuddyPress register form.
+- Added filter 'site_categories_user_can_view' to allow hiding the landing page or widgets content from being displayed on certain pages or to certain users.
+- Fixed reported issue with Cloud widget not showing when showing all categories. 
+
 1.0.8 - 2013-09-02
 ----------------------------------------------------------------------
 - Added option to disable rewrite rules (Pretty URLs) for Category display. Needed if landing page set to home.

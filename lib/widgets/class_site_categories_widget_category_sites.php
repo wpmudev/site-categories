@@ -76,7 +76,7 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 					_e('Ordered List (ol)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 				<option value="ul" <?php if ($instance['show_style'] == "ul") { echo ' selected="selected" '; }?>><?php 
 					_e('Unordered List (ul)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-				<?php /* ?><option value="select" <?php if ($instance['show_style'] == "select") { echo ' selected="selected" '; }?>><?php _e('Dropdown', SITE_CATEGORIES_I18N_DOMAIN); ?></option><?php */ ?>
+				<option value="select" <?php if ($instance['show_style'] == "select") { echo ' selected="selected" '; }?>><?php _e('Dropdown (select)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 			</select>
 		</p>
 
@@ -241,7 +241,14 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 
 			set_site_transient( 'site-categories-sites-data-'. $this->number, $data, 30);
 		}
-
+		
+		$user_access_content = apply_filters('site_categories_user_can_view', '', $this->id_base);
+		
+		// If the filters returned simply false we return the default content'
+		if ($user_access_content === false)
+			return $content;
+		
+		$instance['id'] = $this->id;
 		$categories_content = apply_filters('categories_widget_list_sites_display', '', $data, $instance);
 		if (strlen($categories_content)) {
 			echo $before_widget;
@@ -249,7 +256,11 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 			$title = apply_filters('widget_title', $instance['title']);
 			if ($title) echo $before_title . $title . $after_title;
 		
-			echo $categories_content;
+			// If the filters returned a string/text we want to use that as the user viewed content 	
+			if ((is_string($user_access_content)) && (!empty($user_access_content)))
+				echo  $user_access_content;
+			else
+				echo $categories_content;
 		
 			echo $after_widget;			
 		}
@@ -260,11 +271,15 @@ function process_categories_widget_list_sites_display($content, $data, $args) {
 	//echo "args<pre>"; print_r($args); echo "</pre>";
 	//echo "data<pre>"; print_r($data); echo "</pre>";
 
+	$form_id = str_replace('-', '_', $args['id']) . "_select";
+
 	if (($data['sites']) && (count($data['sites']))) { 
 
 		if ($args['show_style'] == "ol") { $content .= '<ol class="site-categories site-categories-widget">'; }
-		else if ($args['show_style'] == "select") { $content .= '<select class="site-categories site-categories-widget">'; }
-		else { $content .= '<ul class="site-categories site-categories-widget">'; }
+		else if ($args['show_style'] == "select") { 
+			$content .= '<select id="'. $form_id .'" class="site-categories site-categories-widget">'; 
+			$content .= '<option value="">'. __('Select Site', SITE_CATEGORIES_I18N_DOMAIN) .'</option>';
+		} else { $content .= '<ul class="site-categories site-categories-widget">'; }
 
 		foreach ($data['sites'] as $site) { 
 
@@ -302,13 +317,29 @@ function process_categories_widget_list_sites_display($content, $data, $args) {
 				$content .= '</li>';
 				
 			} else {
-				$content .= '<option>'. $site->blogname .'</option>';
+				$content .= '<option value="'. $site->siteurl .'">'. $site->blogname .'</option>';
 			}
 		}
 
 		if ($args['show_style'] == "ol") { $content .= '</ol>'; }
-		else if ($args['show_style'] == "select") { $content .= '</select>'; }
-		else { $content .= '</ul>'; }
+		else if ($args['show_style'] == "select") { 
+			$content .= '</select>'; 
+
+			$content .= '<script type="text/javascript">
+			/* <![CDATA[ */
+				var dropdown_'. $form_id .' = document.getElementById("'. $form_id .'");
+				function onCatChange_'. $form_id .'() {
+					var selected_index = dropdown_'. $form_id .'.selectedIndex;
+					var href = dropdown_'. $form_id .'.options[selected_index].value;
+					if (href != "") {
+						window.location.href = href;
+					}					
+				}
+				dropdown_'. $form_id .'.onchange = onCatChange_'.$form_id.';
+			/* ]]> */
+			</script>';	
+			
+		} else { $content .= '</ul>'; }
 
 		if ((isset($args['show_more_link'])) && ($args['show_more_link']) && (isset($data['landing']))) { 
 

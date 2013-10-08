@@ -15,6 +15,7 @@ class Bcat_WidgetCategories extends WP_Widget {
 		// ...
 		$defaults = array( 
 			'title' 				=> 	'',
+			'category'				=>	'',
 			'per_page'				=>	5,
 			'ordering'				=>	'name',
 			'order'					=>	'ASC',
@@ -43,14 +44,36 @@ class Bcat_WidgetCategories extends WP_Widget {
 				name="<?php echo $this->get_field_name( 'show_style'); ?>" class="widefat" style="width:100%;">
 				<option value="ol" <?php if ($instance['show_style'] == "ol") { echo ' selected="selected" '; } ?>><?php 
 					_e('Ordered List (ol)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				<option value="ol-nested" <?php if ($instance['show_style'] == "ol-nested") { echo ' selected="selected" '; } ?>><?php 
+					_e('Ordered List Nested (ol)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 				<option value="ul" <?php if ($instance['show_style'] == "ul") { echo ' selected="selected" '; } ?>><?php 
 					_e('Unordered List (ul)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-
-<?php /* >
+				<option value="ul-nested" <?php if ($instance['show_style'] == "ul-nested") { echo ' selected="selected" '; } ?>><?php 
+					_e('Unordered List Nested (ul)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 				<option value="select" <?php if ($instance['show_style'] == "select") { echo ' selected="selected" '; } ?>><?php 
 					_e('Dropdown (select)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-<?php */ ?>
 			</select>
+		</p>
+
+		<p>
+			<label for="<?php echo $this->get_field_id('category'); ?>"><?php _e('Site Category Parent:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
+			<?php
+				switch_to_blog( $current_site->blog_id );
+			
+				$bcat_args = array(
+					'taxonomy'			=> 	SITE_CATEGORIES_TAXONOMY,
+					'hierarchical'		=>	true,
+					'hide_empty'		=>	false,
+					'show_count'		=>	true,
+					'show_option_none'	=>	__('All', SITE_CATEGORIES_I18N_DOMAIN), 
+					'name'				=>	$this->get_field_name('category'),
+					'class'				=>	'widefat',
+					'selected'			=>	$instance['category']
+				);
+			
+				wp_dropdown_categories( $bcat_args ); 
+				restore_current_blog();
+			?>
 		</p>
 
 		<p>
@@ -99,7 +122,7 @@ class Bcat_WidgetCategories extends WP_Widget {
 
 
 		<p>
-			<label for="<?php echo $this->get_field_id('icon_show') ?>"><?php _e('Show Site Category icons:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
+			<label for="<?php echo $this->get_field_id('icon_show') ?>"><?php _e('Show Site Category icons: (lists only)', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
 			<input type="radio" name="<?php echo $this->get_field_name( 'icon_show'); ?>" id="<?php echo $this->get_field_id('icon_show') ?>_yes" 
 				value="1" <?php if ($instance['icon_show'] == "1") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('icon_show') ?>_yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			
@@ -136,6 +159,7 @@ class Bcat_WidgetCategories extends WP_Widget {
 		$instance = $old_instance;
 
 		$instance['title'] 				= strip_tags($new_instance['title']);
+		$instance['category'] 			= strip_tags($new_instance['category']);
 		$instance['per_page'] 			= strip_tags($new_instance['per_page']);
 		$instance['ordering'] 			= strip_tags($new_instance['ordering']);
 		$instance['order'] 				= strip_tags($new_instance['order']);
@@ -199,10 +223,17 @@ class Bcat_WidgetCategories extends WP_Widget {
 			$get_terms_args = array();
 			$get_terms_args['hide_empty']	=	$instance['hide_empty'];
 			$get_terms_args['orderby']		=	$instance['ordering'];
-
+			
+			if ( $instance['show_style'] == "select" )
+				$get_terms_args['hierarchical']	=	true;
+			else
+				$get_terms_args['hierarchical']	=	false;
+			
+			if ( isset($instance['category']))
+				$get_terms_args['child_of'] = intval($instance['category']);
+			
 			$categories = get_terms( SITE_CATEGORIES_TAXONOMY, $get_terms_args );
-			//echo "categories<pre>"; print_r($categories); echo "</pre>";
-		
+			
 			if (($categories) && (count($categories))) {
 				$data = array();
 				$data['current_page'] = 1;
@@ -251,7 +282,14 @@ class Bcat_WidgetCategories extends WP_Widget {
 			
 			set_site_transient( 'site-categories-categories-data-'. $this->number, $data, 30);
 		}
+	
+		$user_access_content = apply_filters('site_categories_user_can_view', '', $this->id_base);
 		
+		// If the filters returned simply false we return the default content'
+		if ($user_access_content === false)
+			return $content;
+	
+		$instance['id'] = $this->id;
 		$categories_content = apply_filters('categories_widget_list_display', '', $data, $instance);
 		if (strlen($categories_content)) {
 			echo $before_widget;
@@ -259,7 +297,11 @@ class Bcat_WidgetCategories extends WP_Widget {
 			$title = apply_filters('widget_title', $instance['title']);
 			if ($title) echo $before_title . $title . $after_title;
 		
-			echo $categories_content;
+			// If the filters returned a string/text we want to use that as the user viewed content 	
+			if ((is_string($user_access_content)) && (!empty($user_access_content)))
+				echo $user_access_content;		
+			else
+				echo $categories_content;
 		
 			echo $after_widget;
 			
@@ -271,34 +313,68 @@ function process_categories_widget_list_display($content, $data, $args) {
 	//echo "args<pre>"; print_r($args); echo "</pre>";
 	//echo "data<pre>"; print_r($data); echo "</pre>";
 
+	$form_id = str_replace('-', '_', $args['id']) . "_select";
+
 	if ((isset($data['categories'])) && (count($data['categories']))) {
 
-		if ($args['show_style'] == "ol") { $content .= '<ol class="site-categories site-categories-widget">'; }
-		else if ($args['show_style'] == "select") { $content .= '<select class="site-categories site-categories-widget">'; }
-		else { $content .= '<ul class="site-categories site-categories-widget">'; }
+		if (($args['show_style'] == "ol") || ($args['show_style'] == "ol-nested")) { $content .= '<ol class="site-categories site-categories-widget">'; }
+		else if ($args['show_style'] == "select") { 
+			$content .= '<select id="'. $form_id .'" class="site-categories site-categories-widget">'; 
+			$content .= '<option value="">'. __('Select Category', SITE_CATEGORIES_I18N_DOMAIN) .'</option>';
+		} else { $content .= '<ul class="site-categories site-categories-widget">'; }
 
-		foreach ($data['categories'] as $category) { 
-			if ($args['show_style'] != "select") { 
-
-				$content .=	'<li><a href="'. $category->bcat_url .'">';
+		if (($args['show_style'] == "ol") || ($args['show_style'] == "ul")) { 
+			foreach ($data['categories'] as $category) { 
 				
-					if ( ($args['icon_show'] == true) && (isset($category->icon_image_src))) {
-						$content .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'" alt="'. $category->name .'" src="'. $category->icon_image_src .'" />';
-					} 
-					$content .= '<span class="site-category-title">'. $category->name .'</span>';
-					if ($args['show_counts']) {
-						$content .= '<span class="site-category-count">('. $category->count .')</span>';
-					}
-					$content .= '</a>';
+				if ($category->count > 0) {
+					$output_url = $category->bcat_url;
+					$disabled = '';
+				} else {
+					$output_url = '';
+					$disabled = ' onclick="return false;" ';
+				}
+				
+				$content .=	'<li><a href="'. $output_url .'" '. $disabled .'>';
+				
+				if ( ($args['icon_show'] == true) && (isset($category->icon_image_src))) {
+					$content .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'" alt="'. $category->name .'" src="'. $category->icon_image_src .'" />';
+				} 
+				$content .= '<span class="site-category-title">'. $category->name .'</span>';
+				$content .= '</a>';
+
+				if ($args['show_counts']) {
+					$content .= '<span class="site-category-count">('. $category->count .')</span>';
+				}
 				$content .= '</li>';
-			} else {
-				$content .= '<option value="'. $category->bcat_url .'">'. $category->name .'</option>';
-			}
+			} 
+		} else {
+			global $site_categories;
+			
+			//echo "args<pre>"; print_r($args); echo "</pre>";
+			//echo "data<pre>"; print_r($data); echo "</pre>";
+			$walker = new BCat_Walker_WidgetCategoryDropdown;			
+			$args['walker'] = $walker;
+			$content .= $site_categories->walk_category_dropdown_tree( $data['categories'], 0, $args );			
 		}
 
 		if ($args['show_style'] == "ol") { $content .= "</ol>"; }
-		else if ($args['show_style'] == "select") { $content .= "</select>"; }
-		else { $content .= "</ul>"; }
+		else if ($args['show_style'] == "select") { 
+			$content .= "</select>"; 
+			$content .= '<script type="text/javascript">
+			/* <![CDATA[ */
+				var dropdown_'. $form_id .' = document.getElementById("'. $form_id .'");
+				function onCatChange_'. $form_id .'() {
+					var selected_index = dropdown_'. $form_id .'.selectedIndex;
+					var href = dropdown_'. $form_id .'.options[selected_index].value;
+					if (href != "") {
+						window.location.href = href;
+					}					
+				}
+				dropdown_'. $form_id .'.onchange = onCatChange_'.$form_id.';
+			/* ]]> */
+			</script>';	
+			
+		} else { $content .= "</ul>"; }
 
 		if ((isset($args['show_more_link'])) && ($args['show_more_link']) && (isset($data['landing']))) { 
 

@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.8
+Version: 1.0.8.1
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -50,6 +50,7 @@ class SiteCategories {
 	private $_pagehooks = array();	// A list of our various nav items. Used when hooking into the page load actions.
 	private $_messages 	= array();	// Message set during the form processing steps for add, edit, udate, delete, restore actions
 	private $_settings	= array();	// These are global dynamic settings NOT stores as part of the config options
+	private $_signup_form_errors;
 	
 	private $_admin_header_error;	// Set during processing will contain processing errors to display back to the user
 	private $bcat_signup_meta = array();	// Used to store the signup meta information related to Site Categories during the processing. 
@@ -80,7 +81,7 @@ class SiteCategories {
 	 */
 	function __construct() {
 		
-		$this->_settings['VERSION'] 				= '1.0.7.4';
+		$this->_settings['VERSION'] 				= '1.0.8.1';
 		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
 		$this->_settings['PLUGIN_URL']				= WP_CONTENT_URL . "/plugins/". basename( dirname(__FILE__) );
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
@@ -117,10 +118,14 @@ class SiteCategories {
 		
 		// Adds our Site Categories to the Site signup form. 
 		add_action( 'signup_blogform', 				array($this, 'bcat_signup_blogform') );
-		add_action( 'wpmu_new_blog', 				array($this, 'wpmu_new_blog_proc'), 99, 6 );
+		add_action( 'wpmu_new_blog', 				array($this, 'wpmu_new_blog_proc'), 99, 6 );		
 		add_filter( 'wpmu_validate_blog_signup', 	array($this, 'bcat_wpmu_validate_blog_signup'));
 		add_filter( 'add_signup_meta', 				array($this, 'bcat_add_signup_meta'));
 
+		// Adds our Site Categories section to the BuddyPress register form
+		add_action( 'bp_after_blog_details_fields', array($this, 'bcat_signup_blogform'), 99 );
+		add_filter( 'bp_signup_usermeta', array($this, 'bcat_add_signup_meta'));
+		
 		// Output for the Title and Content of the Site Category listing page
 		add_filter( 'the_title', 					array($this, 'process_categories_title'), 99, 2 );
 		add_filter( 'the_content', 					array($this, 'process_categories_body'), 99 );
@@ -2418,16 +2423,12 @@ class SiteCategories {
 		if (!in_the_loop()) return $content;
 		
 		$this->load_config();
-		//echo "opts<pre>"; print_r($this->opts); echo "</pre>";
-
 		$data = array();
 		
 		// We get the bcat options. This 'should' contain the variable 'landing_page_id' is the admin properly set things up
 		if ((!isset($this->opts['landing_page_id'])) || (!intval($this->opts['landing_page_id'])))
 			$opts['landing_page_id'] = 0; 
-		
-		//echo "post->ID[". $post->ID ."][". $this->opts['landing_page_id'] ."]<br />";
-		
+				
 		if ($post->ID != intval($this->opts['landing_page_id'])) return $content;
 		
 		// Remove our own filter. Since we are here we should not need it. Plus in case other process call the content filters. 
@@ -2448,6 +2449,20 @@ class SiteCategories {
 				$data['current_page'] = intval($_GET['start_at']);
 			}				
 		}
+		
+		// With this filter the user is checked to allow access. If the user DOES have access the return should be blank. However if 
+		// the user DOES NOT have access then return content should be what to show the user in place of the Site Categories listing.
+		// Alternately the admin can setup the filter to redirect the user to some other page. 
+		$user_access_content = apply_filters('site_categories_user_can_view', '', 'landing');
+		
+		// If the filters returned simply false we return the default content'
+		if ($user_access_content === false)
+			return $content;
+
+		// If the filters returned a string/text we want to use that as the user viewed content 	
+		if ((is_string($user_access_content)) && (!empty($user_access_content)))
+			return $user_access_content;
+		
 		if ($category) {
 
 			$data['term'] = get_term_by('slug', $category, SITE_CATEGORIES_TAXONOMY);
@@ -2603,7 +2618,7 @@ class SiteCategories {
 			//echo "args<pre>"; print_r($args); echo "</pre>";
 			//echo "get_terms_args<pre>"; print_r($get_terms_args); echo "</pre>";
 			
-			$unassigned_sites = $this->get_unassigned_sites();
+			//$unassigned_sites = $this->get_unassigned_sites();
 			//echo "unassigned_sites<pre>"; print_r($unassigned_sites); echo "</pre>";
 			
 			$categories = get_terms( SITE_CATEGORIES_TAXONOMY, $get_terms_args );
@@ -2843,18 +2858,14 @@ class SiteCategories {
 	 * @param none
 	 * @return none
 	 */
-	function bcat_signup_blogform($errors) {
-		global $wpdb;
+	function bcat_signup_blogform() {
+		global $wpdb, $bp;
 
 		$this->load_config();
 
 		if ((!isset($this->opts['sites']['signup_show'])) || ($this->opts['sites']['signup_show'] != 1))
 			return;
 		
-		//echo "opts<pre>"; print_r($this->opts); echo "</pre>";
-		//echo "errors<pre>"; print_r($errors); echo "</pre>";
-		//echo "_POST<pre>"; print_r($_POST); echo "</pre>";
-
 		if (!isset($this->opts['sites']['signup_category_label']))	
 			$this->opts['sites']['signup_category_label'] = __('Site Category:', SITE_CATEGORIES_I18N_DOMAIN);
 
@@ -2876,14 +2887,55 @@ class SiteCategories {
 		if (($blog_category_limit > 100)	|| ($blog_category_limit < 1))
 			$blog_category_limit = 1;
 
-		?>
-		<div id="bcat_site_categories_section">
-		<label for=""><?php echo stripslashes($this->opts['sites']['signup_category_label']) ?></label><?php
+		if (!isset($this->opts['sites']['signup_category_minimum']))
+			$this->opts['sites']['signup_category_minimum'] = 1;
+		else
+			$signup_category_minimum = intval($this->opts['sites']['signup_category_minimum']);
 
-		if ( $errmsg = $errors->get_error_message('bcat_site_categories') ) { ?>
-			<p class="error"><?php echo $errmsg ?></p>
-		<?php }
+		$terms_count = wp_count_terms(SITE_CATEGORIES_TAXONOMY, array('hide_empty' => false));
+		if ($this->opts['sites']['signup_category_parent_selectable'] != 1) {
+			$parent_terms = get_terms( SITE_CATEGORIES_TAXONOMY, array('parent' => 0, 'hide_empty' => false) );
+			//echo "parent_terms<pre>"; print_r($parent_terms); echo "</pre>";
+			$terms_count -= count($parent_terms);
+		}
+
+		if (intval($signup_category_minimum) > $terms_count)
+			$signup_category_minimum = $terms_count;
+
+		if (intval($blog_category_limit) > $terms_count)
+			$blog_category_limit = $terms_count;
+			
+		//echo "signup_category_minimum[". $signup_category_minimum ."] blog_category_limit[". $blog_category_limit ."] terms_count[". $terms_count ."]<br />";
+		//echo "signup_category_parent_selectable[". $this->opts['sites']['signup_category_parent_selectable'] ."]<br />";
+
 		
+		// We need to check if we are showing the signup form for WordPress or BuddyPress. For WP we show the Site Categories form elements. But for BP
+		// we hide them until the user selected the 'Yes, I'd like to create a new site' checkbox.
+		$_site_categories_use_js = false;
+		if ((isset($bp->current_component)) && ($bp->current_component == "register")) {
+			if ((wp_script_is('jquery', 'enqueued')) || (wp_script_is('jquery', 'done')) || (wp_script_is('jquery', 'to_do'))) {
+				$_site_categories_use_js = true;
+			}
+		}
+
+		$wrapper_style = 'clear:both;';
+		if ($_site_categories_use_js == true) {
+			$wrapper_style .= " display:none;";
+		}
+		?>
+		<div id="bcat_site_categories_wrapper" style="<?php echo $wrapper_style; ?>">
+		<div id="bcat_site_categories_section">
+		<label for=""><?php echo stripslashes($this->opts['sites']['signup_category_label']) ?></label>
+		<?php
+			if ($this->_signup_form_errors) {
+				if ( $errmsg = $this->_signup_form_errors->get_error_message('bcat_site_categories') ) { 
+					if ($bp) {
+						?><div class="error"><?php echo $errmsg ?></div><?php 
+					} else {
+						?> <p class="error"><?php echo $errmsg ?></p><?php 
+					}
+				}
+			}
 		//$site_categories_description = apply_filters('add_site_page_site_categories_description', '');
 		//if (!empty($site_categories_description)) {
 		//	echo $site_categories_description;
@@ -2921,7 +2973,7 @@ class SiteCategories {
 					$this->wp_dropdown_categories( $bcat_args ); 
 				?> <?php
 				if ((isset($this->opts['sites']['signup_category_required'])) && ($this->opts['sites']['signup_category_required'] == 1)) { 
-					if ($cat_counter <= intval($this->opts['sites']['signup_category_minimum'])) {
+					if ($cat_counter <= intval($signup_category_minimum)) {
 						?><span class="site-categories-required"><?php _e('(* required)', SITE_CATEGORIES_I18N_DOMAIN); ?></span><?php
 					}
 				}
@@ -2934,6 +2986,7 @@ class SiteCategories {
 		?></ol></div><?php
 		
 		?>
+		
 		<div id="bcat_site_description_section">
 			<label for="bcat_site_description"><?php echo stripslashes($this->opts['sites']['signup_description_label']) ?> <?php 
 				if ((isset($this->opts['sites']['signup_description_required'])) && ($this->opts['sites']['signup_description_required'] == 1)) { 
@@ -2946,10 +2999,15 @@ class SiteCategories {
 				//}
 			?>
 			<?php
-				if ( $errmsg = $errors->get_error_message('bcat_site_description') ) { ?>
-					<p class="error"><?php echo $errmsg ?></p>
-				<?php }
-		
+				if ($this->_signup_form_errors) {
+					if ( $errmsg = $this->_signup_form_errors->get_error_message('bcat_site_description') ) {
+						if ($bp) {
+							?><div class="error"><?php echo $errmsg ?></div><?php 
+						} else {
+							?><p class="error"><?php echo $errmsg ?></p><?php 
+						}
+					}
+				}
 			?>
 			<textarea name="bcat_site_description" style="width:100%;" cols="30" rows="10" id="bcat_site_description"><?php
 				if (isset($_POST['bcat_site_description'])) {
@@ -2957,32 +3015,21 @@ class SiteCategories {
 				}
 			?></textarea><br />
 		</div>
+		</div>
 		<?php
-	}
-
-	
-	/**
-	 * 
-	 *
-	 * @since 1.0.2
-	 *
-	 * @param none
-	 * @return none
-	 */
-	function wpmu_new_blog_proc($blog_id, $user_id, $domain, $path, $site_id, $meta ) {
-		global $current_site;
-
-		if ((isset($blog_id)) && ($blog_id)) {
-
-			if (isset($meta['bcat_signup_meta']['bcat_site_categories'])) {
-
-				$bcat_set = wp_set_object_terms($blog_id, $meta['bcat_signup_meta']['bcat_site_categories'], SITE_CATEGORIES_TAXONOMY);
-			}
-
-			if (isset($meta['bcat_signup_meta']['bcat_site_description'])) {
-				update_blog_option($blog_id, 'bact_site_description', $meta['bcat_signup_meta']['bcat_site_description']);
-			}
-		}
+			if ($_site_categories_use_js == true) {
+				?>
+				<script type="text/javascript">
+					jQuery('input#signup_with_blog').click(function() {
+						if (jQuery(this).prop('checked')) {
+							jQuery('#bcat_site_categories_wrapper').slideDown('slow');
+						} else {
+							jQuery('#bcat_site_categories_wrapper').slideUp('fast');
+						}
+					});
+				</script>
+				<?php
+			}		
 	}
 	
 	/**
@@ -2995,18 +3042,38 @@ class SiteCategories {
 	 * @return none
 	 */
 	function bcat_wpmu_validate_blog_signup($result) {
+		global $bp, $errors;
 		
 		$this->load_config();
-
+		
 		if ((!isset($this->opts['sites']['signup_show'])) || ($this->opts['sites']['signup_show'] != 1))
 			return $result;
 		
-		$errors = new WP_Error();
 
 		if ((isset($this->opts['sites']['signup_category_required'])) && ($this->opts['sites']['signup_category_required'] == 1)) {
 
+			$terms_count = wp_count_terms(SITE_CATEGORIES_TAXONOMY, array('hide_empty' => false));
+			if ($this->opts['sites']['signup_category_parent_selectable'] != 1) {
+				$parent_terms = get_terms( SITE_CATEGORIES_TAXONOMY, array('parent' => 0, 'hide_empty' => false) );
+				//echo "parent_terms<pre>"; print_r($parent_terms); echo "</pre>";
+				$terms_count -= count($parent_terms);
+			}
 			if (!isset($this->opts['sites']['signup_category_minimum']))
 				$this->opts['sites']['signup_category_minimum'] = 1;
+			else
+				$signup_category_minimum = intval($this->opts['sites']['signup_category_minimum']);
+				
+			if (intval($signup_category_minimum) > $terms_count)
+				$signup_category_minimum = $terms_count;
+
+			if (intval($blog_category_limit) > $terms_count)
+				$blog_category_limit = $terms_count;
+
+			//echo "signup_category_minimum[". $signup_category_minimum ."] blog_category_limit[". $blog_category_limit ."] terms_count[". $terms_count ."]<br />";
+
+
+			//if (!isset($this->opts['sites']['signup_category_minimum']))
+			//	$this->opts['sites']['signup_category_minimum'] = 1;
 
 			$bcat_site_categories = array();
 			if (isset($_POST['bcat_site_categories'])) {
@@ -3022,8 +3089,14 @@ class SiteCategories {
 			}
 			
 			if (count($bcat_site_categories) < $this->opts['sites']['signup_category_minimum']) {
-					$format = __('You must select at least %d unique categories', SITE_CATEGORIES_I18N_DOMAIN);
-				$result['errors']->add( 'bcat_site_categories', sprintf($format, $this->opts['sites']['signup_category_minimum'] ));
+				$format = __('You must select at least %d unique categories', SITE_CATEGORIES_I18N_DOMAIN);
+				$errmsg = sprintf($format, $signup_category_minimum );
+					
+				$result['errors']->add( 'bcat_site_categories', $errmsg);
+				if ($bp) {
+					$bp->signup->errors['bcat_site_description'] = $errmsg;
+				}
+				
 			} else {
 				$this->bcat_signup_meta['bcat_site_categories'] = $bcat_site_categories;
 				
@@ -3037,12 +3110,17 @@ class SiteCategories {
 			}
 			
 			if (!strlen($bcat_site_description)) {
-				$result['errors']->add( 'bcat_site_description', __('Please provide a site description', SITE_CATEGORIES_I18N_DOMAIN) );
+				$errmsg = __('Please provide a site description', SITE_CATEGORIES_I18N_DOMAIN);
+				$result['errors']->add( 'bcat_site_description',  $errmsg);
+				if ($bp) {
+					$bp->signup->errors['bcat_site_description'] = $errmsg;
+				}
 			} else {
 				$this->bcat_signup_meta['bcat_site_description'] = $bcat_site_description;
 			}
 		}
-
+		$this->_signup_form_errors = $result['errors'];
+		
 		return $result;
 	}
 
@@ -3069,18 +3147,52 @@ class SiteCategories {
 		return $meta;
 	}
 	
+	/**
+	 * Once the signup is validated and stored into the wp_signups. The user will received an email with an activation link. When clicked this will trigger
+	 * a load of the wp_signups record. And passed to here and other plugins which subscribe to the action. Here we check for a valid blog id and assign 
+	 * the previously selected site categories terms and description.
+	 *
+	 * @since 1.0.2
+	 *
+	 * @param none
+	 * @return none
+	 */
+	function wpmu_new_blog_proc($blog_id, $user_id, $domain, $path, $site_id, $meta ) {
+		global $current_site;
+
+		if ((isset($blog_id)) && ($blog_id)) {
+
+			if (isset($meta['bcat_signup_meta']['bcat_site_categories'])) {
+				$bcat_set = wp_set_object_terms($blog_id, $meta['bcat_signup_meta']['bcat_site_categories'], SITE_CATEGORIES_TAXONOMY);
+			}
+
+			if (isset($meta['bcat_signup_meta']['bcat_site_description'])) {
+				update_blog_option($blog_id, 'bact_site_description', $meta['bcat_signup_meta']['bcat_site_description']);
+			}
+		}
+	}
+	
 	function wp_dropdown_categories( $args = '' ) {
 		$defaults = array(
-			'show_option_all' => '', 'show_option_none' => '',
-			'orderby' => 'id', 'order' => 'ASC',
-			'show_last_update' => 0, 'show_count' => 0,
-			'hide_empty' => 1, 'child_of' => 0,
-			'exclude' => '', 'echo' => 1,
-			'selected' => 0, 'hierarchical' => 0,
-			'name' => 'cat', 'id' => '',
-			'class' => 'postform', 'depth' => 0,
-			'tab_index' => 0, 'taxonomy' => 'category',
-			'hide_if_empty' => false
+			'show_option_all' 		=> '', 
+			'show_option_none' 		=> '',
+			'orderby' 				=> 'id', 
+			'order' 				=> 'ASC',
+			'show_last_update' 		=> 0, 
+			'show_count' 			=> 0,
+			'hide_empty' 			=> 1, 
+			'child_of' 				=> 0,
+			'exclude' 				=> '', 
+			'echo' 					=> 1,
+			'selected' 				=> 0, 
+			'hierarchical' 			=> 0,
+			'name' 					=> 'cat', 
+			'id' 					=> '',
+			'class' 				=> 'postform', 
+			'depth' 				=> 0,
+			'tab_index' 			=> 0, 
+			'taxonomy' 				=> 'category',
+			'hide_if_empty' 		=> false
 		);
 
 		$defaults['selected'] = ( is_category() ) ? get_query_var( 'cat' ) : 0;
@@ -3092,7 +3204,8 @@ class SiteCategories {
 		}
 
 		$r = wp_parse_args( $args, $defaults );
-
+		//echo "r<pre>"; print_r($r); echo "</pre>";
+		
 		if ( !isset( $r['pad_counts'] ) && $r['show_count'] && $r['hierarchical'] ) {
 			$r['pad_counts'] = true;
 		}
@@ -3232,6 +3345,96 @@ class BCat_Walker_CategoryDropdown extends Walker {
 			$output .= '</optgroup>';
 		}
 	}
+}
+
+class BCat_Walker_WidgetCategoryDropdown extends Walker {
+	/**
+	 * @see Walker::$tree_type
+	 * @since 2.1.0
+	 * @var string
+	 */
+	var $tree_type = 'category';
+	var $prev_depth = 0;
+	
+	/**
+	 * @see Walker::$db_fields
+	 * @since 2.1.0
+	 * @todo Decouple this
+	 * @var array
+	 */
+	var $db_fields = array ('parent' => 'parent', 'id' => 'term_id');
+
+	function start_lvl( &$output, $depth = 0, $args = array() ) {
+		if (($args['show_style'] == "ol-nested") || ($args['show_style'] == "ul-nested")) {
+			$indent = str_repeat("\t", $depth);
+			$output .= "$indent<ul class='children'>\n";
+		}
+	}
+
+	function end_lvl( &$output, $depth = 0, $args = array() ) {
+		if (($args['show_style'] == "ol-nested") || ($args['show_style'] == "ul-nested")) {
+			$indent = str_repeat("\t", $depth);
+			$output .= "$indent</ul>\n";
+		}
+	}
+
+
+	function start_el(&$output, $category, $depth, $args) {
+
+		//echo "prev_depth[". $this->prev_depth ."] depth[". $depth ."]<br />";
+
+		if ($this->prev_depth != $depth) {
+			$this->prev_depth = $depth;
+		}
+		
+		$cat_name = apply_filters('list_cats', $category->name, $category);		
+
+		if ($category->count > 0) {
+			$output_url = $category->bcat_url;
+			$disabled = '';
+		} else {
+			$output_url = '';
+			$disabled = ' onclick="return false;" ';
+		}
+				
+		if ($args['show_style'] == "select") {
+			$pad = str_repeat('&nbsp;', $depth * 3);
+			$output .= "<option class=\"level-$depth\" value=\"". $output_url ."\"";
+			if ( $category->term_id == $args['selected'] )
+				$output .= ' selected="selected"';
+			$output .= '>';
+			$output .= $pad.$cat_name;
+			if ( $args['show_counts'] )
+				$output .= '&nbsp;&nbsp;('. $category->count .')';
+			if ( $args['show_last_update'] ) {
+				$format = 'Y-m-d';
+				$output .= '&nbsp;&nbsp;' . gmdate($format, $category->last_update_timestamp);
+			}
+			$output .= "</option>\n";
+		} else if (($args['show_style'] == "ul-nested") || ($args['show_style'] == "ol-nested")) {
+
+			$option_spacer = str_repeat('&nbsp;', $depth);
+
+			$output .=	'<li class="level-'. $depth .'"><a href="'. $output_url .'" '. $disabled .'>';
+			
+			if ( ($args['icon_show'] == true) && (isset($category->icon_image_src))) {
+				$output .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'" alt="'. $category->name .'" src="'. $category->icon_image_src .'" />';
+			} 
+			$output .= '<span class="site-category-title">'. $category->name .'</span>';
+			$output .= '</a>';
+
+			if ($args['show_counts']) {
+				$output .= '<span class="site-category-count">('. $category->count .')</span>';
+			}
+		}
+	}
+
+	function end_el( &$output, $category, $depth = 0, $args = array() ) {
+		if (($args['show_style'] == "ol-nested") || ($args['show_style'] == "ul-nested")) {
+			$output .= "</li>\n";
+		}
+	}
+	
 }
 
 $site_categories = new SiteCategories();

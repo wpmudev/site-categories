@@ -161,3 +161,8 @@ ul.site-categories-widget li {
 #site-categories-wrapper .site-categories-accordion .site-categories-accordion-header img.site-category-icon {
 	padding: 5px 0;
 }
+
+
+form#signup_form #bcat_site_categories_section {
+	clear:both;
+}

@@ -14,15 +14,17 @@ class Bcat_WidgetCloud extends WP_Widget {
 		// Set defaults
 		// ...
 		$defaults = array( 
-			'title' 			=> 	'',
-			'number'			=>	'',
-			'orderby'			=>	'name',
-			'order'				=>	'ASC',
-			'smallest'			=>	'8',
-			'largest'			=>	'22',
-			'unit'				=>	'pt',
-			'category'			=>	'',
-			'include_parent'	=>	'on'
+			'title' 				=> 	'',
+			'number'				=>	'',
+			'orderby'				=>	'name',
+			'order'					=>	'ASC',
+			'smallest'				=>	'8',
+			'largest'				=>	'22',
+			'unit'					=>	'pt',
+			'category'				=>	'',
+			'include_parent'		=>	'on',
+			'show_more_link'		=>	1,
+			'landing_link_label'	=>	__('more categories', SITE_CATEGORIES_I18N_DOMAIN)
 		);
 		
 		$instance = wp_parse_args( (array) $instance, $defaults ); 
@@ -132,6 +134,25 @@ class Bcat_WidgetCloud extends WP_Widget {
 					_e('px Pixels', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 			</select>
 		</p>
+		
+		<p>
+			<label for="<?php echo $this->get_field_id('show_more_link') ?>"><?php _e('Landing Page link below cloud list:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
+			<input type="radio" name="<?php echo $this->get_field_name( 'show_more_link'); ?>" id="<?php echo $this->get_field_id('show_more_link') ?>_yes" 
+				value="1" <?php if ($instance['show_more_link'] == "1") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('show_more_link') ?>_yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			
+			<input type="radio" name="<?php echo $this->get_field_name( 'show_more_link'); ?>" id="<?php echo $this->get_field_id('show_more_link') ?>_no" 
+				value="0" <?php if ($instance['show_more_link'] == "0") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('show_more_link') ?>_no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
+			
+		</p>
+		
+		<p>
+			<label for="<?php echo $this->get_field_id( 'landing_link_label' ); ?>"><?php 
+				_e('Label for link:', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+
+			<input type="text" id="<?php echo $this->get_field_id( 'landing_link_label' ); ?>" value="<?php echo $instance['landing_link_label']; ?>"
+				name="<?php echo $this->get_field_name( 'landing_link_label'); ?>" class="widefat" style="width:100%;" />
+		</p>
+		
 
 		<?php
 	}
@@ -188,6 +209,9 @@ class Bcat_WidgetCloud extends WP_Widget {
 		else
 			$instance['unit']		= "pt";
 		
+		$instance['show_more_link'] 	= intval($new_instance['show_more_link']);
+		$instance['landing_link_label'] = strip_tags($new_instance['landing_link_label']);
+		
 		delete_site_transient( 'site-categories-cloud-data-'. $this->number );
 		return $instance;
 	}
@@ -200,22 +224,36 @@ class Bcat_WidgetCloud extends WP_Widget {
 		extract($args);
 
 		$data = get_site_transient( 'site-categories-cloud-data-'. $this->number );
+		//echo "data<pre>"; print_r($data); echo "</pre>";
 		if (!$data) {
 			
 			switch_to_blog( $current_site->blog_id );
 
 			$defaults = array(
-				'smallest' => 8, 'largest' => 22, 'unit' => 'pt', 'number' => 45,
-				'format' => 'flat', 'separator' => "\n", 'orderby' => 'name', 'order' => 'ASC',
-				'exclude' => '', 'include' => '', 'link' => 'view', 'taxonomy' => 'post_tag', 'echo' => true
+				'smallest' 		=> 	8, 
+				'largest' 		=> 	22, 
+				'unit' 			=> 	'pt', 
+				'number' 		=> 	45,
+				'format' 		=> 	'flat', 
+				'separator' 	=> 	"\n", 
+				'orderby' 		=> 	'name', 
+				'order' 		=> 	'ASC',
+				'exclude' 		=> 	'', 
+				'include' 		=> 	'', 
+				'link' 			=> 	'view', 
+				'taxonomy' 		=> 	SITE_CATEGORIES_TAXONOMY, 
+				'echo' 			=> 	false
 			);
 			$instance = wp_parse_args( $instance, $defaults );
-			if ((isset($instance['category'])) && (intval($instance['category']))) {
-				$instance['child_of'] 	= $instance['category'];
+			if ((isset($instance['category'])) && (intval($instance['category']) > 0)) {
+				$instance['child_of'] 	= intval($instance['category']);
+			} else {
+				$instance['child_of'] 	= 0;
 			}
+			//echo "instance<pre>"; print_r($instance); echo "</pre>";
 			
 			$tags = get_terms( SITE_CATEGORIES_TAXONOMY, $instance); // Always query top tags
-			
+			//echo "tags<pre>"; print_r($tags); echo "</pre>";
 			if ((isset($instance['include_parent']))	&& ($instance['include_parent'] == "on")) {
 				$parent_tag = get_term_by('id', $instance['category'], SITE_CATEGORIES_TAXONOMY);
 				if ( !empty( $parent_tag ) && !is_wp_error( $parent_tag ) ) {
@@ -239,10 +277,26 @@ class Bcat_WidgetCloud extends WP_Widget {
 			}
 			$data = wp_generate_tag_cloud( $tags, $instance ); // Here's where those top tags get sorted according to $args
 
+			if (!empty($data)) {
+				if ((isset($instance['show_more_link'])) && ($instance['show_more_link'])) { 
+
+					$data .= '<div id="site-categories-navigation">';
+					$data .= '<a href="'. $site_categories->opts['landing_page_slug'] .'">'. $instance['landing_link_label'] .'</a>';
+					echo '</div>';
+				}
+			}
+
 			restore_current_blog();
 			
 			set_site_transient( 'site-categories-cloud-data-'. $this->number, $data, 30);
 		}
+		
+		$user_access_content = apply_filters('site_categories_user_can_view', '', $this->id_base);
+		//echo "user_access_content[". $user_access_content ."]<br />";
+		
+		// If the filters returned simply false we return the default content'
+		if ($user_access_content === false)
+			return $content;
 		
 		if ($data) {
 			echo $before_widget;
@@ -250,7 +304,11 @@ class Bcat_WidgetCloud extends WP_Widget {
 			$title = apply_filters('widget_title', $instance['title']);
 			if ($title) echo $before_title . $title . $after_title;
 		
-			echo $data;
+			// If the filters returned a string/text we want to use that as the user viewed content 	
+			if ((is_string($user_access_content)) && (!empty($user_access_content)))
+				echo $user_access_content;
+			else
+				echo $data;
 		
 			echo $after_widget;
 			
