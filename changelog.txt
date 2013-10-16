@@ -3,6 +3,10 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.8.3 - 2013-10-16
+----------------------------------------------------------------------
+- Corrected incorrect version number '1.0.8.2-Beta1' in previous update. should have been '1.0.8.2'. Causing update issues for members.
+
 1.0.8.2 - 2013-10-16
 ----------------------------------------------------------------------
 - Corrected issue on new filter added in previous version. Now returning correct value.
