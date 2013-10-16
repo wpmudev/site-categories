@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.8.1
+Version: 1.0.8.2-Beta1
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -3400,16 +3400,16 @@ class BCat_Walker_WidgetCategoryDropdown extends Walker {
 		if ($args['show_style'] == "select") {
 			$pad = str_repeat('&nbsp;', $depth * 3);
 			$output .= "<option class=\"level-$depth\" value=\"". $output_url ."\"";
-			if ( $category->term_id == $args['selected'] )
+			if ((isset($args['selected'])) && ( $category->term_id == $args['selected'] ))
 				$output .= ' selected="selected"';
 			$output .= '>';
 			$output .= $pad.$cat_name;
 			if ( $args['show_counts'] )
 				$output .= '&nbsp;&nbsp;('. $category->count .')';
-			if ( $args['show_last_update'] ) {
-				$format = 'Y-m-d';
-				$output .= '&nbsp;&nbsp;' . gmdate($format, $category->last_update_timestamp);
-			}
+//			if ( $args['show_last_update'] ) {
+//				$format = 'Y-m-d';
+//				$output .= '&nbsp;&nbsp;' . gmdate($format, $category->last_update_timestamp);
+//			}
 			$output .= "</option>\n";
 		} else if (($args['show_style'] == "ul-nested") || ($args['show_style'] == "ol-nested")) {
 

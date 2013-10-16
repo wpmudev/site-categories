@@ -287,7 +287,7 @@ class Bcat_WidgetCategories extends WP_Widget {
 		
 		// If the filters returned simply false we return the default content'
 		if ($user_access_content === false)
-			return $content;
+			return false;
 	
 		$instance['id'] = $this->id;
 		$categories_content = apply_filters('categories_widget_list_display', '', $data, $instance);

@@ -296,7 +296,7 @@ class Bcat_WidgetCloud extends WP_Widget {
 		
 		// If the filters returned simply false we return the default content'
 		if ($user_access_content === false)
-			return $content;
+			return false;
 		
 		if ($data) {
 			echo $before_widget;

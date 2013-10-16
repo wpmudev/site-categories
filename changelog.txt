@@ -3,6 +3,11 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.8.2 - 2013-10-16
+----------------------------------------------------------------------
+- Corrected issue on new filter added in previous version. Now returning correct value.
+- Corrected issue on new dropdown display option
+
 1.0.8.1 - 2013-10-08
 ----------------------------------------------------------------------
 - Added options for Widget Site Categories to display output as select.
