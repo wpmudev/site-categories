@@ -10,7 +10,8 @@ class Bcat_WidgetCloud extends WP_Widget {
 	}
 
 	function form($instance) {
-
+		global $current_site;
+		
 		// Set defaults
 		// ...
 		$defaults = array( 
@@ -22,6 +23,8 @@ class Bcat_WidgetCloud extends WP_Widget {
 			'largest'				=>	'22',
 			'unit'					=>	'pt',
 			'category'				=>	'',
+			'category_filter'		=>	'',
+			'category_ids'			=>	'',
 			'include_parent'		=>	'on',
 			'show_more_link'		=>	1,
 			'landing_link_label'	=>	__('more categories', SITE_CATEGORIES_I18N_DOMAIN)
@@ -30,9 +33,9 @@ class Bcat_WidgetCloud extends WP_Widget {
 		$instance = wp_parse_args( (array) $instance, $defaults ); 
 		//echo "instance<pre>"; print_r($instance); echo "</pre>";
 		
-		if (!empty($instance['per_page'])) {
-			$instance['per_page'] = intval($instance['per_page']);
-		}
+		//if (!empty($instance['per_page'])) {
+		//	$instance['per_page'] = intval($instance['per_page']);
+		//}
 		
 		?>
 		<p>
@@ -54,23 +57,47 @@ class Bcat_WidgetCloud extends WP_Widget {
 				_e('Show Site Categories:', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 
 			<?php
+				switch_to_blog( $current_site->blog_id );
+		
 				$bcat_args = array(
 					'taxonomy'			=> 	SITE_CATEGORIES_TAXONOMY,
+					'orderby'			=>	'name',
+					'order'				=>	'ASC',
 					'hierarchical'		=>	true,
 					'hide_empty'		=>	false,
+					'show_count'		=>	true,
 					'show_option_none'	=>	__('All Categories', SITE_CATEGORIES_I18N_DOMAIN), 
-					'show_count'		=>	1,
-					'name'				=>	$this->get_field_name( 'category'),
-					'selected'			=>	$instance['category'],
-					'class'				=>	'bcat_category_widget',
-					
+					'name'				=>	$this->get_field_name('category'),
+					'class'				=>	'widefat',
+					'selected'			=>	$instance['category']
 				);
-
+		
 				wp_dropdown_categories( $bcat_args ); 
+				restore_current_blog();
+
 			?><input type="checkbox" id="<?php echo $this->get_field_id( 'include_parent' ); ?>" <?php if ($instance['include_parent'] == "on") {
 				echo ' checked="checked" '; } ?>
 				name="<?php echo $this->get_field_name( 'include_parent'); ?>"  /> <label for="<?php echo $this->get_field_id( 'include_parent' ); ?>"><?php 
 				_e('Include Parent:', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+		</p>
+		<p>
+			<label for="<?php echo $this->get_field_id('category_filter') ?>"><?php _e('Site Categories Include/Exclude:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
+			<select id="<?php echo $this->get_field_id( 'category_filter' ); ?>" 
+				name="<?php echo $this->get_field_name( 'category_filter'); ?>" class="widefat">
+				<option value="" <?php if ($instance['category_filter'] == "") { echo ' selected="selected" '; }?>><?php 
+					_e('Show All', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				<option value="include" <?php if ($instance['category_filter'] == "include") { echo ' selected="selected" '; }?>><?php 
+					_e('Include', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				<option value="exclude" <?php if ($instance['category_filter'] == "exclude") { echo ' selected="selected" '; }?>><?php 
+					_e('Exclude', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				<option value="exclude_tree" <?php if ($instance['category_filter'] == "exclude_tree") { echo ' selected="selected" '; }?>><?php 
+					_e('Exclude Tree', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+			</select><br />
+		</p>
+		<p>
+			<label for="<?php echo $this->get_field_id('category_ids') ?>"><?php _e('Site Categories IDs (comma seperated):', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			<input type="text" name="<?php echo $this->get_field_name('category_ids'); ?>" id="<?php echo $this->get_field_id('category_ids'); ?>" 
+				class="widefat" value="<?php echo $instance['category_ids'] ?>"/>
 		</p>
 
 		<p>
@@ -160,30 +187,39 @@ class Bcat_WidgetCloud extends WP_Widget {
 	function update($new_instance, $old_instance) {
 		$instance = $old_instance;
 
-		$instance['title'] 				= strip_tags($new_instance['title']);
+		$instance['title'] 					= strip_tags($new_instance['title']);
 
 		if (!empty($new_instance['category']))
-			$instance['category'] 		= intval($new_instance['category']);
+			$instance['category'] 			= intval($new_instance['category']);
 		else
 			$instance['category']			= '';
 
+		if (!empty($new_instance['category_filter']))
+			$instance['category_filter'] 	= strip_tags($new_instance['category_filter']);
+		else
+			$instance['category_filter'] 	= '';
+		
+		if (!empty($new_instance['category_ids']))
+			$instance['category_ids'] 		= strip_tags($new_instance['category_ids']);
+		else
+			$instance['category_ids'] 		= '';
 
 		if (isset($new_instance['include_parent']))
-			$instance['include_parent'] 		= esc_attr($new_instance['include_parent']);
+			$instance['include_parent'] 	= esc_attr($new_instance['include_parent']);
 		else
-			$instance['include_parent']			= '';
+			$instance['include_parent']		= '';
 
 
 		if (!empty($new_instance['number']))
-			$instance['number'] 		= intval($new_instance['number']);
+			$instance['number'] 			= intval($new_instance['number']);
 		else
-			$instance['number']			= '';
+			$instance['number']				= '';
 			
 
 		if (isset($new_instance['orderby']))			
-			$instance['orderby'] 		= esc_attr($new_instance['orderby']);
+			$instance['orderby'] 			= esc_attr($new_instance['orderby']);
 		else
-			$instance['orderby']		= 'name';
+			$instance['orderby']			= 'name';
 
 			
 		if (isset($new_instance['order']))
@@ -250,6 +286,25 @@ class Bcat_WidgetCloud extends WP_Widget {
 			} else {
 				$instance['child_of'] 	= 0;
 			}
+			
+			
+			if (( isset($instance['category_filter'])) && (!empty($instance['category_filter']))) {
+				$instance['category_ids'] = str_replace(' ', '', $instance['category_ids']);
+				if ((isset($instance['category_ids'])) && (!empty($instance['category_ids']))) {
+					$category_ids = explode( ',', $instance['category_ids'] );
+					if (!empty($category_ids)) {
+						if ($instance['category_filter'] == 'include') {
+							$instance['include'] = $category_ids;
+						} else if ($instance['category_filter'] == "exclude") {
+							$instance['exclude'] = $category_ids;
+					 	} else if ($instance['category_filter'] == 'exclude_tree') {
+							$instance['exclude_tree'] = $category_ids;
+					 	}
+					}
+				}
+			}
+			
+			
 			//echo "instance<pre>"; print_r($instance); echo "</pre>";
 			
 			$tags = get_terms( SITE_CATEGORIES_TAXONOMY, $instance); // Always query top tags

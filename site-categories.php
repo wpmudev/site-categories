@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: 
 Description: 
 Author: Paul Menard (Incsub)
-Version: 1.0.8.3
+Version: 1.0.8.4
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -81,7 +81,7 @@ class SiteCategories {
 	 */
 	function __construct() {
 		
-		$this->_settings['VERSION'] 				= '1.0.8.3';
+		$this->_settings['VERSION'] 				= '1.0.8.4';
 		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
 		$this->_settings['PLUGIN_URL']				= WP_CONTENT_URL . "/plugins/". basename( dirname(__FILE__) );
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
@@ -541,29 +541,29 @@ class SiteCategories {
 	 * @param none
 	 * @return none
 	 */	
-	function get_taxonomy_sites($term_id, $include_child = false, $orderby = '', $order = '') {
+	function get_taxonomy_sites($term_id, $args = array()) {
 		
 		global $wpdb;
 
-		//echo "term_id=[". $term_id ."]<br />";
-
-		if (empty($orderby))
-			$orderby = $this->opts['sites']['orderby'];
-
-		if (empty($order))
-			$order = $this->opts['sites']['order'];
-
-		//echo "orderby[". $orderby ."] order[". $order ."]<br />";
-
-		if ($include_child == true) {
-
-			$args = array();
-			$args['taxonomy']	= SITE_CATEGORIES_TAXONOMY;
-			$args['child_of']	= $term_id;
+		$defaults = array(
+			'include_children' 	=> 	false,
+			'orderby'			=> 	$this->opts['sites']['orderby'],
+			'order'				=>	$this->opts['sites']['order']	
+		);
 			
-			$categories = get_categories($args);
+		$args = wp_parse_args( $args, $defaults );
+
+		$terms = array();
+		if ($args['include_children'] == true) {
+
+			$args['taxonomy']	= SITE_CATEGORIES_TAXONOMY;
+			
+			if (!empty($term_id))
+				$args['child_of']	= $term_id;
+			
+			$categories = get_terms( SITE_CATEGORIES_TAXONOMY, $args );
+			
 			if ($categories) {
-				$terms = array();
 				foreach($categories as $cat) {
 					$terms[] = $cat->term_id;
 				}
@@ -572,12 +572,20 @@ class SiteCategories {
 				$terms = array($term_id);
 			}
 		} else {
-			$terms = array($term_id);
+			//echo "term_id[". $term_id ."]<br />";
+			if (!empty($term_id)) {
+				$terms = array($term_id);
+			} else {
+				$args['taxonomy']	= SITE_CATEGORIES_TAXONOMY;
+				$args['fields']		= 'ids';
+				$terms = get_terms( SITE_CATEGORIES_TAXONOMY, $args );
+				//echo "$terms<pre>"; print_r($terms); echo "</pre>";
+			}
 		}
-		
+		//echo "terms<pre>"; print_r($terms); echo "</pre>";
 		$term_sites = get_objects_in_term( $terms, SITE_CATEGORIES_TAXONOMY);
 
-		if ($term_id == $this->opts['sites']['category_default']) {
+		if ((!empty($term_id)) && ($term_id == $this->opts['sites']['category_default'])) {
 			$sites = $this->get_unassigned_sites();
 			if (($sites) && (is_array($sites))) {
 				$term_sites = array_unique(array_merge($term_sites, $sites));				
@@ -586,11 +594,26 @@ class SiteCategories {
 		
 		if ($term_sites) {
 			$sites = array();
+			
 			foreach($term_sites as $site_id) {
 				$blog = get_blog_details($site_id);
 				if (($blog) && ($blog->public == 1) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
 					
-					switch($orderby) {
+					if ((isset($args['blog_filter'])) && (isset($args['blog_ids'])) && (count($args['blog_ids']))) {
+						if ($args['blog_filter'] == "exclude") {
+							if (array_search($blog->blog_id, $args['blog_ids']) !== false) {
+								continue;
+							}
+						}
+						if ($args['blog_filter'] == "include") {
+							if (array_search($blog->blog_id, $args['blog_ids']) === false) {
+								continue;
+							}
+							
+						}
+					}
+					
+					switch($args['orderby']) {
 						case 'id':
 							$sites[$blog->blog_id] = $blog;
 							break;
@@ -609,15 +632,14 @@ class SiteCategories {
 							break;
 
 					}
-					if ($order == "ASC") {
+					if ($args['order'] == "ASC") {
 						krsort($sites);
 						ksort($sites);
 						
-					} else if ($order == "DESC") {
+					} else if ($args['order'] == "DESC") {
 						ksort($sites);
 						krsort($sites);
 					}
-					
 				}
 			}
 			return $sites;
@@ -3397,7 +3419,7 @@ class BCat_Walker_WidgetCategoryDropdown extends Walker {
 			$disabled = ' onclick="return false;" ';
 		}
 				
-		if ($args['show_style'] == "select") {
+		if ($args['show_style'] == "select-nested") {
 			$pad = str_repeat('&nbsp;', $depth * 3);
 			$output .= "<option class=\"level-$depth\" value=\"". $output_url ."\"";
 			if ((isset($args['selected'])) && ( $category->term_id == $args['selected'] ))

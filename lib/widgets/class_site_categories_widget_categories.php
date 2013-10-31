@@ -10,12 +10,15 @@ class Bcat_WidgetCategories extends WP_Widget {
 	}
 
 	function form($instance) {
-
+		global $current_site;
+		
 		// Set defaults
 		// ...
 		$defaults = array( 
 			'title' 				=> 	'',
 			'category'				=>	'',
+			'category_filter'		=>	'',
+			'category_ids'			=>	'',
 			'per_page'				=>	5,
 			'ordering'				=>	'name',
 			'order'					=>	'ASC',
@@ -31,6 +34,10 @@ class Bcat_WidgetCategories extends WP_Widget {
 		$instance = wp_parse_args( (array) $instance, $defaults ); 
 		//echo "instance<pre>"; print_r($instance); echo "</pre>";
 		
+		// version 1.0.8.4. we changed 'select' to two options 'select-nested' (default) and 'select-flat' (non-hierarchial)
+		if ($instance['show_style'] == "select") {
+			$instance['show_style'] = 'select-nested';
+		}
 		?>
 		<p>
 			<label for="<?php echo $this->get_field_id('title') ?>"><?php _e('Title:', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
@@ -50,7 +57,9 @@ class Bcat_WidgetCategories extends WP_Widget {
 					_e('Unordered List (ul)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 				<option value="ul-nested" <?php if ($instance['show_style'] == "ul-nested") { echo ' selected="selected" '; } ?>><?php 
 					_e('Unordered List Nested (ul)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-				<option value="select" <?php if ($instance['show_style'] == "select") { echo ' selected="selected" '; } ?>><?php 
+				<option value="select-nested" <?php if ($instance['show_style'] == "select-nested") { echo ' selected="selected" '; } ?>><?php 
+					_e('Dropdown Nested (select)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				<option value="select-flat" <?php if ($instance['show_style'] == "select-flat") { echo ' selected="selected" '; } ?>><?php 
 					_e('Dropdown (select)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 			</select>
 		</p>
@@ -62,6 +71,8 @@ class Bcat_WidgetCategories extends WP_Widget {
 			
 				$bcat_args = array(
 					'taxonomy'			=> 	SITE_CATEGORIES_TAXONOMY,
+					'orderby'			=>	'name',
+					'order'				=>	'ASC',
 					'hierarchical'		=>	true,
 					'hide_empty'		=>	false,
 					'show_count'		=>	true,
@@ -76,9 +87,30 @@ class Bcat_WidgetCategories extends WP_Widget {
 			?>
 		</p>
 
+
+		<p>
+			<label for="<?php echo $this->get_field_id('category_filter') ?>"><?php _e('Site Categories Include/Exclude:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
+			<select id="<?php echo $this->get_field_id( 'category_filter' ); ?>" 
+				name="<?php echo $this->get_field_name( 'category_filter'); ?>" class="widefat">
+				<option value="" <?php if ($instance['category_filter'] == "") { echo ' selected="selected" '; }?>><?php 
+					_e('Show All', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				<option value="include" <?php if ($instance['category_filter'] == "include") { echo ' selected="selected" '; }?>><?php 
+					_e('Include', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				<option value="exclude" <?php if ($instance['category_filter'] == "exclude") { echo ' selected="selected" '; }?>><?php 
+					_e('Exclude', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				<option value="exclude_tree" <?php if ($instance['category_filter'] == "exclude_tree") { echo ' selected="selected" '; }?>><?php 
+					_e('Exclude Tree', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+			</select><br />
+		</p>
+		<p>
+			<label for="<?php echo $this->get_field_id('category_ids') ?>"><?php _e('Site Categories IDs (comma seperated):', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			<input type="text" name="<?php echo $this->get_field_name('category_ids'); ?>" id="<?php echo $this->get_field_id('category_ids'); ?>" 
+				class="widefat" value="<?php echo $instance['category_ids'] ?>"/>
+		</p>
+
 		<p>
 			<label for="<?php echo $this->get_field_id( 'per_page' ); ?>"><?php 
-				_e('Number of Site Categories to show:', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+				_e('Number of Site Categories to show (0 for all):', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 
 			<input type="text" id="<?php echo $this->get_field_id( 'per_page' ); ?>" value="<?php echo intval($instance['per_page']); ?>"
 				name="<?php echo $this->get_field_name( 'per_page'); ?>" class="widefat" style="width:100%;" />
@@ -160,7 +192,9 @@ class Bcat_WidgetCategories extends WP_Widget {
 
 		$instance['title'] 				= strip_tags($new_instance['title']);
 		$instance['category'] 			= strip_tags($new_instance['category']);
-		$instance['per_page'] 			= strip_tags($new_instance['per_page']);
+		$instance['category_filter'] 	= strip_tags($new_instance['category_filter']);
+		$instance['category_ids'] 		= strip_tags($new_instance['category_ids']);
+		$instance['per_page'] 			= intval($new_instance['per_page']);
 		$instance['ordering'] 			= strip_tags($new_instance['ordering']);
 		$instance['order'] 				= strip_tags($new_instance['order']);
 		$instance['hide_empty'] 		= intval($new_instance['hide_empty']);
@@ -181,6 +215,11 @@ class Bcat_WidgetCategories extends WP_Widget {
 		
 		$site_categories->load_config();
 		extract($args);
+
+		// version 1.0.8.4. we changed 'select' to two options 'select-nested' (default) and 'select-flat' (non-hierarchial)
+		if ($instance['show_style'] == "select") {
+			$instance['show_style'] = 'select-nested';
+		}
 
 		$per_page 		= intval($instance['per_page']);
 		if (!$per_page) {
@@ -215,7 +254,8 @@ class Bcat_WidgetCategories extends WP_Widget {
 		
 		//echo "instance<pre>"; print_r($instance); echo "</pre>";
 		
-		$data = get_site_transient( 'site-categories-categories-data-'. $this->number );
+		//$data = get_site_transient( 'site-categories-categories-data-'. $this->number );
+		$data = '';
 		if (!$data) {
 			
 			switch_to_blog( $current_site->blog_id );
@@ -224,21 +264,39 @@ class Bcat_WidgetCategories extends WP_Widget {
 			$get_terms_args['hide_empty']	=	$instance['hide_empty'];
 			$get_terms_args['orderby']		=	$instance['ordering'];
 			
-			if ( $instance['show_style'] == "select" )
+			if ( $instance['show_style'] == "select-nested" )
 				$get_terms_args['hierarchical']	=	true;
 			else
 				$get_terms_args['hierarchical']	=	false;
 			
-			if ( isset($instance['category']))
+			if (( isset($instance['category'])) && ($instance['category'] != "-1"))
 				$get_terms_args['child_of'] = intval($instance['category']);
 			
+			
+			if (( isset($instance['category_filter'])) && (!empty($instance['category_filter']))) {
+				$instance['category_ids'] = str_replace(' ', '', $instance['category_ids']);
+				if ((isset($instance['category_ids'])) && (!empty($instance['category_ids']))) {
+					$category_ids = explode( ',', $instance['category_ids'] );
+					if (!empty($category_ids)) {
+						if ($instance['category_filter'] == 'include') {
+							$get_terms_args['include'] = $category_ids;
+						} else if ($instance['category_filter'] == "exclude") {
+							$get_terms_args['exclude'] = $category_ids;
+					 	} else if ($instance['category_filter'] == 'exclude_tree') {
+							$get_terms_args['exclude_tree'] = $category_ids;
+					 	}
+					}
+				}
+			}
+			//echo "get_terms_args<pre>"; print_r($get_terms_args); echo "</pre>";
 			$categories = get_terms( SITE_CATEGORIES_TAXONOMY, $get_terms_args );
+			//echo "categories<pre>"; print_r($categories); echo "</pre>";
 			
 			if (($categories) && (count($categories))) {
 				$data = array();
 				$data['current_page'] = 1;
 
-				if (count($categories) < $instance['per_page']) {
+				if (($instance['per_page'] == 0) || (count($categories) < $instance['per_page'])) {
 
 					$data['categories'] = $categories;
 
@@ -318,7 +376,7 @@ function process_categories_widget_list_display($content, $data, $args) {
 	if ((isset($data['categories'])) && (count($data['categories']))) {
 
 		if (($args['show_style'] == "ol") || ($args['show_style'] == "ol-nested")) { $content .= '<ol class="site-categories site-categories-widget">'; }
-		else if ($args['show_style'] == "select") { 
+		else if (($args['show_style'] == "select-flat") || ($args['show_style'] == "select-nested")) { 
 			$content .= '<select id="'. $form_id .'" class="site-categories site-categories-widget">'; 
 			$content .= '<option value="">'. __('Select Category', SITE_CATEGORIES_I18N_DOMAIN) .'</option>';
 		} else { $content .= '<ul class="site-categories site-categories-widget">'; }
@@ -347,18 +405,23 @@ function process_categories_widget_list_display($content, $data, $args) {
 				}
 				$content .= '</li>';
 			} 
-		} else {
+		} else if (($args['show_style'] == "select-nested") || ($args['show_style'] == "ol-nested") || ($args['show_style'] == "ul-nested")) {
 			global $site_categories;
 			
 			//echo "args<pre>"; print_r($args); echo "</pre>";
 			//echo "data<pre>"; print_r($data); echo "</pre>";
 			$walker = new BCat_Walker_WidgetCategoryDropdown;			
 			$args['walker'] = $walker;
-			$content .= $site_categories->walk_category_dropdown_tree( $data['categories'], 0, $args );			
+			$content .= $site_categories->walk_category_dropdown_tree( $data['categories'], 0, $args );
+			
+		} else if ($args['show_style'] == "select-flat") { 
+			foreach ($data['categories'] as $category) { 
+				$content .= '<option value="'. $category->bcat_url .'">'. $category->name .'</option>';
+			}
 		}
 
 		if ($args['show_style'] == "ol") { $content .= "</ol>"; }
-		else if ($args['show_style'] == "select") { 
+		else if (($args['show_style'] == "select-flat") || ($args['show_style'] == "select-nested")) { 
 			$content .= "</select>"; 
 			$content .= '<script type="text/javascript">
 			/* <![CDATA[ */

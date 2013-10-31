@@ -3,6 +3,13 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.8.4 - 2013-10-31
+----------------------------------------------------------------------
+- Added Include/Exclude/Exclude Tree option for Site Category IDs to all three widgets
+- Added Include/Exclude option for Blog IDs to Category Sites widget
+- Added Output Option Select Nested/Flat option categories widget
+- Corrected issue on widget admin to show dropdown categories in alph order
+
 1.0.8.3 - 2013-10-16
 ----------------------------------------------------------------------
 - Corrected incorrect version number '1.0.8.2-Beta1' in previous update. should have been '1.0.8.2'. Causing update issues for members.
