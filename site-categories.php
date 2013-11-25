@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: Site Categories
-Plugin URI: 
-Description: 
+Plugin URI: http://premium.wpmudev.org/project/site-categories/
+Description: Easily categorize sites on your multisite network with Site Categories!
 Author: Paul Menard (Incsub)
-Version: 1.0.8.4
+Version: 1.0.8.5
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -42,9 +42,6 @@ require_once( dirname(__FILE__) . '/lib/display_templates/display_list_categorie
 require_once( dirname(__FILE__) . '/lib/display_templates/display_grid_categories.php');
 require_once( dirname(__FILE__) . '/lib/display_templates/display_accordion_categories.php');
 
-include_once( dirname(__FILE__) . '/lib/dash-notices/wpmudev-dash-notification.php');
-
-
 class SiteCategories {
 		
 	private $_pagehooks = array();	// A list of our various nav items. Used when hooking into the page load actions.
@@ -81,7 +78,12 @@ class SiteCategories {
 	 */
 	function __construct() {
 		
-		$this->_settings['VERSION'] 				= '1.0.8.4';
+		// Add support for new WPMUDEV Dashboard Notices
+		global $wpmudev_notices;
+		$wpmudev_notices[] = array( 'id'=> 679160,'name'=> 'Site Categories', 'screens' => array( 'toplevel_page_bcat_settings', 'edit-bcat'));
+		include_once( dirname(__FILE__) . '/lib/dash-notices/wpmudev-dash-notification.php' );
+		
+		$this->_settings['VERSION'] 				= '1.0.8.5';
 		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
 		$this->_settings['PLUGIN_URL']				= WP_CONTENT_URL . "/plugins/". basename( dirname(__FILE__) );
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
@@ -548,55 +550,103 @@ class SiteCategories {
 		$defaults = array(
 			'include_children' 	=> 	false,
 			'orderby'			=> 	$this->opts['sites']['orderby'],
-			'order'				=>	$this->opts['sites']['order']	
+			'order'				=>	$this->opts['sites']['order'],
+			'taxonomy'			=>	SITE_CATEGORIES_TAXONOMY,
+			'fields'			=> 	'ids'
 		);
 			
 		$args = wp_parse_args( $args, $defaults );
-
+		
+		//echo "term_id[". $term_id ."] args<pre>"; print_r($args); echo "</pre>";
+		//die();
+		
 		$terms = array();
-		if ($args['include_children'] == true) {
+		if ((isset($args['context'])) && ($args['context'] == "widget")) {
+		
+			// If we are to include children we query via get_terms for child_of term_id. Those returned category terms (if any)
+			// are then combined with the other term ids passed via the 'include' array.
+			if ($args['include_children'] == true) {
 
-			$args['taxonomy']	= SITE_CATEGORIES_TAXONOMY;
-			
-			if (!empty($term_id))
-				$args['child_of']	= $term_id;
-			
-			$categories = get_terms( SITE_CATEGORIES_TAXONOMY, $args );
-			
-			if ($categories) {
-				foreach($categories as $cat) {
-					$terms[] = $cat->term_id;
+				if ( (isset($args['include-and'])) && (is_array($args['include-and'])) && (count($args['include-and']))) {
+					if (!empty($term_id)) 
+						$terms[] = $term_id;
+				} else {
+					
+					$args['taxonomy']	= SITE_CATEGORIES_TAXONOMY;
+					if ((!empty($term_id)) && ($term_id != -1))
+						$args['child_of']	= $term_id;
+
+					// Copy this to a temp array so we can make changes without effectin the main $args array.
+					$get_terms_args = $args;
+
+					// Need to remove the 'include' parameter because WP will limit it to be only terms which are child_of selected term
+					//if (isset($get_terms_args['include'])) {
+					//	unset($get_terms_args['include']);
+					//}
+		
+					//echo "get_terms_args<pre>"; print_r($get_terms_args); echo "</pre>";
+					$terms = get_terms( SITE_CATEGORIES_TAXONOMY, $get_terms_args );
 				}
-				$terms = array_unique($terms);
 			} else {
-				$terms = array($term_id);
+				if ((!empty($term_id)) && (!isset($args['include-and']))) {
+					if (is_admin())
+						$args['parent'] = 0;
+					else
+						$args['parent'] = '';
+				
+					//echo "args<pre>"; print_r($args); echo "</pre>";
+					$terms = get_terms( SITE_CATEGORIES_TAXONOMY, $args );
+				}
 			}
 		} else {
-			//echo "term_id[". $term_id ."]<br />";
-			if (!empty($term_id)) {
-				$terms = array($term_id);
-			} else {
-				$args['taxonomy']	= SITE_CATEGORIES_TAXONOMY;
-				$args['fields']		= 'ids';
-				$terms = get_terms( SITE_CATEGORIES_TAXONOMY, $args );
-				//echo "$terms<pre>"; print_r($terms); echo "</pre>";
+		
+			if ((!empty($term_id)) && (intval($term_id) > 0)) {
+				$terms[] = $term_id;
 			}
 		}
 		//echo "terms<pre>"; print_r($terms); echo "</pre>";
-		$term_sites = get_objects_in_term( $terms, SITE_CATEGORIES_TAXONOMY);
+		//die();
+				
+		if ((isset($args['include-and'])) && (is_array($args['include-and'])) && (count($args['include-and']))) {
+			if ((!empty($term_id)) && (intval($term_id) > 0)) {
+				$terms[] = $term_id;
+			}	
+			$terms = array_unique(array_merge($terms, $args['include-and']));
+			//echo "terms<pre>"; print_r($terms); echo "</pre>";
 
-		if ((!empty($term_id)) && ($term_id == $this->opts['sites']['category_default'])) {
-			$sites = $this->get_unassigned_sites();
-			if (($sites) && (is_array($sites))) {
-				$term_sites = array_unique(array_merge($term_sites, $sites));				
+			$sites_by_term = array();
+			foreach($terms as $term_id) {
+				$sites = get_objects_in_term( $term_id, SITE_CATEGORIES_TAXONOMY);
+				//echo "term_id[". $term_id ."] sites<pre>"; print_r($sites); echo "</pre>";
+				if (($sites) && (is_array($sites)) && (count($sites))) {
+					$sites_by_term[$term_id] = $sites;
+				} else {
+					$sites_by_term[$term_id] = array();
+				}
 			}
+			//echo "sites_by_term<pre>"; print_r($sites_by_term); echo "</pre>";
+			//die();
+			
+			$term_sites = array_shift($sites_by_term);
+			foreach($sites_by_term as $sites){
+				if (($sites) && (is_array($sites)) && (count($sites)))
+					 $term_sites = array_intersect($term_sites, $sites);
+			}			
+			//echo "term_sites<pre>"; print_r($term_sites); echo "</pre>";
+		} else if (($terms) && (count($terms))) {
+			
+			$term_sites = get_objects_in_term( $terms, SITE_CATEGORIES_TAXONOMY);
 		}
+
+		//echo "term_sites<pre>"; print_r($term_sites); echo "</pre>";
 		
-		if ($term_sites) {
+		if (($term_sites) && (count($term_sites))) {
 			$sites = array();
 			
 			foreach($term_sites as $site_id) {
 				$blog = get_blog_details($site_id);
+				//echo "blog<pre>"; print_r($blog); echo "</pre>";
+				
 				if (($blog) && ($blog->public == 1) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
 					
 					if ((isset($args['blog_filter'])) && (isset($args['blog_ids'])) && (count($args['blog_ids']))) {
@@ -642,6 +692,8 @@ class SiteCategories {
 					}
 				}
 			}
+			//echo "sites<pre>"; print_r($sites); echo "</pre>";
+			
 			return $sites;
 		} else {
 			return array();

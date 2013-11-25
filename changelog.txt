@@ -3,6 +3,13 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.8.5 - 2013-11-25
+----------------------------------------------------------------------
+- Added Include 'AND' option to Site from single site categoy widget.
+- Corrected logic for the include OR/AND category IDs 
+- Check UI works with new WP 38 and TwentyFourteen theme
+- Updates to new WPMU DEV Dashboard notification library
+
 1.0.8.4 - 2013-10-31
 ----------------------------------------------------------------------
 - Added Include/Exclude/Exclude Tree option for Site Category IDs to all three widgets

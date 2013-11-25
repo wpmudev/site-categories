@@ -18,6 +18,7 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 			'category'				=>	0,
 			'include_children'		=>	'',
 			'category_filter'		=>	'',
+			'category_relation'		=>	'OR',
 			'category_ids'			=>	'',
 			'blog_filter'			=>	'',
 			'blog_ids'				=>	'',
@@ -70,7 +71,7 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 				wp_dropdown_categories( $bcat_args ); 
 				restore_current_blog();
 			?><input type="checkbox" id="<?php echo $this->get_field_id( 'include_children' ); ?>" <?php if ($instance['include_children'] == "on") {
-				echo ' checked="checked" '; } ?> name="<?php echo $this->get_field_name( 'include_children'); ?>"  /> <label for="<?php echo $this->get_field_id( 'include_children' ); ?>"><?php _e('Include Children:', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+				echo ' checked="checked" '; } ?> name="<?php echo $this->get_field_name( 'include_children'); ?>"  /> <label for="<?php echo $this->get_field_id( 'include_children' ); ?>"><?php _e('Include child categories? If not set only top-level categories will be included', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 		</p>
 
 		<p>
@@ -85,18 +86,6 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 			</select>
 		</p>
 
-<?php /* ?>
-		<p>
-			<label for="<?php echo $this->get_field_id('include_children') ?>"><?php _e('Include Child Categories:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
-			<input type="radio" name="<?php echo $this->get_field_name( 'include_children'); ?>" id="<?php echo $this->get_field_id('include_children') ?>_yes" 
-				value="1" <?php if ($instance['include_children'] == "1") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('include_children') ?>_yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
-			
-			<input type="radio" name="<?php echo $this->get_field_name( 'include_children'); ?>" id="<?php echo $this->get_field_id('include_children') ?>_no" 
-				value="0" <?php if ($instance['include_children'] == "0") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('include_children') ?>_no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
-			
-		</p>
-<?php */ ?>
-
 		<p>
 			<label for="<?php echo $this->get_field_id('category_filter') ?>"><?php _e('Site Categories Include/Exclude:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
 			<select id="<?php echo $this->get_field_id( 'category_filter' ); ?>" 
@@ -104,7 +93,9 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 				<option value="" <?php if ($instance['category_filter'] == "") { echo ' selected="selected" '; }?>><?php 
 					_e('Show All', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 				<option value="include" <?php if ($instance['category_filter'] == "include") { echo ' selected="selected" '; }?>><?php 
-					_e('Include', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					_e('Include (OR)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+				<option value="include-and" <?php if ($instance['category_filter'] == "include-and") { echo ' selected="selected" '; }?>><?php 
+					_e('Include (AND)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 				<option value="exclude" <?php if ($instance['category_filter'] == "exclude") { echo ' selected="selected" '; }?>><?php 
 					_e('Exclude', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 				<option value="exclude_tree" <?php if ($instance['category_filter'] == "exclude_tree") { echo ' selected="selected" '; }?>><?php 
@@ -244,11 +235,13 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 		global $site_categories, $current_site;
 		
 		$site_categories->load_config();
-
+		//echo "args<pre>"; print_r($args); echo "</pre>";
+		//echo "instance<pre>"; print_r($instance); echo "</pre>";
+		
 		extract($args);
 
 		//$data = get_site_transient( 'site-categories-sites-data-'. $this->number );
-		$data = array();;
+		$data = array();
 		if (!$data) {
 
 			switch_to_blog( $current_site->blog_id );
@@ -271,16 +264,23 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 
 			if (( isset($instance['category_filter'])) && (!empty($instance['category_filter']))) {
 				$instance['category_ids'] = str_replace(' ', '', $instance['category_ids']);
+				
 				if ((isset($instance['category_ids'])) && (!empty($instance['category_ids']))) {
+					
 					$category_ids = explode( ',', $instance['category_ids'] );
 					if (!empty($category_ids)) {
+						foreach($category_ids as $cat_idx => $cat_id) {
+							$category_ids[$cat_idx] = intval($cat_id);
+						}
 						if ($instance['category_filter'] == 'include') {
 							$get_terms_args['include'] = $category_ids;
+						} else if ($instance['category_filter'] == "include-and") {
+							$get_terms_args['include-and'] = $category_ids;
 						} else if ($instance['category_filter'] == "exclude") {
 							$get_terms_args['exclude'] = $category_ids;
 					 	} else if ($instance['category_filter'] == 'exclude_tree') {
 							$get_terms_args['exclude_tree'] = $category_ids;
-					 	}
+					 	}							
 					}
 				}
 			}
@@ -305,6 +305,7 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 				$instance['category'] = '';
 			//echo "get_terms_args<pre>"; print_r($get_terms_args); echo "</pre>";
 			
+			$get_terms_args['context'] = 'widget';
 			$sites = $site_categories->get_taxonomy_sites($instance['category'], $get_terms_args);
 			//echo "sites<pre>"; print_r($sites); echo "</pre>";
 			if (($instance['per_page'] == 0) || (count($sites) < $instance['per_page'])) {
@@ -436,6 +437,7 @@ function process_categories_widget_list_sites_display($content, $data, $args) {
 						$content .= '<div class="site-category-site-description">'. $bact_site_description .'</div>';
 					}
 				}
+				$content = apply_filters('categories_widget_list_sites_display_item_after', $content, $args, $site);
 				$content .= '</li>';
 				
 			} else {
