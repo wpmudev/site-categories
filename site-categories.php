@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: http://premium.wpmudev.org/project/site-categories/
 Description: Easily categorize sites on your multisite network with Site Categories!
 Author: Paul Menard (Incsub)
-Version: 1.0.8.5
+Version: 1.0.8.6
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -83,11 +83,13 @@ class SiteCategories {
 		$wpmudev_notices[] = array( 'id'=> 679160,'name'=> 'Site Categories', 'screens' => array( 'toplevel_page_bcat_settings', 'edit-bcat'));
 		include_once( dirname(__FILE__) . '/lib/dash-notices/wpmudev-dash-notification.php' );
 		
-		$this->_settings['VERSION'] 				= '1.0.8.5';
+		$this->_settings['VERSION'] 				= '1.0.8.6';
 		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
-		$this->_settings['PLUGIN_URL']				= WP_CONTENT_URL . "/plugins/". basename( dirname(__FILE__) );
+		//$this->_settings['PLUGIN_URL']				= plugins_url(basename( dirname(__FILE__) ));
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
 		$this->_settings['admin_menu_label']		= __( "Site Categories", SITE_CATEGORIES_I18N_DOMAIN ); 
+		//echo "settings<pre>"; print_r($this->_settings); echo "</pre>";
+		//die();
 		
 		$this->_settings['options_key']				= "wpmudev-site-categories"; 
 		
@@ -157,6 +159,9 @@ class SiteCategories {
 	 */
 	function enqueue_scripts_proc()
 	{
+		if (!is_multisite())
+			return;
+		
 		global $wp_version; 
 		if (is_admin()) {
 
@@ -165,7 +170,7 @@ class SiteCategories {
 
 			$site_categories_data = array();
 			$site_categories_data['wp_version'] = $wp_version;
-			if ((is_multisite()) && (is_main_site()) && (is_super_admin())) {
+			if ( (is_main_site()) && (is_super_admin()) ) {
 				
 				if ((isset($_GET['action'])) && ($_GET['action'] == "edit")
 				 && (isset($_GET['taxonomy'])) && ($_GET['taxonomy'] == "bcat")
@@ -186,7 +191,7 @@ class SiteCategories {
 						$site_categories_data['image_view'] = 'thickbox';
 					//}
 
-					wp_register_script('site-categories-admin', WP_PLUGIN_URL .'/'. basename(dirname(__FILE__)) .'/js/jquery.site-categories-admin.js', 
+					wp_register_script('site-categories-admin', plugins_url('/js/jquery.site-categories-admin.js', __FILE__), 
 						array('jquery'), $this->_settings['VERSION']  );
 					wp_enqueue_script('site-categories-admin');
 					
@@ -207,7 +212,7 @@ class SiteCategories {
 						$site_categories_data['image_view'] = 'thickbox';						
 					}
 
-					wp_register_script('site-categories-admin', WP_PLUGIN_URL .'/'. basename(dirname(__FILE__)) .'/js/jquery.site-categories-admin.js', 
+					wp_register_script('site-categories-admin', plugins_url('/js/jquery.site-categories-admin.js', __FILE__), 
 						array('jquery'), $this->_settings['VERSION']  );
 					wp_enqueue_script('site-categories-admin');
 				}
@@ -219,7 +224,7 @@ class SiteCategories {
 				wp_enqueue_script('jquery');
 				wp_enqueue_script('jquery-ui-accordion');
 
-				wp_register_script('site-categories', WP_PLUGIN_URL .'/'. basename(dirname(__FILE__)) .'/js/jquery.site-categories.js', 
+				wp_register_script('site-categories', plugins_url('/js/jquery.site-categories.js', __FILE__), 
 					array('jquery', 'jquery-ui-accordion'), $this->_settings['VERSION']  );
 				wp_enqueue_script('site-categories');
 			}
@@ -238,6 +243,9 @@ class SiteCategories {
 	 * @return none
 	 */	
 	function widgets_init_proc() {
+		if (!is_multisite()) 
+			return;
+		
 		register_widget('Bcat_WidgetCategories');
 		register_widget('Bcat_WidgetCategorySites');		
 		register_widget('Bcat_WidgetCloud');		
@@ -311,6 +319,8 @@ class SiteCategories {
 					if ($bcat_image_id)
 					{
 						$image_src 	= wp_get_attachment_image_src($bcat_image_id, 'thumbnail', true);
+						//echo "image_src<pre>"; print_r($image_src); echo "</pre>";
+						
 						if ($image_src) {
 							$bcat_image_src = $image_src[0];
 						}
@@ -320,7 +330,9 @@ class SiteCategories {
 				if (!strlen($bcat_image_src)) {
 					$bcat_image_src = $this->get_default_category_icon_url();
 				}
-
+				if (is_ssl()) {
+					$bcat_image_src = str_replace('http://', 'https://', $bcat_image_src);
+				}
 				?><img src="<?php echo $bcat_image_src; ?>" alt="" width="50" /><?php
 
 				break;
@@ -388,7 +400,7 @@ class SiteCategories {
 	 */
 	
 	function get_default_category_icon_url() {
-		return WP_PLUGIN_URL .'/'. basename(dirname(__FILE__)) .'/img/default.jpg';
+		return plugins_url('/img/default.jpg', __FILE__);
 	}
 
 	/**
@@ -417,6 +429,9 @@ class SiteCategories {
 			$icon_image_id = $this->opts['icons_category'][$term_id];
 			$icon_image_src = wp_get_attachment_image_src($icon_image_id, array($size, $size));
 			if ($icon_image_src) {
+				if (is_ssl()) {
+					$icon_image_src[0] = str_replace('http://', 'https://', $icon_image_src[0]);
+				}
 				return $icon_image_src[0];
 			}
 
@@ -425,6 +440,9 @@ class SiteCategories {
 			$icon_image_src = wp_get_attachment_image_src($default_icon_id, array($size, $size), true);
 			if (( !is_wp_error($icon_image_src)) && ($icon_image_src !== false)) {
 				if (($icon_image_src) && (isset($icon_image_src[0])) && (strlen($icon_image_src[0]))) {
+					if (is_ssl()) {
+						$icon_image_src[0] = str_replace('http://', 'https://', $icon_image_src[0]);
+					}
 					return $icon_image_src[0];
 				} 
 			} 
@@ -434,13 +452,22 @@ class SiteCategories {
 			$icon_image_src = image_make_intermediate_size($icon_image_path, $size, $size, true);
 			if (( !is_wp_error($icon_image_src)) && ($icon_image_src !== false)) {
 				if (($icon_image_src) && (isset($icon_image_src['file']))) {
-					return dirname($this->get_default_category_icon_url()) ."/". $icon_image_src['file'];
+					$image_src = dirname($this->get_default_category_icon_url()) ."/". $icon_image_src['file'];
+					if (is_ssl()) {
+						$image_src = str_replace('http://', 'https://', $image_src);
+					}
+					return $image_src;
 				} 
 			} 
 		}
 
-		if ((isset($icon_image_path)) && (strlen($icon_image_path)))
-			return dirname($this->get_default_category_icon_url()) ."/". basename($icon_image_path);
+		if ((isset($icon_image_path)) && (strlen($icon_image_path))) {
+			$image_src = dirname($this->get_default_category_icon_url()) ."/". basename($icon_image_path);
+			if (is_ssl()) {
+				$image_src = str_replace('http://', 'https://', $image_src);
+			}
+			return $image_src;
+		}
 	}
 	
 	
@@ -498,6 +525,10 @@ class SiteCategories {
 					} else {
 						$image_src[0] = $bcat_image_default_src;
 					}
+					if (is_ssl()) {
+						$image_src[0] = str_replace('http://', 'https://', $image_src[0]);
+					}
+					
 					?>
 					<img id="bcat_image_src" src="<?php echo $image_src[0]; ?>" alt="" style="margin-top: 10px; max-width: 300px; max-height: 300px" 
 						rel="<?php echo $bcat_image_default_src; ?>"/>
@@ -840,6 +871,8 @@ class SiteCategories {
 	function insert_rewrite_rules ($old) {
 		global $wp_rewrite;
 		
+		if (!is_multisite()) return $old;
+		
 		$this->load_config();
 
 		if ( (isset($wp_rewrite)) && ($wp_rewrite->using_permalinks()) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
@@ -869,6 +902,8 @@ class SiteCategories {
 	 */
 	function insert_query_vars ($vars) {
 		global $wp_rewrite;
+		
+		if (!is_multisite()) return $vars;
 				
 		$this->load_config();
 		if ( (isset($wp_rewrite)) && ($wp_rewrite->using_permalinks()) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
@@ -1067,43 +1102,44 @@ class SiteCategories {
 	 */
 	function register_taxonomy_proc() {
 	
-		if (is_multisite()) {
-			// Add new taxonomy, make it hierarchical (like categories)
-			$labels = array(
-				'name' 					=> 	_x( 'Site Categories', 'taxonomy general name', SITE_CATEGORIES_I18N_DOMAIN ),
-				'singular_name' 		=> 	_x( 'Site Category', 'taxonomy singular name', SITE_CATEGORIES_I18N_DOMAIN ),
-				'search_items' 			=>  __( 'Search Site Categories', SITE_CATEGORIES_I18N_DOMAIN ),
-				'all_items' 			=> 	__( 'All Site Categories', SITE_CATEGORIES_I18N_DOMAIN ),
-				'parent_item' 			=> 	__( 'Parent Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
-				'parent_item_colon' 	=> 	__( 'Parent Site Category:', SITE_CATEGORIES_I18N_DOMAIN ),
-				'edit_item' 			=> 	__( 'Edit Site Category', SITE_CATEGORIES_I18N_DOMAIN ), 
-				'update_item' 			=> 	__( 'Update Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
-				'add_new_item' 			=> 	__( 'Add New Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
-				'new_item_name' 		=> 	__( 'New Site Category Name', SITE_CATEGORIES_I18N_DOMAIN ),
-				'menu_name' 			=> 	__( 'Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
-			); 	
+		if (!is_multisite())
+			return;
+		
+		// Add new taxonomy, make it hierarchical (like categories)
+		$labels = array(
+			'name' 					=> 	_x( 'Site Categories', 'taxonomy general name', SITE_CATEGORIES_I18N_DOMAIN ),
+			'singular_name' 		=> 	_x( 'Site Category', 'taxonomy singular name', SITE_CATEGORIES_I18N_DOMAIN ),
+			'search_items' 			=>  __( 'Search Site Categories', SITE_CATEGORIES_I18N_DOMAIN ),
+			'all_items' 			=> 	__( 'All Site Categories', SITE_CATEGORIES_I18N_DOMAIN ),
+			'parent_item' 			=> 	__( 'Parent Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
+			'parent_item_colon' 	=> 	__( 'Parent Site Category:', SITE_CATEGORIES_I18N_DOMAIN ),
+			'edit_item' 			=> 	__( 'Edit Site Category', SITE_CATEGORIES_I18N_DOMAIN ), 
+			'update_item' 			=> 	__( 'Update Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
+			'add_new_item' 			=> 	__( 'Add New Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
+			'new_item_name' 		=> 	__( 'New Site Category Name', SITE_CATEGORIES_I18N_DOMAIN ),
+			'menu_name' 			=> 	__( 'Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
+		); 	
 
 
-			if (is_super_admin()) {
-				$show_ui 	= true;
-				$query_var	= true;
-				$rewrite	= array( 'slug' => SITE_CATEGORIES_TAXONOMY );
-			}
-			else {
-				$show_ui 	= false;
-				$query_var	= false;
-				$rewrite	= '';
-			}
-				
-			register_taxonomy(SITE_CATEGORIES_TAXONOMY, null, array(
-				'hierarchical' 				=> 	true,
-				'update_count_callback'		=>	array($this, 'bcat_taxonomy_terms_count'),
-				'labels' 					=> 	$labels,
-				'show_ui' 					=> 	$show_ui,
-				'query_var' 				=> 	$query_var,
-				'rewrite' 					=> 	$rewrite
-			));
+		if (is_super_admin()) {
+			$show_ui 	= true;
+			$query_var	= true;
+			$rewrite	= array( 'slug' => SITE_CATEGORIES_TAXONOMY );
 		}
+		else {
+			$show_ui 	= false;
+			$query_var	= false;
+			$rewrite	= '';
+		}
+			
+		register_taxonomy(SITE_CATEGORIES_TAXONOMY, null, array(
+			'hierarchical' 				=> 	true,
+			'update_count_callback'		=>	array($this, 'bcat_taxonomy_terms_count'),
+			'labels' 					=> 	$labels,
+			'show_ui' 					=> 	$show_ui,
+			'query_var' 				=> 	$query_var,
+			'rewrite' 					=> 	$rewrite
+		));
 	}
 	
 	/**
@@ -1222,7 +1258,10 @@ class SiteCategories {
 	 */
 	function admin_menu_proc() {
 
-		if ((is_multisite()) && (is_main_site()) && (is_super_admin())) {
+		if (!is_multisite()) 
+			return;
+
+		if ((is_main_site()) && (is_super_admin())) {
 
 			$page_hook = add_menu_page( _x("Site Categories", 'page label', SITE_CATEGORIES_I18N_DOMAIN), 
 							_x("Site Categories", 'menu label', SITE_CATEGORIES_I18N_DOMAIN),
@@ -1250,9 +1289,9 @@ class SiteCategories {
 
 			// Hook into the WordPress load page action for our new nav items. This is better then checking page query_str values.
 			add_action('load-'. $this->_pagehooks['site-categories-settings-main-site'], 		array(&$this, 'on_load_page_main_site'));
-			
+		
 		} 
-			
+		
 		$this->_pagehooks['site-categories-settings-site'] = add_options_page(
 			_x("Site Categories", 'page label', SITE_CATEGORIES_I18N_DOMAIN), 
 			_x("Site Categories", 'menu label', SITE_CATEGORIES_I18N_DOMAIN),
@@ -1260,8 +1299,8 @@ class SiteCategories {
 			'bcat_settings_site', 
 			array(&$this, 'settings_panel_site')
 		);
-		
-		add_action('load-'. $this->_pagehooks['site-categories-settings-site'], 		array(&$this, 'on_load_page_site'));
+	
+		add_action('load-'. $this->_pagehooks['site-categories-settings-site'], 		array(&$this, 'on_load_page_site'));	
 	}
 
 	/**
@@ -1287,7 +1326,7 @@ class SiteCategories {
 		wp_enqueue_script('wp-lists');
 		wp_enqueue_script('postbox');
 		
-		wp_register_script('site-categories-admin', WP_PLUGIN_URL .'/'. basename(dirname(__FILE__)) .'/js/jquery.site-categories-admin.js', 
+		wp_register_script('site-categories-admin', plugins_url('/js/jquery.site-categories-admin.js', __FILE__), 
 			array('jquery'), $this->_settings['VERSION']  );
 		wp_enqueue_script('site-categories-admin');
 		
@@ -2492,8 +2531,8 @@ class SiteCategories {
 		global $post;
 		
 		//echo "content=[". $content ."]<br />";
-
 		if (is_admin()) return $content;
+		if (!is_multisite()) return $content;
 		if (!in_the_loop()) return $content;
 		
 		$this->load_config();
@@ -2866,6 +2905,7 @@ class SiteCategories {
 		global $post;
 
 		if (is_admin()) return $content;
+		if (!is_multisite()) return $content;
 		if (!in_the_loop()) return $content;
 
 		$this->load_config();
@@ -3215,8 +3255,10 @@ class SiteCategories {
 	 */
 
 	function bcat_add_signup_meta($meta) {
-		if (isset($this->bcat_signup_meta)) {
-			$meta['bcat_signup_meta'] = $this->bcat_signup_meta;
+		if (is_multisite()) {
+			if (isset($this->bcat_signup_meta)) {
+				$meta['bcat_signup_meta'] = $this->bcat_signup_meta;
+			}
 		}
 		return $meta;
 	}

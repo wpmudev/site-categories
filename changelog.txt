@@ -3,6 +3,12 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.8.6 - 2013-12-12
+----------------------------------------------------------------------
+- Corrected issues enqueueing JS/CSS to be compatable with https in dashboard.
+- Ensure all avatars and icons on dashboard and front-end are being set to https:// when SSL used.
+- Added logic to prevent loading plugin if installed on non-Multisite WordPress site.
+
 1.0.8.5 - 2013-11-25
 ----------------------------------------------------------------------
 - Added Include 'AND' option to Site from single site categoy widget.
