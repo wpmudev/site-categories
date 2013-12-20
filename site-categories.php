@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: http://premium.wpmudev.org/project/site-categories/
 Description: Easily categorize sites on your multisite network with Site Categories!
 Author: Paul Menard (Incsub)
-Version: 1.0.8.6
+Version: 1.0.8.7
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -176,20 +176,20 @@ class SiteCategories {
 				 && (isset($_GET['taxonomy'])) && ($_GET['taxonomy'] == "bcat")
 				 && (isset($_GET['tag_ID']))) {
 					//echo "wp_version[". $wp_version ."]<br />";
-					//if ( version_compare( $wp_version, '3.5', '>=' )) {
-					//	if (function_exists('wp_enqueue_media')) {
-					//		wp_enqueue_media();
-					//		$site_categories_data['image_view'] = 'new_media';
-					//		$site_categories_data['image_view_title_text'] = __('Select image for Site Category', SITE_CATEGORIES_I18N_DOMAIN);
-					//		$site_categories_data['image_view_button_text'] = __('Use image', SITE_CATEGORIES_I18N_DOMAIN);
-					//	} else {
-					//		add_thickbox();
-					//		$site_categories_data['image_view'] = 'thickbox';
-					//	}
-					//} else {
+					if ( version_compare( $wp_version, '3.8', '>=' )) {
+						if (function_exists('wp_enqueue_media')) {
+							wp_enqueue_media();
+							$site_categories_data['image_view'] = 'new_media';
+							$site_categories_data['image_view_title_text'] = __('Select image for Site Category', SITE_CATEGORIES_I18N_DOMAIN);
+							$site_categories_data['image_view_button_text'] = __('Use image', SITE_CATEGORIES_I18N_DOMAIN);
+						} else {
+							add_thickbox();
+							$site_categories_data['image_view'] = 'thickbox';
+						}
+					} else {
 						add_thickbox();
 						$site_categories_data['image_view'] = 'thickbox';
-					//}
+					}
 
 					wp_register_script('site-categories-admin', plugins_url('/js/jquery.site-categories-admin.js', __FILE__), 
 						array('jquery'), $this->_settings['VERSION']  );
@@ -197,16 +197,16 @@ class SiteCategories {
 					
 					
 				} else if ((isset($_GET['page'])) && ($_GET['page'] == "bcat_settings")) {
-					if (version_compare('3.5', $wp_version) >= 0) {	
-						//if (function_exists('wp_enqueue_media')) {
-						//	wp_enqueue_media();
-						//	$site_categories_data['image_view'] = 'new_media';
-						//	$site_categories_data['image_view_title_text'] = __('Select image for Site Category', SITE_CATEGORIES_I18N_DOMAIN);
-						//	$site_categories_data['image_view_button_text'] = __('Use image', SITE_CATEGORIES_I18N_DOMAIN);
-						//} else {
+					if (version_compare($wp_version, '3.8') >= 0) {	
+						if (function_exists('wp_enqueue_media')) {
+							wp_enqueue_media();
+							$site_categories_data['image_view'] = 'new_media';
+							$site_categories_data['image_view_title_text'] = __('Select image for Site Category', SITE_CATEGORIES_I18N_DOMAIN);
+							$site_categories_data['image_view_button_text'] = __('Use image', SITE_CATEGORIES_I18N_DOMAIN);
+						} else {
 							add_thickbox();
 							$site_categories_data['image_view'] = 'thickbox';
-						//}						
+						}						
 					} else {
 						add_thickbox();
 						$site_categories_data['image_view'] = 'thickbox';						

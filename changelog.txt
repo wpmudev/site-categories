@@ -3,6 +3,10 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.8.7 - 2013-12-20
+----------------------------------------------------------------------
+- Updated avatar selection buttons to use new WP Media popup over thickbox.
+
 1.0.8.6 - 2013-12-12
 ----------------------------------------------------------------------
 - Corrected issues enqueueing JS/CSS to be compatable with https in dashboard.
