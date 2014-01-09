@@ -69,9 +69,21 @@ ul.site-categories-widget li {
 }
 
 #site-categories-wrapper span.site-category-count,
-.site-categories-widget li span.site-category-count {
+#site-categories-wrapper [class*="site"]:before, 
+#site-categories-wrapper [class*="site"]:after,
+.site-categories-widget li span.site-category-count,
+.site-categories-widget [class*="site"]:before, 
+.site-categories-widget [class*="site"]:after {
+	vertical-align: top;
+	display: inline;
+	clear: none;
 	padding-left: 3px;
 	font-size: 1.0em;
+}
+
+#site-categories-wrapper div.site-categories-accordion ul.site-categories-children {
+	vertical-align: top;
+	display: inherit;
 }
 
 #site-categories-wrapper div.site-category-description,

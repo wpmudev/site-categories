@@ -8,53 +8,73 @@ function process_site_categories_list_display($content, $data, $args) {
 
 		$content .= '<div id="site-categories-wrapper">';
 		
-		if ($args['show_style'] == "ol") { $content .= '<ol class="site-categories site-categories-list">'; }
-		else if ($args['show_style'] == "select") { $content .= '<select class="site-categories site-categories-select">'; }
-		else { $content .= '<ul class="site-categories site-categories-list">'; }
+		if (($args['show_style'] == "ul-nested") || ($args['show_style'] == "ol-nested")) {
+			//echo "args<pre>"; print_r($args); echo "</pre>";
+		
+			if ($args['show_style'] == "ol-nested") { $content .= '<ol class="site-categories site-categories-list">'; }
+			else if ($args['show_style'] == "ul-nested") { $content .= '<ul class="site-categories site-categories-list">'; }
+			
+			global $site_categories;
+			$walker = new BCat_Walker_WidgetCategoryDropdown;			
+			$args['walker'] = $walker;
+			$args['category'] = -1;
+		
+			$content .= $site_categories->walk_category_dropdown_tree( $data['categories'], 0, $args );
+			//echo "content[". $content ."]<br />";
+		
+			if ($args['show_style'] == "ol-nested") { $content .= '</ol>'; }
+			if ($args['show_style'] == "ul-nested") { $content .= '</ul>'; }
+			
+		} else {
+		
+			if ($args['show_style'] == "ol") { $content .= '<ol class="site-categories site-categories-list">'; }
+			else if ($args['show_style'] == "select") { $content .= '<select class="site-categories site-categories-select">'; }
+			else { $content .= '<ul class="site-categories site-categories-list">'; }
 
-		foreach ($data['categories'] as $category) { 
-			//echo "category<pre>"; print_r($category); echo "</pre>";
-			if ($args['show_style'] != "select") { 
+			foreach ($data['categories'] as $category) { 
+				//echo "category<pre>"; print_r($category); echo "</pre>";
+				if ($args['show_style'] != "select") { 
 
-				$content .=	'<li>';
-					if ($category->count > 0)
-						$content .= '<a href="'. $category->bcat_url .'">';
+					$content .=	'<li>';
+						if ($category->count > 0)
+							$content .= '<a href="'. $category->bcat_url .'">';
 				
-					if ( ($args['icon_show'] == true) && (isset($category->icon_image_src)) && (strlen($category->icon_image_src)) ) {
-						if (is_ssl()) {						
-							$image_src = str_replace('http://', 'https://', $category->icon_image_src);
-						} else {
-							$image_src = $category->icon_image_src;
-						}
+						if ( ($args['icon_show'] == true) && (isset($category->icon_image_src)) && (strlen($category->icon_image_src)) ) {
+							if (is_ssl()) {						
+								$image_src = str_replace('http://', 'https://', $category->icon_image_src);
+							} else {
+								$image_src = $category->icon_image_src;
+							}
 						
-						$content .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'" alt="'. $category->name .'" src="'. $image_src .'" />';
-					} 
-					$content .= '<span class="site-category-title">'. $category->name .'</span>';
-					if ($args['show_counts']) {
-						$content .= '<span class="site-category-count">('. $category->count .')</span>';
-					}
-
-					if ($category->count > 0)
-						$content .= '</a>';
-					
-					if (($args['show_description']) && (strlen($category->description))) {						
-						$bact_category_description = wpautop(stripslashes($category->description));						
-						$bact_category_description = str_replace(']]>', ']]&gt;', $bact_category_description);
-						if (strlen($bact_category_description)) {
-							$content .= '<div class="site-category-description">'. $bact_category_description .'</div>';
+							$content .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'" alt="'. $category->name .'" src="'. $image_src .'" />';
+						} 
+						$content .= '<span class="site-category-title">'. $category->name .'</span>';
+						if ($args['show_counts']) {
+							$content .= '<span class="site-category-count">('. $category->count .')</span>';
 						}
-					}
+
+						if ($category->count > 0)
+							$content .= '</a>';
 					
-				$content .= '</li>';
-			} else {
-				$content .= '<option value="'. $category->bcat_url .'">'. $category->name .'</option>';
+						if (($args['show_description']) && (strlen($category->description))) {						
+							$bact_category_description = wpautop(stripslashes($category->description));						
+							$bact_category_description = str_replace(']]>', ']]&gt;', $bact_category_description);
+							if (strlen($bact_category_description)) {
+								$content .= '<div class="site-category-description">'. $bact_category_description .'</div>';
+							}
+						}
+					
+					$content .= '</li>';
+				} else {
+					$content .= '<option value="'. $category->bcat_url .'">'. $category->name .'</option>';
+				}
 			}
+
+			if ($args['show_style'] == "ol") { $content .= "</ol>"; }
+			else if ($args['show_style'] == "select") { $content .= "</select>"; }
+			else { $content .= "</ul>"; }
 		}
-
-		if ($args['show_style'] == "ol") { $content .= "</ol>"; }
-		else if ($args['show_style'] == "select") { $content .= "</select>"; }
-		else { $content .= "</ul>"; }
-
+		
 		if ((isset($data['prev'])) || (isset($data['next']))) { 
 
 			$content .= '<div id="site-categories-navigation">';

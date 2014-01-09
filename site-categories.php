@@ -4,7 +4,7 @@ Plugin Name: Site Categories
 Plugin URI: http://premium.wpmudev.org/project/site-categories/
 Description: Easily categorize sites on your multisite network with Site Categories!
 Author: Paul Menard (Incsub)
-Version: 1.0.8.7
+Version: 1.0.8.8
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -53,19 +53,6 @@ class SiteCategories {
 	private $bcat_signup_meta = array();	// Used to store the signup meta information related to Site Categories during the processing. 
 
 	/**
-	 * The old-style PHP Class constructor. Used when an instance of this class 
- 	 * is needed. If used (PHP4) this function calls the PHP5 version of the constructor.
-	 *
-	 * @since 1.0.0
-	 * @param none
-	 * @return self
-	 */
-    function SiteCategories() {
-        __construct();
-    }
-
-
-	/**
 	 * The PHP5 Class constructor. Used when an instance of this class is needed.
 	 * Sets up the initial object environment and hooks into the various WordPress 
 	 * actions and filters.
@@ -83,7 +70,7 @@ class SiteCategories {
 		$wpmudev_notices[] = array( 'id'=> 679160,'name'=> 'Site Categories', 'screens' => array( 'toplevel_page_bcat_settings', 'edit-bcat'));
 		include_once( dirname(__FILE__) . '/lib/dash-notices/wpmudev-dash-notification.php' );
 		
-		$this->_settings['VERSION'] 				= '1.0.8.6';
+		$this->_settings['VERSION'] 				= '1.0.8.8';
 		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
 		//$this->_settings['PLUGIN_URL']				= plugins_url(basename( dirname(__FILE__) ));
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
@@ -103,8 +90,11 @@ class SiteCategories {
 		/* Standard activation hook for all WordPress plugins see http://codex.wordpress.org/Function_Reference/register_activation_hook */
         register_activation_hook( __FILE__, 	array( &$this, 'plugin_activation_proc' ) );
 
-		add_action( 'init', 						array(&$this, 'register_taxonomy_proc') );		
-		add_action( 'init', 						array(&$this, 'enqueue_scripts_proc'));
+		add_action( 'init', 						array(&$this, 'init_proc') );		
+		add_action( 'admin_enqueue_scripts', 		array(&$this, 'admin_enqueue_scripts_proc'));
+		add_action( 'wp_enqueue_scripts', 			array(&$this, 'wp_enqueue_scripts_proc'), 99);
+		
+		
 		add_action( 'admin_menu', 					array(&$this, 'admin_menu_proc') );	
 		add_action( 'widgets_init', 				array(&$this, 'widgets_init_proc') );
 
@@ -149,6 +139,21 @@ class SiteCategories {
 		add_action( 'deactivate_blog', 				array($this, 'blog_change_status_count') );		
 	}	
 	
+	/**
+	 * The old-style PHP Class constructor. Used when an instance of this class 
+ 	 * is needed. If used (PHP4) this function calls the PHP5 version of the constructor.
+	 *
+	 * @since 1.0.0
+	 * @param none
+	 * @return self
+	 */
+    function SiteCategories() {
+        __construct();
+    }
+
+	function init_proc() {
+		$this->register_taxonomy_proc();
+	}
 
 	/**
 	 * Setup scripts and stylsheets
@@ -157,81 +162,79 @@ class SiteCategories {
 	 * @param none
 	 * @return none
 	 */
-	function enqueue_scripts_proc()
+	function wp_enqueue_scripts_proc() {
+		if (isset($this->opts['categories']['show_style']) &&  ($this->opts['categories']['show_style'] == "accordion")) {
+			wp_enqueue_script('jquery');
+			wp_enqueue_script('jquery-ui-accordion');
+
+			wp_register_script('site-categories', plugins_url('/js/jquery.site-categories.js', __FILE__), 
+				array('jquery', 'jquery-ui-accordion'), $this->_settings['VERSION']  );
+			wp_enqueue_script('site-categories');
+		}
+	
+		wp_register_style( 'site-categories-styles', plugins_url('css/site-categories-styles.css', __FILE__) );
+		wp_enqueue_style( 'site-categories-styles' );			
+	}
+
+	function admin_enqueue_scripts_proc()
 	{
 		if (!is_multisite())
 			return;
 		
 		global $wp_version; 
-		if (is_admin()) {
 
-			wp_register_style( 'site-categories-admin-styles', plugins_url('css/site-categories-admin-styles.css', __FILE__) );
-			wp_enqueue_style( 'site-categories-admin-styles' );
+		wp_register_style( 'site-categories-admin-styles', plugins_url('css/site-categories-admin-styles.css', __FILE__) );
+		wp_enqueue_style( 'site-categories-admin-styles' );
 
-			$site_categories_data = array();
-			$site_categories_data['wp_version'] = $wp_version;
-			if ( (is_main_site()) && (is_super_admin()) ) {
-				
-				if ((isset($_GET['action'])) && ($_GET['action'] == "edit")
-				 && (isset($_GET['taxonomy'])) && ($_GET['taxonomy'] == "bcat")
-				 && (isset($_GET['tag_ID']))) {
-					//echo "wp_version[". $wp_version ."]<br />";
-					if ( version_compare( $wp_version, '3.8', '>=' )) {
-						if (function_exists('wp_enqueue_media')) {
-							wp_enqueue_media();
-							$site_categories_data['image_view'] = 'new_media';
-							$site_categories_data['image_view_title_text'] = __('Select image for Site Category', SITE_CATEGORIES_I18N_DOMAIN);
-							$site_categories_data['image_view_button_text'] = __('Use image', SITE_CATEGORIES_I18N_DOMAIN);
-						} else {
-							add_thickbox();
-							$site_categories_data['image_view'] = 'thickbox';
-						}
+		$site_categories_data = array();
+		$site_categories_data['wp_version'] = $wp_version;
+		if ( (is_main_site()) && (is_super_admin()) ) {
+			
+			if ((isset($_GET['action'])) && ($_GET['action'] == "edit")
+			 && (isset($_GET['taxonomy'])) && ($_GET['taxonomy'] == "bcat")
+			 && (isset($_GET['tag_ID']))) {
+				//echo "wp_version[". $wp_version ."]<br />";
+				if ( version_compare( $wp_version, '3.8', '>=' )) {
+					if (function_exists('wp_enqueue_media')) {
+						wp_enqueue_media();
+						$site_categories_data['image_view'] = 'new_media';
+						$site_categories_data['image_view_title_text'] = __('Select image for Site Category', SITE_CATEGORIES_I18N_DOMAIN);
+						$site_categories_data['image_view_button_text'] = __('Use image', SITE_CATEGORIES_I18N_DOMAIN);
 					} else {
 						add_thickbox();
 						$site_categories_data['image_view'] = 'thickbox';
 					}
+				} else {
+					add_thickbox();
+					$site_categories_data['image_view'] = 'thickbox';
+				}
 
-					wp_register_script('site-categories-admin', plugins_url('/js/jquery.site-categories-admin.js', __FILE__), 
-						array('jquery'), $this->_settings['VERSION']  );
-					wp_enqueue_script('site-categories-admin');
-					
-					
-				} else if ((isset($_GET['page'])) && ($_GET['page'] == "bcat_settings")) {
-					if (version_compare($wp_version, '3.8') >= 0) {	
-						if (function_exists('wp_enqueue_media')) {
-							wp_enqueue_media();
-							$site_categories_data['image_view'] = 'new_media';
-							$site_categories_data['image_view_title_text'] = __('Select image for Site Category', SITE_CATEGORIES_I18N_DOMAIN);
-							$site_categories_data['image_view_button_text'] = __('Use image', SITE_CATEGORIES_I18N_DOMAIN);
-						} else {
-							add_thickbox();
-							$site_categories_data['image_view'] = 'thickbox';
-						}						
+				wp_register_script('site-categories-admin', plugins_url('/js/jquery.site-categories-admin.js', __FILE__), 
+					array('jquery'), $this->_settings['VERSION']  );
+				wp_enqueue_script('site-categories-admin');
+				
+				
+			} else if ((isset($_GET['page'])) && ($_GET['page'] == "bcat_settings")) {
+				if (version_compare($wp_version, '3.8') >= 0) {	
+					if (function_exists('wp_enqueue_media')) {
+						wp_enqueue_media();
+						$site_categories_data['image_view'] = 'new_media';
+						$site_categories_data['image_view_title_text'] = __('Select image for Site Category', SITE_CATEGORIES_I18N_DOMAIN);
+						$site_categories_data['image_view_button_text'] = __('Use image', SITE_CATEGORIES_I18N_DOMAIN);
 					} else {
 						add_thickbox();
-						$site_categories_data['image_view'] = 'thickbox';						
-					}
-
-					wp_register_script('site-categories-admin', plugins_url('/js/jquery.site-categories-admin.js', __FILE__), 
-						array('jquery'), $this->_settings['VERSION']  );
-					wp_enqueue_script('site-categories-admin');
+						$site_categories_data['image_view'] = 'thickbox';
+					}						
+				} else {
+					add_thickbox();
+					$site_categories_data['image_view'] = 'thickbox';						
 				}
-				wp_localize_script('site-categories-admin', 'site_categories_data', $site_categories_data);
-			}
-		} else {
-			$this->load_config();
-			if (isset($this->opts['categories']['show_style']) &&  ($this->opts['categories']['show_style'] == "accordion")) {
-				wp_enqueue_script('jquery');
-				wp_enqueue_script('jquery-ui-accordion');
 
-				wp_register_script('site-categories', plugins_url('/js/jquery.site-categories.js', __FILE__), 
-					array('jquery', 'jquery-ui-accordion'), $this->_settings['VERSION']  );
-				wp_enqueue_script('site-categories');
+				wp_register_script('site-categories-admin', plugins_url('/js/jquery.site-categories-admin.js', __FILE__), 
+					array('jquery'), $this->_settings['VERSION']  );
+				wp_enqueue_script('site-categories-admin');
 			}
-			
-			wp_register_style( 'site-categories-styles', plugins_url('css/site-categories-styles.css', __FILE__) );
-			wp_enqueue_style( 'site-categories-styles' );
-			
+			wp_localize_script('site-categories-admin', 'site_categories_data', $site_categories_data);
 		}
 	}
 
@@ -245,6 +248,8 @@ class SiteCategories {
 	function widgets_init_proc() {
 		if (!is_multisite()) 
 			return;
+		
+		$this->load_config();
 		
 		register_widget('Bcat_WidgetCategories');
 		register_widget('Bcat_WidgetCategorySites');		
@@ -671,7 +676,7 @@ class SiteCategories {
 
 		//echo "term_sites<pre>"; print_r($term_sites); echo "</pre>";
 		
-		if (($term_sites) && (count($term_sites))) {
+		if ((isset($term_sites)) && (count($term_sites))) {
 			$sites = array();
 			
 			foreach($term_sites as $site_id) {
@@ -1723,12 +1728,22 @@ class SiteCategories {
 				<select id="site-categories-show-style" name="bcat[categories][show_style]">
 					<option value="ul" <?php if ($this->opts['categories']['show_style'] == "ul") { 
 						echo 'selected="selected" '; } ?>><?php _e('Unordered List (ul)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					<?php /* ?><option value="ul-nested" <?php if ($this->opts['categories']['show_style'] == "ul-nested") { 
+						echo 'selected="selected" '; } ?>><?php _e('Unordered List (ul) Nested', SITE_CATEGORIES_I18N_DOMAIN); ?></option><?php */ ?>
 					<option value="ol" <?php if ($this->opts['categories']['show_style'] == "ol") { 
 						echo 'selected="selected" '; } ?>><?php _e('Ordered List (ol)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					<?php /* ?><option value="ol-nested" <?php if ($this->opts['categories']['show_style'] == "ol-nested") { 
+						echo 'selected="selected" '; } ?>><?php _e('Ordered List (ol) Nested', SITE_CATEGORIES_I18N_DOMAIN); ?></option><?php */ ?>
 					<option value="accordion" <?php if ($this->opts['categories']['show_style'] == "accordion") { 
 						echo 'selected="selected" '; } ?>><?php _e('Accordion', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 					<option value="grid" <?php if ($this->opts['categories']['show_style'] == "grid") { 
 						echo 'selected="selected" '; } ?>><?php _e('Grid', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					<?php /* ?>
+					<option value="select-nested" <?php if ($this->opts['categories']['show_style'] == "select-nested") { 
+						echo 'selected="selected" '; } ?>><?php _e('Dropdown (select) Nested', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					<option value="select-flat" <?php if ($this->opts['categories']['show_style'] == "select-flat") { 
+						echo 'selected="selected" '; } ?>><?php _e('Dropdown (select)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					<?php */ ?>
 				</select>
 			</td>
 		</tr>
@@ -2878,7 +2893,8 @@ class SiteCategories {
 					}
 				}
 
-				if (($args['show_style'] == "ul") || ($args['show_style'] == "ol")) {
+				if (($args['show_style'] == "ul") || ($args['show_style'] == "ul-nested") 
+				 || ($args['show_style'] == "ol") || ($args['show_style'] == "ol-nested")) {
 					$categories_string = apply_filters('site_categories_landing_list_display', $content, $data, $args);
 				} else if ($args['show_style'] == "grid") {
 					$categories_string = apply_filters('site_categories_landing_grid_display', $content, $data, $args);
@@ -3432,7 +3448,7 @@ class BCat_Walker_CategoryDropdown extends Walker {
 	 * @param int $depth Depth of category. Used for padding.
 	 * @param array $args Uses 'selected', 'show_count', and 'show_last_update' keys, if they exist.
 	 */
-	function start_el(&$output, $category, $depth, $args) {
+	function start_el(&$output, $category, $depth = 0, $args = array(), $id = 0) {
 		$pad = str_repeat('&nbsp;', $depth * 3);
 
 		$cat_name = apply_filters('list_cats', $category->name, $category);
@@ -3456,7 +3472,7 @@ class BCat_Walker_CategoryDropdown extends Walker {
 		}
 	}
 
-	function end_el(&$output, $page, $depth, $args) {
+	function end_el(&$output, $category, $depth = 0, $args = array()) {
 		if ($depth == 0) {
 			$output .= '</optgroup>';
 		}
@@ -3494,8 +3510,7 @@ class BCat_Walker_WidgetCategoryDropdown extends Walker {
 		}
 	}
 
-
-	function start_el(&$output, $category, $depth, $args) {
+	function start_el(&$output, $category, $depth = 0, $args = array(), $id = 0) {
 
 		//echo "prev_depth[". $this->prev_depth ."] depth[". $depth ."]<br />";
 

@@ -3,6 +3,13 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.8.8 - 2014-01-09
+----------------------------------------------------------------------
+- Corrections to WP Media popup loading. Corrections to loading the new media libraries used for WP 3.5.
+- Corrections to Accordion landing page display where zero count categories were improperly being linked. 
+- Corrections to content formatting for sub-category desctiptions. Previously calling content filters which causes recursive looping. 
+- Corrections to inherited Walker class showing PHP5 strict errors.
+
 1.0.8.7 - 2013-12-20
 ----------------------------------------------------------------------
 - Updated avatar selection buttons to use new WP Media popup over thickbox.
