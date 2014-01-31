@@ -3,7 +3,7 @@
 Plugin Name: Site Categories
 Plugin URI: http://premium.wpmudev.org/project/site-categories/
 Description: Easily categorize sites on your multisite network with Site Categories!
-Author: Paul Menard (Incsub)
+Author: WPMU DEV
 Version: 1.0.8.8
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
