@@ -1,6 +1,8 @@
 <?php
 
 function process_site_categories_list_display($content, $data, $args) {
+	global $site_categories;
+
 	//echo "args<pre>"; print_r($args); echo "</pre>";
 	//echo "data<pre>"; print_r($data); echo "</pre>";
 
@@ -8,22 +10,57 @@ function process_site_categories_list_display($content, $data, $args) {
 
 		$content .= '<div id="site-categories-wrapper">';
 		
-		if (($args['show_style'] == "ul-nested") || ($args['show_style'] == "ol-nested")) {
+		if (($args['show_style'] == "ul-nested") || ($args['show_style'] == "ol-nested") 
+		 || ($args['show_style'] == "select-flat") || ($args['show_style'] == "select-nested")) {
 			//echo "args<pre>"; print_r($args); echo "</pre>";
 		
-			if ($args['show_style'] == "ol-nested") { $content .= '<ol class="site-categories site-categories-list">'; }
-			else if ($args['show_style'] == "ul-nested") { $content .= '<ul class="site-categories site-categories-list">'; }
+			if (($args['show_style'] == "ul-nested") || ($args['show_style'] == "ol-nested")) {
+				if (count($data['categories']) > $args['per_page']) {
+					echo "categories[". count($data['categories']) ."] per_page[". $args['per_page'] ."]<br />";
+				}
+			}
+		
+			if ($args['show_style'] == "ol-nested") { 
+				$content .= '<ol class="site-categories site-categories-list">'; 
+			} else if ($args['show_style'] == "ul-nested") { 
+				$content .= '<ul class="site-categories site-categories-list">'; 
+			} else if (($args['show_style'] == "select-nested") || ($args['show_style'] == "select-flat")) {
+				$content .= '<select id="site-categories-list-'. $category->slug .'" class="site-categories site-categories-list">'; 
+				$content .= '<option value="">'. __('Select Category', SITE_CATEGORIES_I18N_DOMAIN) .'</option>';
+			}
 			
-			global $site_categories;
 			$walker = new BCat_Walker_WidgetCategoryDropdown;			
 			$args['walker'] = $walker;
 			$args['category'] = -1;
-		
-			$content .= $site_categories->walk_category_dropdown_tree( $data['categories'], 0, $args );
+			$args['number'] = $args['per_page'];
+			//$args['per_page'] = -1;
+			//$args['show_style'] = $args['show_children'];
+			//$args['hierarchical'] = 0;
+			
+			$content .= $site_categories->walk_category_dropdown_tree( $data['categories'], 10, $args );
 			//echo "content[". $content ."]<br />";
 		
-			if ($args['show_style'] == "ol-nested") { $content .= '</ol>'; }
-			if ($args['show_style'] == "ul-nested") { $content .= '</ul>'; }
+			if ($args['show_style'] == "ol-nested") { 
+				$content .= '</ol>'; 
+			} else if ($args['show_style'] == "ul-nested") { 
+				$content .= '</ul>'; 
+			} else if (($args['show_style'] == "select-nested") || ($args['show_style'] == "select-flar")) {
+					$content .= '</select>';
+					$content .= '<script type="text/javascript">
+					/* <![CDATA[ */
+						var dropdown_'. $category->slug .' = document.getElementById("site-categories-list-'. $category->slug .'");
+						function onCatChange_'. $category->slug .'() {
+							var selected_index = dropdown_'. $category->slug .'.selectedIndex;
+							var href = dropdown_'. $category->slug .'.options[selected_index].value;
+							if (href != "") {
+								window.location.href = href;
+							}					
+						}
+						dropdown_'. $category->slug .'.onchange = onCatChange_'.$category->slug.';
+					/* ]]> */
+					</script>';	
+					
+				}
 			
 		} else {
 		

@@ -31,7 +31,9 @@ function process_site_categories_landing_list_sites_display($content, $data, $ar
 				}
 
 				$content .= '<li class="site-category-site">';
-				$content .=	'<a href="'. $site->siteurl .'" class="site-category-site-url">'. $image_src 
+				if ($args['open_blank'] == '1') { $link_target = ' target="_blank" '; } 
+				else { $link_target = ''; }
+				$content .=	'<a href="'. $site->siteurl .'" '. $link_target .' class="site-category-site-url">'. $image_src 
 					.'<span class="site-category-site-title">'. $site->blogname .'</span></a>';
 
 				if (($args['show_description'] == true) && (isset($site->bact_site_description)) && (strlen($site->bact_site_description))) {

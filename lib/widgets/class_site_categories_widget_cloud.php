@@ -26,6 +26,7 @@ class Bcat_WidgetCloud extends WP_Widget {
 			'category_filter'		=>	'',
 			'category_ids'			=>	'',
 			'include_parent'		=>	'on',
+			'open_blank'			=>	0,
 			'show_more_link'		=>	1,
 			'landing_link_label'	=>	__('more categories', SITE_CATEGORIES_I18N_DOMAIN)
 		);
@@ -163,6 +164,15 @@ class Bcat_WidgetCloud extends WP_Widget {
 		</p>
 		
 		<p>
+			<label for="<?php echo $this->get_field_id('open_blank') ?>"><?php _e('Open links in new window:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
+			<input type="radio" name="<?php echo $this->get_field_name( 'open_blank'); ?>" id="<?php echo $this->get_field_id('open_blank') ?>_yes" 
+				value="1" <?php if ($instance['open_blank'] == "1") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('open_blank') ?>_yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			
+			<input type="radio" name="<?php echo $this->get_field_name( 'open_blank'); ?>" id="<?php echo $this->get_field_id('open_blank') ?>_no" 
+				value="0" <?php if ($instance['open_blank'] == "0") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('open_blank') ?>_no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
+			
+		</p>
+		<p>
 			<label for="<?php echo $this->get_field_id('show_more_link') ?>"><?php _e('Landing Page link below cloud list:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
 			<input type="radio" name="<?php echo $this->get_field_name( 'show_more_link'); ?>" id="<?php echo $this->get_field_id('show_more_link') ?>_yes" 
 				value="1" <?php if ($instance['show_more_link'] == "1") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('show_more_link') ?>_yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
@@ -246,6 +256,7 @@ class Bcat_WidgetCloud extends WP_Widget {
 			$instance['unit']		= "pt";
 		
 		$instance['show_more_link'] 	= intval($new_instance['show_more_link']);
+		$instance['open_blank'] 		= intval($new_instance['open_blank']);
 		$instance['landing_link_label'] = strip_tags($new_instance['landing_link_label']);
 		
 		delete_site_transient( 'site-categories-cloud-data-'. $this->number );
@@ -332,11 +343,17 @@ class Bcat_WidgetCloud extends WP_Widget {
 			}
 			$data = wp_generate_tag_cloud( $tags, $instance ); // Here's where those top tags get sorted according to $args
 
+			if ($instance['open_blank'] == '1'){
+				$data = str_replace('<a ', '<a target="_blank" ', $data);
+			}
+			
 			if (!empty($data)) {
 				if ((isset($instance['show_more_link'])) && ($instance['show_more_link'])) { 
 
+					if ($instance['open_blank'] == '1') { $link_target = ' target="_blank" '; } 
+					else { $link_target = ''; }
 					$data .= '<div id="site-categories-navigation">';
-					$data .= '<a href="'. $site_categories->opts['landing_page_slug'] .'">'. $instance['landing_link_label'] .'</a>';
+					$data .= '<a href="'. $site_categories->opts['landing_page_slug'] .'" '. $link_target .'>'. $instance['landing_link_label'] .'</a>';
 					echo '</div>';
 				}
 			}

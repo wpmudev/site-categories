@@ -3,8 +3,8 @@
 Plugin Name: Site Categories
 Plugin URI: http://premium.wpmudev.org/project/site-categories/
 Description: Easily categorize sites on your multisite network with Site Categories!
-Author: WPMU DEV
-Version: 1.0.8.8
+Author: Paul Menard (Incsub)
+Version: 1.0.9
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -70,7 +70,7 @@ class SiteCategories {
 		$wpmudev_notices[] = array( 'id'=> 679160,'name'=> 'Site Categories', 'screens' => array( 'toplevel_page_bcat_settings', 'edit-bcat'));
 		include_once( dirname(__FILE__) . '/lib/dash-notices/wpmudev-dash-notification.php' );
 		
-		$this->_settings['VERSION'] 				= '1.0.8.8';
+		$this->_settings['VERSION'] 				= '1.0.9';
 		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
 		//$this->_settings['PLUGIN_URL']				= plugins_url(basename( dirname(__FILE__) ));
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
@@ -769,6 +769,9 @@ class SiteCategories {
 			'landing_page_use_rewrite'	=>	'yes',
 			'sites'										=>	array(
 				'header_prefix'							=>	__('Category', SITE_CATEGORIES_TAXONOMY),
+				'return_link_label'						=>	__('Return', SITE_CATEGORIES_TAXONOMY),
+				'return_link'							=>	1,
+				'open_blank'							=>	0,
 				'per_page'								=>	5,
 				'icon_show' 							=> 	1,
 				'icon_size'								=>	32,
@@ -791,6 +794,7 @@ class SiteCategories {
 			'categories'								=>	array(
 				'per_page'								=>	5,
 				'hide_empty'							=>	0,
+				'hide_empty_children'					=>	0,
 				'show_description'						=>	0,
 				'show_description_children'				=>	0,
 				'show_counts'							=>	0,
@@ -800,10 +804,13 @@ class SiteCategories {
 				'icon_size'								=>	32,
 				'icon_size_children'					=>	32,
 				'show_style'							=>	'ul',
+				'show_style_children'					=>	'ul',
 				'grid_cols'								=>	3,
 				'grid_rows'								=>	3,
 				'orderby'								=>	'name',
 				'order'									=>	'ASC',
+				'orderby_children'						=>	'name',
+				'order_children'						=>	'ASC',
 			)
 		);
 
@@ -1725,36 +1732,63 @@ class SiteCategories {
 				<label for="site-categories-show-style"><?php _e('Display Style', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			</th>
 			<td>
-				<select id="site-categories-show-style" name="bcat[categories][show_style]">
-					<option value="ul" <?php if ($this->opts['categories']['show_style'] == "ul") { 
-						echo 'selected="selected" '; } ?>><?php _e('Unordered List (ul)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-					<?php /* ?><option value="ul-nested" <?php if ($this->opts['categories']['show_style'] == "ul-nested") { 
-						echo 'selected="selected" '; } ?>><?php _e('Unordered List (ul) Nested', SITE_CATEGORIES_I18N_DOMAIN); ?></option><?php */ ?>
-					<option value="ol" <?php if ($this->opts['categories']['show_style'] == "ol") { 
-						echo 'selected="selected" '; } ?>><?php _e('Ordered List (ol)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-					<?php /* ?><option value="ol-nested" <?php if ($this->opts['categories']['show_style'] == "ol-nested") { 
-						echo 'selected="selected" '; } ?>><?php _e('Ordered List (ol) Nested', SITE_CATEGORIES_I18N_DOMAIN); ?></option><?php */ ?>
-					<option value="accordion" <?php if ($this->opts['categories']['show_style'] == "accordion") { 
-						echo 'selected="selected" '; } ?>><?php _e('Accordion', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-					<option value="grid" <?php if ($this->opts['categories']['show_style'] == "grid") { 
-						echo 'selected="selected" '; } ?>><?php _e('Grid', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-					<?php /* ?>
-					<option value="select-nested" <?php if ($this->opts['categories']['show_style'] == "select-nested") { 
-						echo 'selected="selected" '; } ?>><?php _e('Dropdown (select) Nested', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-					<option value="select-flat" <?php if ($this->opts['categories']['show_style'] == "select-flat") { 
-						echo 'selected="selected" '; } ?>><?php _e('Dropdown (select)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-					<?php */ ?>
-				</select>
+				<div class="site-categories-parent-child-left">
+					<p class="site-categories-accordion-options site-categories-grid-options" style="<?php echo $display_grid_accordion_options; ?>"><?php _e('Parents',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+				
+					<select id="site-categories-show-style" name="bcat[categories][show_style]">
+						<option value="ul" <?php if ($this->opts['categories']['show_style'] == "ul") { 
+							echo 'selected="selected" '; } ?>><?php _e('Unordered List (ul)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="ul-nested" <?php if ($this->opts['categories']['show_style'] == "ul-nested") { 
+							echo 'selected="selected" '; } ?>><?php _e('Unordered List (ul) Nested', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="ol" <?php if ($this->opts['categories']['show_style'] == "ol") { 
+							echo 'selected="selected" '; } ?>><?php _e('Ordered List (ol)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="ol-nested" <?php if ($this->opts['categories']['show_style'] == "ol-nested") { 
+							echo 'selected="selected" '; } ?>><?php _e('Ordered List (ol) Nested', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="accordion" <?php if ($this->opts['categories']['show_style'] == "accordion") { 
+							echo 'selected="selected" '; } ?>><?php _e('Accordion', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="grid" <?php if ($this->opts['categories']['show_style'] == "grid") { 
+							echo 'selected="selected" '; } ?>><?php _e('Grid', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="select-nested" <?php if ($this->opts['categories']['show_style'] == "select-nested") { 
+							echo 'selected="selected" '; } ?>><?php _e('Dropdown (select) Nested', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="select-flat" <?php if ($this->opts['categories']['show_style'] == "select-flat") { 
+							echo 'selected="selected" '; } ?>><?php _e('Dropdown (select)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					</select>
+				</div>
+				<div style="<?php echo $display_grid_accordion_options; ?>" class="site-categories-parent-child-right site-categories-accordion-options site-categories-grid-options">
+					<p><?php _e('Children',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+					
+					<select id="site-categories-show-style-children" name="bcat[categories][show_style_children]">
+						<option value="ul" <?php if ($this->opts['categories']['show_style_children'] == "ul") { 
+							echo 'selected="selected" '; } ?>><?php _e('Unordered List (ul)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="ul-nested" <?php if ($this->opts['categories']['show_style_children'] == "ul-nested") { 
+							echo 'selected="selected" '; } ?>><?php _e('Unordered List (ul) Nested', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="ol" <?php if ($this->opts['categories']['show_style_children'] == "ol") { 
+							echo 'selected="selected" '; } ?>><?php _e('Ordered List (ol)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="ol-nested" <?php if ($this->opts['categories']['show_style_children'] == "ol-nested") { 
+							echo 'selected="selected" '; } ?>><?php _e('Ordered List (ol) Nested', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="select-nested" <?php if ($this->opts['categories']['show_style_children'] == "select-nested") { 
+							echo 'selected="selected" '; } ?>><?php _e('Dropdown (select) Nested', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="select-flat" <?php if ($this->opts['categories']['show_style_children'] == "select-flat") { 
+							echo 'selected="selected" '; } ?>><?php _e('Dropdown (select)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					</select>
+				</div>
 			</td>
 		</tr>
 
-		<tr class="form-field site-categories-non-grid-options" <?php if ($this->opts['categories']['show_style'] == "grid") { echo ' style="display: none" '; } ?>>
+		<tr class="form-field site-categories-non-grid-options form-field site-categories-non-select-options" <?php if (($this->opts['categories']['show_style'] == "grid") || ($this->opts['categories']['show_style'] == "select-flat") || ($this->opts['categories']['show_style'] == "select-nested")) { echo ' style="display: none" '; } ?>>
 			<th scope="row">
 				<label for="site-categories-per-page"><?php _e('Categories per page', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			</th>
 			<td>
-				<input type="text" id="site-categories-per-page" name="bcat[categories][per_page]" 
-					value="<?php echo $this->opts['categories']['per_page']; ?>" />
+				<div class="site-categories-parent-child-left">
+					<p class="site-categories-accordion-options site-categories-grid-options" style="<?php echo $display_grid_accordion_options; ?>"><?php _e('Parents',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+					<input type="text" id="site-categories-per-page" name="bcat[categories][per_page]" 
+						value="<?php echo $this->opts['categories']['per_page']; ?>" />
+				</div>
+				<div style="<?php echo $display_grid_accordion_options; ?>" class="site-categories-parent-child-right site-categories-accordion-options site-categories-grid-options">
+					<p><?php _e('Children',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+					<?php _e('All Children will be shown', SITE_CATEGORIES_I18N_DOMAIN); ?>
+				</div>
 			</td>
 		</tr>
 
@@ -1778,22 +1812,42 @@ class SiteCategories {
 			<td>
 				<p><?php _e('This order by option controls how the listed Site Categories will be ordered on the listing page.', 
 					SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+				<div class="site-categories-parent-child-left">
+					<p class="site-categories-accordion-options site-categories-grid-options" style="<?php echo $display_grid_accordion_options; ?>"><?php _e('Parents',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 
-				<select id="site-categories-orderby" name="bcat[categories][orderby]">
-					<option value="name" <?php if ($this->opts['categories']['orderby'] == "name") { 
-						echo 'selected="selected" '; } ?>><?php _e('Name', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-					<option value="id" <?php if ($this->opts['categories']['orderby'] == "id") { 
-						echo 'selected="selected" '; } ?>><?php _e('Category ID', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-					<option value="none" <?php if ($this->opts['categories']['orderby'] == "none") { 
-						echo 'selected="selected" '; } ?>><?php _e('None', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-				</select>
-
-				<select id="site-categories-order" name="bcat[categories][order]">
-					<option value="ASC" <?php if ($this->opts['categories']['order'] == "ASC") { 
-						echo 'selected="selected" '; } ?>><?php _e('ASC', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-					<option value="DESC" <?php if ($this->opts['categories']['order'] == "DESC") { 
-						echo 'selected="selected" '; } ?>><?php _e('DESC', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
-				</select>
+					<select id="site-categories-orderby" name="bcat[categories][orderby]">
+						<option value="name" <?php if ($this->opts['categories']['orderby'] == "name") { 
+							echo 'selected="selected" '; } ?>><?php _e('Name', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="id" <?php if ($this->opts['categories']['orderby'] == "id") { 
+							echo 'selected="selected" '; } ?>><?php _e('Category ID', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="none" <?php if ($this->opts['categories']['orderby'] == "none") { 
+							echo 'selected="selected" '; } ?>><?php _e('None', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					</select>
+					<select id="site-categories-order" name="bcat[categories][order]">
+						<option value="ASC" <?php if ($this->opts['categories']['order'] == "ASC") { 
+							echo 'selected="selected" '; } ?>><?php _e('ASC', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="DESC" <?php if ($this->opts['categories']['order'] == "DESC") { 
+							echo 'selected="selected" '; } ?>><?php _e('DESC', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					</select>
+				</div>
+				<div style="<?php echo $display_grid_accordion_options; ?>" class="site-categories-parent-child-right site-categories-accordion-options site-categories-grid-options">
+					<p><?php _e('Children',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+					
+					<select id="site-categories-orderby-children" name="bcat[categories][orderby_children]">
+						<option value="name" <?php if ($this->opts['categories']['orderby_children'] == "name") { 
+							echo 'selected="selected" '; } ?>><?php _e('Name', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="id" <?php if ($this->opts['categories']['orderby_children'] == "id") { 
+							echo 'selected="selected" '; } ?>><?php _e('Category ID', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="none" <?php if ($this->opts['categories']['orderby_children'] == "none") { 
+							echo 'selected="selected" '; } ?>><?php _e('None', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					</select>
+					<select id="site-categories-order-children" name="bcat[categories][order_children]">
+						<option value="ASC" <?php if ($this->opts['categories']['order_children'] == "ASC") { 
+							echo 'selected="selected" '; } ?>><?php _e('ASC', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="DESC" <?php if ($this->opts['categories']['order_children'] == "DESC") { 
+							echo 'selected="selected" '; } ?>><?php _e('DESC', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					</select>
+				</div>
 			</td>
 		</tr>
 
@@ -1802,10 +1856,18 @@ class SiteCategories {
 				<label for="site-categories-hide-empty"><?php _e('Hide Empty Categories', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			</th>
 			<td>
-				<input type="radio" name="bcat[categories][hide_empty]" id="category-hide-empty-yes" value="1" 
-				<?php if ($this->opts['categories']['hide_empty'] == "1") { echo ' checked="checked" '; }?> /> <label for="category-hide-empty-yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN) ?></label><br /><input type="radio" name="bcat[categories][hide_empty]" id="category-hide-empty-no" value="0" 
-				<?php if ($this->opts['categories']['hide_empty'] == "0") { echo ' checked="checked" '; }?>/> <label for="category-hide-empty-no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+				<div class="site-categories-parent-child-left">
+					<p class="site-categories-accordion-options site-categories-grid-options" style="<?php echo $display_grid_accordion_options; ?>"><?php _e('Parents',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 				
+					<input type="radio" name="bcat[categories][hide_empty]" id="category-hide-empty-yes" value="1" <?php if ($this->opts['categories']['hide_empty'] == "1") { echo ' checked="checked" '; }?> /> <label for="category-hide-empty-yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN) ?></label><br /><input type="radio" name="bcat[categories][hide_empty]" id="category-hide-empty-no" value="0" 
+					<?php if ($this->opts['categories']['hide_empty'] == "0") { echo ' checked="checked" '; }?>/> <label for="category-hide-empty-no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+				</div>
+				<div style="<?php echo $display_grid_accordion_options; ?>" class="site-categories-parent-child-right site-categories-accordion-options site-categories-grid-options">
+			
+					<p><?php _e('Children',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+			
+					<input type="radio" name="bcat[categories][hide_empty_children]" id="category-hide-empty-children-yes" value="1" <?php if ($this->opts['categories']['hide_empty_children'] == "1") { echo ' checked="checked" '; }?> /> <label for="category-hide-empty-children-yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN) ?></label><br /><input type="radio" name="bcat[categories][hide_empty_children]" id="category-hide-empty-children-no" value="0" <?php if ($this->opts['categories']['hide_empty_children'] == "0") { echo ' checked="checked" '; }?>/> <label for="category-hide-empty-children-no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+				</div>
 			</td>
 		</tr>
 
@@ -1814,7 +1876,7 @@ class SiteCategories {
 				<label for="site-categories-show-counts"><?php _e('Show counts', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			</th>
 			<td>
-				<div style="float: left; width: 100px;">
+				<div class="site-categories-parent-child-left">
 
 					<p class="site-categories-accordion-options site-categories-grid-options" style="<?php echo $display_grid_accordion_options; ?>"><?php _e('Parents',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 				
@@ -1827,8 +1889,8 @@ class SiteCategories {
 					for="category-show-counts-no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 				</div>
 				
-				<div style="float: left; width: 100px; margin-left: 10px; <?php echo $display_grid_accordion_options; ?>" 
-						class="site-categories-accordion-options site-categories-grid-options">
+				<div style="<?php echo $display_grid_accordion_options; ?>" 
+						class="site-categories-parent-child-right site-categories-accordion-options site-categories-grid-options">
 				
 					<p><?php _e('Children',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 				
@@ -1845,12 +1907,12 @@ class SiteCategories {
 			</td>
 		</tr>
 
-		<tr>
+		<tr class="site-categories-non-select-options" <?php if (($this->opts['categories']['show_style'] == "select-flat") || ($this->opts['categories']['show_style'] == "select-nested")) { echo ' style="display: none" '; } ?>>
 			<th scope="row">
 				<label for="site-categories-show-description"><?php _e('Show Category Description', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			</th>
 			<td>
-				<div style="float: left; width: 100px;">
+				<div class="site-categories-parent-child-left">
 
 					<p class="site-categories-accordion-options site-categories-grid-options" style="<?php echo $display_grid_accordion_options; ?>"><?php _e('Parents',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 
@@ -1864,8 +1926,8 @@ class SiteCategories {
 
 				</div>
 				
-				<div style="float: left; width: 100px; margin-left: 10px; <?php echo $display_grid_accordion_options; ?>" 
-					class="site-categories-accordion-options site-categories-grid-options">
+				<div style="<?php echo $display_grid_accordion_options; ?>" 
+					class="site-categories-parent-child-right site-categories-accordion-options site-categories-grid-options">
 
 					<p><?php _e('Children',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 					<input type="radio" name="bcat[categories][show_description_children]" id="category-show-description-children-yes" value="1" 
@@ -1881,12 +1943,12 @@ class SiteCategories {
 			</td>
 		</tr>
 
-		<tr>
+		<tr class="site-categories-non-select-options" <?php if (($this->opts['categories']['show_style'] == "select-flat") || ($this->opts['categories']['show_style'] == "select-nested")) { echo ' style="display: none" '; } ?>>
 			<th scope="row">
 				<label for="site-categories-icons"><?php _e('Show icons', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			</th>
 			<td>
-				<div style="float: left; width: 100px;">
+				<div class="site-categories-parent-child-left">
 
 					<p class="site-categories-accordion-options site-categories-grid-options" style="<?php echo $display_grid_accordion_options; ?>"><?php _e('Parents',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 
@@ -1899,8 +1961,8 @@ class SiteCategories {
 					for="category-icons-show-no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 
 				</div>
-				<div style="float: left; width: 100px; margin-left: 10px; <?php echo $display_grid_accordion_options; ?>" 
-					class="site-categories-accordion-options site-categories-grid-options">
+				<div style="<?php echo $display_grid_accordion_options; ?>" 
+					class="site-categories-parent-child-right site-categories-accordion-options site-categories-grid-options">
 
 					<p><?php _e('Children',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 				
@@ -1915,12 +1977,12 @@ class SiteCategories {
 				</div>
 			</td>
 		</tr>
-		<tr>
+		<tr class="form-field form-field site-categories-non-select-options" <?php if (($this->opts['categories']['show_style'] == "select-flat") || ($this->opts['categories']['show_style'] == "select-nested")) { echo ' style="display: none" '; } ?>>
 			<th scope="row">
 				<label for="site-categories-icons"><?php _e('Icon size', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			</th>
 			<td>
-				<div style="float: left; width: 100px;">
+				<div class="site-categories-parent-child-left">
 
 					<p class="site-categories-accordion-options site-categories-grid-options" style="<?php echo $display_grid_accordion_options; ?>"><?php _e('Parents',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 					<input type="text" class='' size="5" name="bcat[categories][icon_size]" 
@@ -1928,8 +1990,8 @@ class SiteCategories {
 					<p class="description"><?php _e('default is 32px', SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 
 				</div>
-				<div style="float: left; width: 100px; margin-left: 10px; <?php echo $display_grid_accordion_options; ?>" 
-					class="site-categories-accordion-options site-categories-grid-options">
+				<div style="<?php echo $display_grid_accordion_options; ?>" 
+					class="site-categories-parent-child-right site-categories-accordion-options site-categories-grid-options">
 
 					<p ><?php _e('Children',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 
@@ -1948,7 +2010,7 @@ class SiteCategories {
 				$bcat_image_id = 0;
 			}
 		?>
-		<tr>
+		<tr class="form-field form-field site-categories-non-select-options" <?php if (($this->opts['categories']['show_style'] == "select-flat") || ($this->opts['categories']['show_style'] == "select-nested")) { echo ' style="display: none" '; } ?>>
 			<th scope="row" valign="top"><label for="upload_image"><?php _ex('Default Category Image', 'Category Image', SITE_CATEGORIES_I18N_DOMAIN); ?></label></th>
 			<td>
 				<p class="description"><?php _e('Upload or select an image to used as the default category icons. Ensure it is at least as large as the icon size specified above. A square version of this image will be auto generated.', SITE_CATEGORIES_I18N_DOMAIN) ?></p>
@@ -1995,10 +2057,10 @@ class SiteCategories {
 
 		<tr class="form-field" >
 			<th scope="row">
-				<label for="site-categories-site-show-style"><?php _e('Display Style', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+				<label for="site-categories-sites-show-style"><?php _e('Display Style', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			</th>
 			<td>
-				<select id="site-categories-site-show-style" name="bcat[sites][show_style]">
+				<select id="site-categories-sites-show-style" name="bcat[sites][show_style]">
 					<option value="ul" <?php if ($this->opts['sites']['show_style'] == "ul") { 
 						echo 'selected="selected" '; } ?>><?php _e('Unordered List (ul)', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
 					<option value="ol" <?php if ($this->opts['sites']['show_style'] == "ol") { 
@@ -2014,6 +2076,31 @@ class SiteCategories {
 			<td>
 				<input type="text" id="site-categories-sites-header-prefix" name="bcat[sites][header_prefix]" 
 				value="<?php echo $this->opts['sites']['header_prefix']; ?>" />
+			</td>
+		</tr>
+
+		<tr>
+			<th scope="row">
+				<label for="site-categories-sites-return-link"><?php _e('Show return link', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			</th>
+			<td>
+				<p><?php _e('The return link is shown on the sites listing and is a return to the main Site Categories landing page. Not a return to the previous page the user was viewing.', SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+				<input type="radio" name="bcat[sites][return_link]" id="category-site-return_link-yes" value="1" 
+				<?php if ($this->opts['sites']['return_link'] == "1") { echo ' checked="checked" '; }?> /> <label 
+				for="category-site-return-link-yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN) ?></label><br />
+				
+				<input type="radio" name="bcat[sites][return_link]" id="category-site-return_link-no" value="0" 
+				<?php if ($this->opts['sites']['return_link'] == "0") { echo ' checked="checked" '; }?>/> <label 
+				for="category-site-return-link-no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			</td>
+		</tr>
+		<tr class="form-field" >
+			<th scope="row">
+				<label for="site-categories-sites-return-link-label"><?php _e('Show return link label', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			</th>
+			<td>
+				<input type="text" id="site-categories-sites-return-link-label" name="bcat[sites][return_link_label]" 
+				value="<?php echo $this->opts['sites']['return_link_label']; ?>" />
 			</td>
 		</tr>
 		
@@ -2068,6 +2155,20 @@ class SiteCategories {
 				<input type="radio" name="bcat[sites][show_description]" id="category-site-show-description-no" value="0" 
 				<?php if ($this->opts['sites']['show_description'] == "0") { echo ' checked="checked" '; }?>/> <label 
 				for="category-site-show-description-no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			</td>
+		</tr>
+		<tr>
+			<th scope="row">
+				<label for="site-categories-sites-open-blank"><?php _e('Open Site links in new window', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			</th>
+			<td>
+				<input type="radio" name="bcat[sites][open_blank]" id="category-site-open_blank-yes" value="1" 
+				<?php if ($this->opts['sites']['open_blank'] == "1") { echo ' checked="checked" '; }?> /> <label 
+				for="category-site-open_blank-yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN) ?></label><br />
+				
+				<input type="radio" name="bcat[sites][open_blank]" id="category-site-open_blank-no" value="0" 
+				<?php if ($this->opts['sites']['open_blank'] == "0") { echo ' checked="checked" '; }?>/> <label 
+				for="category-site-open_blank-no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
 			</td>
 		</tr>
 
@@ -2590,9 +2691,8 @@ class SiteCategories {
 		// If the filters returned a string/text we want to use that as the user viewed content 	
 		if ((is_string($user_access_content)) && (!empty($user_access_content)))
 			return $user_access_content;
-		
+				
 		if ($category) {
-
 			$data['term'] = get_term_by('slug', $category, SITE_CATEGORIES_TAXONOMY);
 			if (( is_wp_error( $data['term'] ) ) || (!$data['term'])) {
 
@@ -2706,6 +2806,10 @@ class SiteCategories {
 				}
 			}
 			
+			if ($this->opts['sites']['return_link']) {
+				$content .= '<p><a href="'. esc_url($this->opts['landing_page_slug']) .'">'. $this->opts['sites']['return_link_label'] .'</p>';
+			}
+			
 			$categories_string = apply_filters('site_categories_landing_list_sites_display', $content, $data, $args);
 			return $categories_string;
 				
@@ -2715,12 +2819,12 @@ class SiteCategories {
 			$get_terms_args = array();
 			
 			// For processing default category logic we need to include empty categories in our initial query. Then remove when we are done before the display.
-			//$get_terms_args['hide_empty']	=	$args['hide_empty'];
-			$get_terms_args['hide_empty']	=	0;
+			$get_terms_args['hide_empty']	=	$args['hide_empty'];
+			//$get_terms_args['hide_empty']	=	0;
 
 			$get_terms_args['orderby']		=	$args['orderby'];
 			$get_terms_args['order']		=	$args['order'];
-			$get_terms_args['pad_counts'] 	= 	true;
+			$get_terms_args['pad_counts'] 	= 	false;
 			
 			$get_terms_args['hierarchical']	=	false;
 			
@@ -2741,8 +2845,10 @@ class SiteCategories {
 				$get_terms_args['pad_counts'] = 1;
 				$get_terms_args['parent'] = 0;
 				$get_terms_args['hierarchical']	= 0;
+			} else if (($args['show_style'] == "select-flat") || ($args['show_style'] == "select-nested")) {
+				$get_terms_args['per_page'] = -1;
+				//$get_terms_args['per_page'] = -1;
 			}
-			
 			//echo "args<pre>"; print_r($args); echo "</pre>";
 			//echo "get_terms_args<pre>"; print_r($get_terms_args); echo "</pre>";
 			
@@ -2754,50 +2860,53 @@ class SiteCategories {
 			
 			if (($categories) && (count($categories))) {
 
-				if (count($categories) < $args['per_page']) {
-
+				if (($args['show_style'] == 'select-flat') || ($args['show_style'] == 'select-nested')) {
 					$data['categories'] = $categories;
-
 				} else {
+					if (/* ($args['per_page'] > 0) || */ (count($categories) < $args['per_page'])) {
 
-					$data['offset'] 		= intval($args['per_page']) * (intval($data['current_page'])-1); 
-					$data['categories'] 	= array_slice($categories, $data['offset'], $args['per_page'], true);
+						$data['categories'] = $categories;
 
-					$data['total_pages'] 	= ceil(count($categories)/intval($args['per_page']));
+					} else {
 
-					if (intval($data['current_page']) > 1) {
+						$data['offset'] 		= intval($args['per_page']) * (intval($data['current_page'])-1); 
+						$data['categories'] 	= array_slice($categories, $data['offset'], $args['per_page'], true);
 
-						$data['prev'] = array();
-						$data['prev']['page_number'] = intval($data['current_page']) - 1;
+						$data['total_pages'] 	= ceil(count($categories)/intval($args['per_page']));
 
-						if ($data['prev']['page_number'] > 1) {
-							if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
-								$data['prev']['link_url'] = trailingslashit($this->opts['landing_page_slug']) . $data['prev']['page_number'];
+						if (intval($data['current_page']) > 1) {
+
+							$data['prev'] = array();
+							$data['prev']['page_number'] = intval($data['current_page']) - 1;
+
+							if ($data['prev']['page_number'] > 1) {
+								if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
+									$data['prev']['link_url'] = trailingslashit($this->opts['landing_page_slug']) . $data['prev']['page_number'];
+								} else {
+									$data['prev']['link_url'] = add_query_arg(array('start_at' => $data['prev']['page_number']), $this->opts['landing_page_slug']); 
+								}
 							} else {
-								$data['prev']['link_url'] = add_query_arg(array('start_at' => $data['prev']['page_number']), $this->opts['landing_page_slug']); 
+								$data['prev']['link_url'] = $this->opts['landing_page_slug'];
 							}
-						} else {
-							$data['prev']['link_url'] = $this->opts['landing_page_slug'];
+							$data['prev']['link_label'] = __('Previous page', SITE_CATEGORIES_I18N_DOMAIN);						
 						}
-						$data['prev']['link_label'] = __('Previous page', SITE_CATEGORIES_I18N_DOMAIN);						
-					}
 					
-					if ($data['current_page'] < $data['total_pages']) {
+						if ($data['current_page'] < $data['total_pages']) {
 
-						$data['next'] = array();
+							$data['next'] = array();
 
-						$data['next']['page_number'] = $data['current_page'] + 1;
+							$data['next']['page_number'] = $data['current_page'] + 1;
 
-						if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
-							$data['next']['link_url'] = trailingslashit($this->opts['landing_page_slug']) . $data['next']['page_number'];
-						} else {
-							//$data['next']['link_url'] = $this->opts['landing_page_slug'] .'&amp;start_at=' . $data['next']['page_number'];
-							$data['next']['link_url'] = add_query_arg(array('start_at' => $data['next']['page_number']), $this->opts['landing_page_slug']);
+							if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
+								$data['next']['link_url'] = trailingslashit($this->opts['landing_page_slug']) . $data['next']['page_number'];
+							} else {
+								//$data['next']['link_url'] = $this->opts['landing_page_slug'] .'&amp;start_at=' . $data['next']['page_number'];
+								$data['next']['link_url'] = add_query_arg(array('start_at' => $data['next']['page_number']), $this->opts['landing_page_slug']);
+							}
+							$data['next']['link_label'] = __('Next page', SITE_CATEGORIES_I18N_DOMAIN);
 						}
-						$data['next']['link_label'] = __('Next page', SITE_CATEGORIES_I18N_DOMAIN);
 					}
 				}
-				
 				if (count($data['categories'])) {
 					//echo "data<pre>"; print_r($data); echo "</pre>";
 
@@ -2828,19 +2937,22 @@ class SiteCategories {
 						if (($args['show_style'] == "grid") || ($args['show_style'] == "accordion")) {
 							$get_terms_args = array();
 							
-							//$get_terms_args['hide_empty']	=	$args['hide_empty'];
-							$get_terms_args['hide_empty']	=	0;
+							$get_terms_args['hide_empty']	=	$args['hide_empty_children'];
+							//$get_terms_args['hide_empty']	=	0;
 
-							$get_terms_args['orderby']		=	$args['orderby'];
-							$get_terms_args['order']		=	$args['order'];
+							$get_terms_args['orderby']		=	$args['orderby_children'];
+							$get_terms_args['order']		=	$args['order_children'];
 
-							$get_terms_args['parent'] = $data_category->term_id;
-							$get_terms_args['hierarchical']	=	0;
+							//$get_terms_args['parent'] = $data_category->term_id;
+							$get_terms_args['child_of'] = $data_category->term_id;
+							$get_terms_args['hierarchical']	=	1;
 
 							//echo "child get_terms_args<pre>"; print_r($get_terms_args); echo "</pre>";
 
 							$child_categories = get_terms( SITE_CATEGORIES_TAXONOMY, $get_terms_args );
 							if (($child_categories) && (count($child_categories))) {
+
+								//echo "child_categories<pre>"; print_r($child_categories); echo "</pre>";
 
 								// We tally the count of the children to make sure the parent count shows correctly. 
 								$children_count = 0;
@@ -2868,9 +2980,10 @@ class SiteCategories {
 									
 								}
 								if ($args['show_style'] == "accordion")
-									$data['categories'][$idx]->count = $children_count;
+									$data['categories'][$idx]->children_count = $children_count;
 								
 								$data['categories'][$idx]->children = $child_categories;
+								//echo "children<pre>"; print_r($data['categories'][$idx]->children); echo "</pre>";
 							}
 						}
 					}
@@ -2893,8 +3006,13 @@ class SiteCategories {
 					}
 				}
 
+				//echo "data<pre>"; print_r($data); echo "</pre>";
+				//die();
+				
+				//echo "args<pre>"; print_r($args); echo "</pre>";
 				if (($args['show_style'] == "ul") || ($args['show_style'] == "ul-nested") 
-				 || ($args['show_style'] == "ol") || ($args['show_style'] == "ol-nested")) {
+				 || ($args['show_style'] == "ol") || ($args['show_style'] == "ol-nested")
+				 || ($args['show_style'] == "select-flat") || ($args['show_style'] == "select-nested")) {
 					$categories_string = apply_filters('site_categories_landing_list_display', $content, $data, $args);
 				} else if ($args['show_style'] == "grid") {
 					$categories_string = apply_filters('site_categories_landing_grid_display', $content, $data, $args);
@@ -3497,22 +3615,39 @@ class BCat_Walker_WidgetCategoryDropdown extends Walker {
 	var $db_fields = array ('parent' => 'parent', 'id' => 'term_id');
 
 	function start_lvl( &$output, $depth = 0, $args = array() ) {
-		if (($args['show_style'] == "ol-nested") || ($args['show_style'] == "ul-nested")) {
+		//echo "args<pre>"; print_r($args); echo "</pre>";
+		if ($args['show_style'] == "ol-nested") {
 			$indent = str_repeat("\t", $depth);
 			$output .= "$indent<ul class='children'>\n";
+			
+		} else if ($args['show_style'] == "ul-nested") {
+			$indent = str_repeat("\t", $depth);
+			$output .= "$indent<ul class='children'>\n";
+
+		} 
+		else if ($args['show_style'] == "select-nested") {
+//			$indent = str_repeat("\t", $depth);
+//			$output .= "$indent<select class='children children-$depth'>\n";
 		}
 	}
 
 	function end_lvl( &$output, $depth = 0, $args = array() ) {
-		if (($args['show_style'] == "ol-nested") || ($args['show_style'] == "ul-nested")) {
-			$indent = str_repeat("\t", $depth);
+		if ($args['show_style'] == "ol-nested") {
+			if ($args['show_style'] == "ol-nested")
+				$indent = str_repeat("\t", $depth);
+			else
+				$indent = '';
 			$output .= "$indent</ul>\n";
-		}
+		} else if ($args['show_style'] == "ul-nested") {
+			if ($args['show_style'] == "ul-nested")
+				$indent = str_repeat("\t", $depth);
+			else
+				$indent = '';
+			$output .= "$indent</ul>\n";
+		} 
 	}
 
 	function start_el(&$output, $category, $depth = 0, $args = array(), $id = 0) {
-
-		//echo "prev_depth[". $this->prev_depth ."] depth[". $depth ."]<br />";
 
 		if ($this->prev_depth != $depth) {
 			$this->prev_depth = $depth;
@@ -3528,21 +3663,23 @@ class BCat_Walker_WidgetCategoryDropdown extends Walker {
 			$disabled = ' onclick="return false;" ';
 		}
 				
-		if ($args['show_style'] == "select-nested") {
-			$pad = str_repeat('&nbsp;', $depth * 3);
-			$output .= "<option class=\"level-$depth\" value=\"". $output_url ."\"";
-			if ((isset($args['selected'])) && ( $category->term_id == $args['selected'] ))
-				$output .= ' selected="selected"';
+		if (($args['show_style'] == "select-nested") || ($args['show_style'] == "select-flat")) {
+			if ($args['show_style'] == "select-nested")
+				$pad = str_repeat('&nbsp;', $depth * 3);
+			else
+				$pad = '';
+			
+			$output .= '<option class="level-$depth" value="'. $output_url .'"';
+			//if ((isset($args['selected'])) && ( $category->term_id == $args['selected'] ))
+			//	$output .= ' selected="selected"';
 			$output .= '>';
 			$output .= $pad.$cat_name;
 			if ( $args['show_counts'] )
 				$output .= '&nbsp;&nbsp;('. $category->count .')';
-//			if ( $args['show_last_update'] ) {
-//				$format = 'Y-m-d';
-//				$output .= '&nbsp;&nbsp;' . gmdate($format, $category->last_update_timestamp);
-//			}
 			$output .= "</option>\n";
-		} else if (($args['show_style'] == "ul-nested") || ($args['show_style'] == "ol-nested")) {
+			
+		} else if (($args['show_style'] == "ul") || ($args['show_style'] == "ul-nested") 
+		        || ($args['show_style'] == "ol") || ($args['show_style'] == "ol-nested")) {
 
 			$option_spacer = str_repeat('&nbsp;', $depth);
 
@@ -3556,6 +3693,19 @@ class BCat_Walker_WidgetCategoryDropdown extends Walker {
 
 			if ($args['show_counts']) {
 				$output .= '<span class="site-category-count">('. $category->count .')</span>';
+			}
+			
+			if (($args['show_description']) && (strlen($category->description))) {						
+
+				if (($args['show_style'] == "ul") || ($args['show_style'] == "ul-nested") 
+				 || ($args['show_style'] == "ol") || ($args['show_style'] == "ol-nested")) {
+
+					$bact_category_description = wpautop(stripslashes($category->description));						
+					$bact_category_description = str_replace(']]>', ']]&gt;', $bact_category_description);
+					if (strlen($bact_category_description)) {
+						$output .= '<div class="site-category-description">'. $bact_category_description .'</div>';
+					}
+				}
 			}
 		}
 	}

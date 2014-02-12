@@ -159,10 +159,14 @@ $(document).ready(function () {
 		$('.site-categories-non-accordion-options').hide();
 		$('.site-categories-grid-options').hide();
 		$('.site-categories-accordion-options').show();
+	} else if (($(this).val() == "select-flat") || ($(this).val() == "select-nested")) {
+		$('.site-categories-non-select-options').hide();
+
 	} else {
 		$('.site-categories-grid-options').hide();		
 		$('.site-categories-accordion-options').hide();
 		$('.site-categories-non-grid-options').show();
+		$('.site-categories-non-select-options').show();
 	}
 	});
 })

@@ -3,6 +3,16 @@ Site Categories
 Author: Paul Menard (Incsub)
 ----------------------------------------------------------------------
 
+1.0.9 - 2014-02-12
+----------------------------------------------------------------------
+- Added option on accordion output to link to parent category.
+- Added option to open site links in new window for landing page as well as all three widgets. 
+- Added option to show return link on sites listing to return to main landing page listing.
+- Added landing page output option for nested unordered list, nested ordered list and nested select.
+- Added accordion display option for child categories to show in flat unordered list, nested unordered list, flat ordered list, nested ordered list OL flat select and nested select.
+- Added grid display option for child categories to show in flat unordered list, nested unordered list, flat ordered list, nested ordered list OL flat select and nested select.
+
+
 1.0.8.8 - 2014-01-09
 ----------------------------------------------------------------------
 - Corrections to WP Media popup loading. Corrections to loading the new media libraries used for WP 3.5.

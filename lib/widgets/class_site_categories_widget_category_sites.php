@@ -28,6 +28,7 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 			'icon_size'				=>	32,
 			'ordering' 				=> 	'name',
 			'order' 				=> 	'ASC',
+			'open_blank'			=>	0,
 			'show_more_link'		=>	1,
 			'landing_link_label'	=>	__('more sites', SITE_CATEGORIES_I18N_DOMAIN)	
 		);
@@ -181,6 +182,16 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 		}
 		?>
 		<p>
+			<label for="<?php echo $this->get_field_id('open_blank') ?>"><?php _e('Open links in new window:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
+			<input type="radio" name="<?php echo $this->get_field_name( 'open_blank'); ?>" id="<?php echo $this->get_field_id('open_blank') ?>_yes" 
+				value="1" <?php if ($instance['open_blank'] == "1") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('open_blank') ?>_yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			
+			<input type="radio" name="<?php echo $this->get_field_name( 'open_blank'); ?>" id="<?php echo $this->get_field_id('open_blank') ?>_no" 
+				value="0" <?php if ($instance['open_blank'] == "0") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('open_blank') ?>_no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
+			
+		</p>
+		
+		<p>
 			<label for="<?php echo $this->get_field_id('show_more_link') ?>"><?php _e('Landing Page link below Sites list:', SITE_CATEGORIES_I18N_DOMAIN); ?></label><br />
 			<input type="radio" name="<?php echo $this->get_field_name( 'show_more_link'); ?>" id="<?php echo $this->get_field_id('show_more_link') ?>_yes" 
 				value="1" <?php if ($instance['show_more_link'] == "1") { echo ' checked="checked" '; } ?> /> <label for="<?php echo $this->get_field_id('show_more_link') ?>_yes"><?php _e('Yes', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
@@ -224,6 +235,7 @@ class Bcat_WidgetCategorySites extends WP_Widget {
 			$instance['icon_size'] 			= intval($new_instance['icon_size']);
 		
 		$instance['show_more_link'] 	= intval($new_instance['show_more_link']);
+		$instance['open_blank'] 		= intval($new_instance['open_blank']);
 		$instance['landing_link_label'] = strip_tags($new_instance['landing_link_label']);
 		
 		delete_site_transient( 'site-categories-sites-data-'. $this->number);
@@ -423,7 +435,12 @@ function process_categories_widget_list_sites_display($content, $data, $args) {
 				}
 
 				$content .= '<li class="site-category-site">';
-				$content .=	'<a href="'. $site->siteurl .'" class="site-category-site-url">'. $image_src 
+				if ($args['open_blank'] == 1)
+					$link_target = ' target="_blank" ';
+				else
+					$link_target = '';
+				//echo "link_target[". $link_target ."]<br />";	
+				$content .=	'<a href="'. $site->siteurl .'" '. $link_target .' class="site-category-site-url">'. $image_src 
 					.'<span class="site-category-site-title">'. $site->blogname .'</span></a>';
 
 				if ( (isset($args['show_description'])) && ($args['show_description'] == true) && (isset($site->bact_site_description)) && (strlen($site->bact_site_description))) {
@@ -448,28 +465,47 @@ function process_categories_widget_list_sites_display($content, $data, $args) {
 		if ($args['show_style'] == "ol") { $content .= '</ol>'; }
 		else if ($args['show_style'] == "select") { 
 			$content .= '</select>'; 
-
-			$content .= '<script type="text/javascript">
-			/* <![CDATA[ */
-				var dropdown_'. $form_id .' = document.getElementById("'. $form_id .'");
-				function onCatChange_'. $form_id .'() {
-					var selected_index = dropdown_'. $form_id .'.selectedIndex;
-					var href = dropdown_'. $form_id .'.options[selected_index].value;
-					if (href != "") {
-						window.location.href = href;
-					}					
-				}
-				dropdown_'. $form_id .'.onchange = onCatChange_'.$form_id.';
-			/* ]]> */
-			</script>';	
-			
+			if ($args['open_blank'] == '1') {
+				$content .= '<script type="text/javascript">
+				/* <![CDATA[ */
+					var dropdown_'. $form_id .' = document.getElementById("'. $form_id .'");
+					function onCatChange_'. $form_id .'() {
+						var selected_index = dropdown_'. $form_id .'.selectedIndex;
+						var href = dropdown_'. $form_id .'.options[selected_index].value;
+						if (href != "") {
+							var a = document.createElement(\'a\');
+							a.href=href;
+							a.target = \'_blank\';
+							document.body.appendChild(a);
+							a.click();
+						}					
+					}
+					dropdown_'. $form_id .'.onchange = onCatChange_'.$form_id.';
+				/* ]]> */
+				</script>';	
+			} else {
+				$content .= '<script type="text/javascript">
+				/* <![CDATA[ */
+					var dropdown_'. $form_id .' = document.getElementById("'. $form_id .'");
+					function onCatChange_'. $form_id .'() {
+						var selected_index = dropdown_'. $form_id .'.selectedIndex;
+						var href = dropdown_'. $form_id .'.options[selected_index].value;
+						if (href != "") {
+							window.location.href = href;
+						}					
+					}
+					dropdown_'. $form_id .'.onchange = onCatChange_'.$form_id.';
+				/* ]]> */
+				</script>';	
+			}
 		} else { $content .= '</ul>'; }
 
 		if ((isset($args['show_more_link'])) && ($args['show_more_link']) && (isset($data['landing']))) { 
 
+			if ($args['open_blank'] == '1') { $link_target = ' target="_blank" '; } 
+			else { $link_target = ''; }
 			$content .= '<div id="site-categories-navigation">';
-
-				$content .= '<a href="'. $data['landing']['link_url'] .'">'. $data['landing']['link_label'] .'</a>';
+			$content .= '<a href="'. $data['landing']['link_url'] .'" '. $link_target .'>'. $data['landing']['link_label'] .'</a>';
 			$content .= '</div>';
 		}
 	} 

@@ -81,6 +81,12 @@ ul.site-categories-widget li {
 	font-size: 1.0em;
 }
 
+#site-categories-wrapper div.site-categories-accordion-details div.site-category-description-parent,
+#site-categories-wrapper div.site-categories-accordion-details .site-categories-children-list {
+	display: block;
+}
+
+
 #site-categories-wrapper div.site-categories-accordion ul.site-categories-children {
 	vertical-align: top;
 	display: inherit;
@@ -96,10 +102,14 @@ ul.site-categories-widget li {
 	margin-bottom: 10px;
 }
 
-#site-categories-wrapper .site-categories-accordion ul.site-categories-children div.site-category-description {
+#site-categories-wrapper .site-categories-accordion ul.site-categories-children div.site-category-description,
+#site-categories-wrapper .site-categories-accordion ol.site-categories-children div.site-category-description {
 	width: 90%;
 }
 
+#site-categories-wrapper .site-categories-children li {
+	clear: both;
+}
 
 #site-categories-wrapper li.site-categories-parent {
 	float: left;
