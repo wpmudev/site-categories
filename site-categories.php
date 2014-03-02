@@ -3,8 +3,8 @@
 Plugin Name: Site Categories
 Plugin URI: http://premium.wpmudev.org/project/site-categories/
 Description: Easily categorize sites on your multisite network with Site Categories!
-Author: Paul Menard (Incsub)
-Version: 1.0.9
+Author: WPMU DEV
+Version: 1.0.9.1
 Author URI: http://premium.wpmudev.org/
 WDP ID: 679160
 Text Domain: site-categories
@@ -70,7 +70,7 @@ class SiteCategories {
 		$wpmudev_notices[] = array( 'id'=> 679160,'name'=> 'Site Categories', 'screens' => array( 'toplevel_page_bcat_settings', 'edit-bcat'));
 		include_once( dirname(__FILE__) . '/lib/dash-notices/wpmudev-dash-notification.php' );
 		
-		$this->_settings['VERSION'] 				= '1.0.9';
+		$this->_settings['VERSION'] 				= '1.0.9.1';
 		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
 		//$this->_settings['PLUGIN_URL']				= plugins_url(basename( dirname(__FILE__) ));
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
@@ -3683,13 +3683,19 @@ class BCat_Walker_WidgetCategoryDropdown extends Walker {
 
 			$option_spacer = str_repeat('&nbsp;', $depth);
 
-			$output .=	'<li class="level-'. $depth .'"><a href="'. $output_url .'" '. $disabled .'>';
+			$output .= '<li class="level-'. $depth .'">';
+			
+			if ($category->count > 0) {
+				$output .= '<a id="site-categories-" href="'. $output_url .'">';
+			}
 			
 			if ( ($args['icon_show'] == true) && (isset($category->icon_image_src))) {
 				$output .= '<img class="site-category-icon" width="'. $args['icon_size'] .'" height="'. $args['icon_size'] .'" alt="'. $category->name .'" src="'. $category->icon_image_src .'" />';
 			} 
 			$output .= '<span class="site-category-title">'. $category->name .'</span>';
-			$output .= '</a>';
+			if ($category->count > 0) {
+				$output .= '</a>';
+			}
 
 			if ($args['show_counts']) {
 				$output .= '<span class="site-category-count">('. $category->count .')</span>';
