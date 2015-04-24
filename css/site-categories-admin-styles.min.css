@@ -1,0 +1,5 @@
+/*! Site Categories - v1.0.91
+ * https://premium.wpmudev.org/project/site-categories/
+ * Copyright (c) 2015; * Licensed GPLv2+ */
+
+select.bcat_category_widget{width:100%}#site-categories-settings-main-categories-display-options-panel div.site-categories-parent-child-left{float:left;width:30%}#site-categories-settings-main-categories-display-options-panel div.site-categories-parent-child-right{float:left;width:30%;margin-left:10px}#bcat_image_upload{width:100px}
