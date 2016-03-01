@@ -683,7 +683,7 @@ class SiteCategories {
 				$blog = get_blog_details($site_id);
 				//echo "blog<pre>"; print_r($blog); echo "</pre>";
 				
-				if (($blog) && ($blog->public == 1) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
+				if (($blog) && ($blog->public != 0) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
 					
 					if ((isset($args['blog_filter'])) && (isset($args['blog_ids'])) && (count($args['blog_ids']))) {
 						if ($args['blog_filter'] == "exclude") {
@@ -1171,7 +1171,7 @@ class SiteCategories {
 
 		foreach($tt_ids as $tt_id) {
 			//$sql_str = $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->term_relationships WHERE term_taxonomy_id = %d", $tt_id );
-			$sql_str = $wpdb->prepare( "SELECT COUNT( $wpdb->blogs.blog_id ) as count FROM $wpdb->term_relationships LEFT JOIN $wpdb->blogs ON $wpdb->term_relationships.object_id = $wpdb->blogs.blog_id WHERE $wpdb->term_relationships.term_taxonomy_id =%d AND $wpdb->blogs.blog_id IS NOT NULL AND $wpdb->blogs.public = 1 AND $wpdb->blogs.archived = '0' AND $wpdb->blogs.mature = 0 AND $wpdb->blogs.spam = 0 AND $wpdb->blogs.deleted = 0", $tt_id );
+			$sql_str = $wpdb->prepare( "SELECT COUNT( $wpdb->blogs.blog_id ) as count FROM $wpdb->term_relationships LEFT JOIN $wpdb->blogs ON $wpdb->term_relationships.object_id = $wpdb->blogs.blog_id WHERE $wpdb->term_relationships.term_taxonomy_id =%d AND $wpdb->blogs.blog_id IS NOT NULL AND $wpdb->blogs.public != 0 AND $wpdb->blogs.archived = '0' AND $wpdb->blogs.mature = 0 AND $wpdb->blogs.spam = 0 AND $wpdb->blogs.deleted = 0", $tt_id );
 			
 			
 			//echo "sql_str=[". $sql_str ."]<br />";
@@ -1245,7 +1245,7 @@ class SiteCategories {
 						$terms_count = count($term_sites);
 
 						$blog = get_blog_details($blog_id);
-						if (($blog) && ($blog->public == 1) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
+						if (($blog) && ($blog->public != 0) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
 							$terms_count += 1;
 						}
 						$wpdb->update( $wpdb->term_taxonomy, array('count' => $terms_count ), array( 'term_taxonomy_id' => $term->term_taxonomy_id ) );
