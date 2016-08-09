@@ -4,7 +4,7 @@
  */
 class Bcat_WidgetCategorySites extends WP_Widget {
 
-	function Bcat_WidgetCategorySites () {
+	function __construct () {
 		$widget_ops = array('classname' => __CLASS__, 'description' => __('Shows a list of all sites that belong to selected site category.', SITE_CATEGORIES_I18N_DOMAIN));
 		parent::WP_Widget(__CLASS__, __('Sites from a single site category', SITE_CATEGORIES_I18N_DOMAIN), $widget_ops);
 	}

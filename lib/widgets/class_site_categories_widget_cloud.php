@@ -4,7 +4,7 @@
  */
 class Bcat_WidgetCloud extends WP_Widget {
 
-	function Bcat_WidgetCloud () {
+	function __construct () {
 		$widget_ops = array('classname' => __CLASS__, 'description' => __('Shows a tag cloud of Site Categories.', SITE_CATEGORIES_I18N_DOMAIN));
 		parent::WP_Widget(__CLASS__, __('Site Categories Cloud', SITE_CATEGORIES_I18N_DOMAIN), $widget_ops);
 	}
