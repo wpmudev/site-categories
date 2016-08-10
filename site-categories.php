@@ -190,8 +190,7 @@ class SiteCategories {
 		$site_categories_data['wp_version'] = $wp_version;
 		if ( (is_main_site()) && (is_super_admin()) ) {
 			
-			if ((isset($_GET['action'])) && ($_GET['action'] == "edit")
-			 && (isset($_GET['taxonomy'])) && ($_GET['taxonomy'] == "bcat")
+			if ((isset($_GET['taxonomy'])) && ($_GET['taxonomy'] == "bcat")
 			 && (isset($_GET['tag_ID']))) {
 				//echo "wp_version[". $wp_version ."]<br />";
 				if ( version_compare( $wp_version, '3.8', '>=' )) {
