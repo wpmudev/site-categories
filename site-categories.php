@@ -3466,7 +3466,17 @@ class SiteCategories {
 		if ( (int) $tab_index > 0 )
 			$tab_index_attribute = " tabindex=\"$tab_index\"";
 
-		$categories = get_terms( $taxonomy, $r );
+        // Exclude irrelevant arguments, particularly name (which causes no categories to return).
+        $term_args = compact(
+            "taxonomy",
+            "orderby",
+            "order",
+            "hide_empty",
+            "child_of",
+            "exclude",
+            "hierarchical"
+        );
+		$categories = get_terms( $term_args );
 		$name = esc_attr( $name );
 		$class = esc_attr( $class );
 		$id = $id ? esc_attr( $id ) : $name;
