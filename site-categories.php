@@ -45,7 +45,7 @@ require_once( dirname(__FILE__) . '/lib/display_templates/display_accordion_cate
 class SiteCategories {
 		
 	private $_pagehooks = array();	// A list of our various nav items. Used when hooking into the page load actions.
-	private $_messages 	= array();	// Message set during the form processing steps for add, edit, udate, delete, restore actions
+	private $_messages	= array();	// Message set during the form processing steps for add, edit, udate, delete, restore actions
 	private $_settings	= array();	// These are global dynamic settings NOT stores as part of the config options
 	private $_signup_form_errors;
 	
@@ -70,8 +70,8 @@ class SiteCategories {
 		$wpmudev_notices[] = array( 'id'=> 679160,'name'=> 'Site Categories', 'screens' => array( 'toplevel_page_bcat_settings', 'edit-bcat'));
 		include_once( dirname(__FILE__) . '/lib/dash-notices/wpmudev-dash-notification.php' );
 		
-		$this->_settings['VERSION'] 				= '1.0.9.1';
-		$this->_settings['MENU_URL'] 				= 'options-general.php?page=site_categories';
+		$this->_settings['VERSION']					= '1.0.9.1';
+		$this->_settings['MENU_URL']				= 'options-general.php?page=site_categories';
 		//$this->_settings['PLUGIN_URL']				= plugins_url(basename( dirname(__FILE__) ));
 		$this->_settings['PLUGIN_BASE_DIR']			= dirname(__FILE__);
 		$this->_settings['admin_menu_label']		= __( "Site Categories", SITE_CATEGORIES_I18N_DOMAIN ); 
@@ -80,76 +80,76 @@ class SiteCategories {
 		
 		$this->_settings['options_key']				= "wpmudev-site-categories"; 
 		
-		$this->_admin_header_error 					= "";		
+		$this->_admin_header_error					= "";		
 		
 		add_action('admin_notices', array(&$this, 'admin_notices_proc') );
 
 		/* Setup the tetdomain for i18n language handling see http://codex.wordpress.org/Function_Reference/load_plugin_textdomain */
-        load_plugin_textdomain( SITE_CATEGORIES_I18N_DOMAIN, false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+		load_plugin_textdomain( SITE_CATEGORIES_I18N_DOMAIN, false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
 		/* Standard activation hook for all WordPress plugins see http://codex.wordpress.org/Function_Reference/register_activation_hook */
-        register_activation_hook( __FILE__, 	array( &$this, 'plugin_activation_proc' ) );
+		register_activation_hook( __FILE__,		array( &$this, 'plugin_activation_proc' ) );
 
-		add_action( 'init', 						array(&$this, 'init_proc') );		
-		add_action( 'admin_enqueue_scripts', 		array(&$this, 'admin_enqueue_scripts_proc'));
-		add_action( 'wp_enqueue_scripts', 			array(&$this, 'wp_enqueue_scripts_proc'), 99);
+		add_action( 'init',							array(&$this, 'init_proc') );		
+		add_action( 'admin_enqueue_scripts',		array(&$this, 'admin_enqueue_scripts_proc'));
+		add_action( 'wp_enqueue_scripts',			array(&$this, 'wp_enqueue_scripts_proc'), 99);
 		
 		
-		add_action( 'admin_menu', 					array(&$this, 'admin_menu_proc') );	
-		add_action( 'widgets_init', 				array(&$this, 'widgets_init_proc') );
+		add_action( 'admin_menu',					array(&$this, 'admin_menu_proc') );	
+		add_action( 'widgets_init',					array(&$this, 'widgets_init_proc') );
 
 		// Add/Modify the column for the Taxonomy terms list page 
-		add_filter( "manage_edit-bcat_columns", 	array(&$this, 'bcat_taxonomy_column_headers') );	
-		add_filter( 'manage_bcat_custom_column', 	array(&$this, 'bcat_taxonomy_column'), 10, 3 );
+		add_filter( "manage_edit-bcat_columns",		array(&$this, 'bcat_taxonomy_column_headers') );	
+		add_filter( 'manage_bcat_custom_column',	array(&$this, 'bcat_taxonomy_column'), 10, 3 );
 
-		add_filter( 'wpmu_blogs_columns', 			array(&$this, 'bcat_sites_column_headers') );	
+		add_filter( 'wpmu_blogs_columns',			array(&$this, 'bcat_sites_column_headers') );	
 		add_action( 'manage_sites_custom_column',	array(&$this, 'bcat_sites_column_row'), 10, 2 );
 
 
 		// Add/Edit Taxonomy term form fields. 
-		add_action( 'bcat_edit_form_fields', 		array(&$this, 'bcat_taxonomy_term_edit'), 99, 2 );		
-		add_action( "edit_bcat", 					array(&$this, 'bcat_taxonomy_term_save'), 99, 2 );
+		add_action( 'bcat_edit_form_fields',		array(&$this, 'bcat_taxonomy_term_edit'), 99, 2 );		
+		add_action( "edit_bcat",					array(&$this, 'bcat_taxonomy_term_save'), 99, 2 );
 		
 		// Adds our Site Categories to the Site signup form. 
-		add_action( 'signup_blogform', 				array($this, 'bcat_signup_blogform') );
-		add_action( 'wpmu_new_blog', 				array($this, 'wpmu_new_blog_proc'), 99, 6 );		
-		add_filter( 'wpmu_validate_blog_signup', 	array($this, 'bcat_wpmu_validate_blog_signup'));
-		add_filter( 'add_signup_meta', 				array($this, 'bcat_add_signup_meta'));
+		add_action( 'signup_blogform',				array($this, 'bcat_signup_blogform') );
+		add_action( 'wpmu_new_blog',				array($this, 'wpmu_new_blog_proc'), 99, 6 );		
+		add_filter( 'wpmu_validate_blog_signup',	array($this, 'bcat_wpmu_validate_blog_signup'));
+		add_filter( 'add_signup_meta',				array($this, 'bcat_add_signup_meta'));
 
 		// Adds our Site Categories section to the BuddyPress register form
 		add_action( 'bp_after_blog_details_fields', array($this, 'bcat_signup_blogform'), 99 );
 		add_filter( 'bp_signup_usermeta', array($this, 'bcat_add_signup_meta'));
 		
 		// Output for the Title and Content of the Site Category listing page
-		add_filter( 'the_title', 					array($this, 'process_categories_title'), 99, 2 );
-		add_filter( 'the_content', 					array($this, 'process_categories_body'), 99 );
+		add_filter( 'the_title',					array($this, 'process_categories_title'), 99, 2 );
+		add_filter( 'the_content',					array($this, 'process_categories_body'), 99 );
 				
 		// Rewrite rules logic
-		add_filter( 'rewrite_rules_array', 			array($this, 'insert_rewrite_rules') );
-		add_filter( 'query_vars', 					array($this, 'insert_query_vars') );
+		add_filter( 'rewrite_rules_array',			array($this, 'insert_rewrite_rules') );
+		add_filter( 'query_vars',					array($this, 'insert_query_vars') );
 		
-		add_action( 'delete_blog', 					array($this, 'blog_change_status_count') );
-		add_action( 'make_spam_blog', 				array($this, 'blog_change_status_count') );
-		add_action( 'make_ham_blog', 				array($this, 'blog_change_status_count') );
-		add_action( 'mature_blog', 					array($this, 'blog_change_status_count') );
-		add_action( 'unmature_blog', 				array($this, 'blog_change_status_count') );		
-		add_action( 'archive_blog', 				array($this, 'blog_change_status_count') );
-		add_action( 'unarchive_blog', 				array($this, 'blog_change_status_count') );		
-		add_action( 'activate_blog', 				array($this, 'blog_change_status_count') );
-		add_action( 'deactivate_blog', 				array($this, 'blog_change_status_count') );		
+		add_action( 'delete_blog',					array($this, 'blog_change_status_count') );
+		add_action( 'make_spam_blog',				array($this, 'blog_change_status_count') );
+		add_action( 'make_ham_blog',				array($this, 'blog_change_status_count') );
+		add_action( 'mature_blog',					array($this, 'blog_change_status_count') );
+		add_action( 'unmature_blog',				array($this, 'blog_change_status_count') );		
+		add_action( 'archive_blog',					array($this, 'blog_change_status_count') );
+		add_action( 'unarchive_blog',				array($this, 'blog_change_status_count') );		
+		add_action( 'activate_blog',				array($this, 'blog_change_status_count') );
+		add_action( 'deactivate_blog',				array($this, 'blog_change_status_count') );		
 	}	
 	
 	/**
 	 * The old-style PHP Class constructor. Used when an instance of this class 
- 	 * is needed. If used (PHP4) this function calls the PHP5 version of the constructor.
+	 * is needed. If used (PHP4) this function calls the PHP5 version of the constructor.
 	 *
 	 * @since 1.0.0
 	 * @param none
 	 * @return self
 	 */
-    function SiteCategories() {
-        __construct();
-    }
+	function SiteCategories() {
+		__construct();
+	}
 
 	function init_proc() {
 		$this->register_taxonomy_proc();
@@ -322,7 +322,7 @@ class SiteCategories {
 					$bcat_image_id = $this->opts['icons_category'][$term_id];
 					if ($bcat_image_id)
 					{
-						$image_src 	= wp_get_attachment_image_src($bcat_image_id, 'thumbnail', true);
+						$image_src	= wp_get_attachment_image_src($bcat_image_id, 'thumbnail', true);
 						//echo "image_src<pre>"; print_r($image_src); echo "</pre>";
 						
 						if ($image_src) {
@@ -522,7 +522,7 @@ class SiteCategories {
 					$bcat_image_default_src = $this->get_default_category_icon_url();
 					if ($bcat_image_id)
 					{
-						$image_src 	= wp_get_attachment_image_src($bcat_image_id, array(100, 100));
+						$image_src	= wp_get_attachment_image_src($bcat_image_id, array(100, 100));
 						if (!$image_src) {
 							$image_src[0] = "#";							
 						}
@@ -583,11 +583,11 @@ class SiteCategories {
 		global $wpdb;
 
 		$defaults = array(
-			'include_children' 	=> 	false,
-			'orderby'			=> 	$this->opts['sites']['orderby'],
+			'include_children'	=>	false,
+			'orderby'			=>	$this->opts['sites']['orderby'],
 			'order'				=>	$this->opts['sites']['order'],
 			'taxonomy'			=>	SITE_CATEGORIES_TAXONOMY,
-			'fields'			=> 	'ids'
+			'fields'			=>	'ids'
 		);
 			
 		$args = wp_parse_args( $args, $defaults );
@@ -772,9 +772,9 @@ class SiteCategories {
 				'return_link'							=>	1,
 				'open_blank'							=>	0,
 				'per_page'								=>	5,
-				'icon_show' 							=> 	1,
+				'icon_show'								=>	1,
 				'icon_size'								=>	32,
-				'orderby' 								=> 	'name',
+				'orderby'								=>	'name',
 				'order'									=>	'ASC',
 				'show_style'							=>	'ul',
 				'show_description'						=>	0,
@@ -782,7 +782,7 @@ class SiteCategories {
 				'signup_category_minimum'				=>	1,
 				'category_default'						=>	0,
 				'category_excludes'						=>	'',
-				'signup_category_parent_selectable'		=> 	1,
+				'signup_category_parent_selectable'		=>	1,
 				'signup_show'							=>	1,
 				'signup_category_required'				=>	1,
 				'signup_category_label'					=>	__('Site Categories', SITE_CATEGORIES_TAXONOMY),
@@ -850,7 +850,7 @@ class SiteCategories {
 			else
 				$this->opts['categories'] = wp_parse_args( (array) $this->opts['categories'], $defaults['categories'] );
 				
-			$this->opts = wp_parse_args( (array) $this->opts, $defaults ); 			
+			$this->opts = wp_parse_args( (array) $this->opts, $defaults );			
 			
 			//echo "opts<pre>"; print_r($this->opts); echo "</pre>";
 		}
@@ -900,7 +900,7 @@ class SiteCategories {
 				//echo "new<pre>"; print_r($new); echo "</pre>";
 				return $new + $old;
 			}
-		} 	
+		}	
 		return $old;
 	}
 
@@ -925,7 +925,7 @@ class SiteCategories {
 			
 			//echo "vars<pre>"; print_r($vars); echo "</pre>";
 		}
-    	return $vars;
+		return $vars;
 	}
 
 
@@ -1118,38 +1118,38 @@ class SiteCategories {
 		
 		// Add new taxonomy, make it hierarchical (like categories)
 		$labels = array(
-			'name' 					=> 	_x( 'Site Categories', 'taxonomy general name', SITE_CATEGORIES_I18N_DOMAIN ),
-			'singular_name' 		=> 	_x( 'Site Category', 'taxonomy singular name', SITE_CATEGORIES_I18N_DOMAIN ),
-			'search_items' 			=>  __( 'Search Site Categories', SITE_CATEGORIES_I18N_DOMAIN ),
-			'all_items' 			=> 	__( 'All Site Categories', SITE_CATEGORIES_I18N_DOMAIN ),
-			'parent_item' 			=> 	__( 'Parent Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
-			'parent_item_colon' 	=> 	__( 'Parent Site Category:', SITE_CATEGORIES_I18N_DOMAIN ),
-			'edit_item' 			=> 	__( 'Edit Site Category', SITE_CATEGORIES_I18N_DOMAIN ), 
-			'update_item' 			=> 	__( 'Update Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
-			'add_new_item' 			=> 	__( 'Add New Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
-			'new_item_name' 		=> 	__( 'New Site Category Name', SITE_CATEGORIES_I18N_DOMAIN ),
-			'menu_name' 			=> 	__( 'Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
-		); 	
+			'name'					=>	_x( 'Site Categories', 'taxonomy general name', SITE_CATEGORIES_I18N_DOMAIN ),
+			'singular_name'			=>	_x( 'Site Category', 'taxonomy singular name', SITE_CATEGORIES_I18N_DOMAIN ),
+			'search_items'			=>	__( 'Search Site Categories', SITE_CATEGORIES_I18N_DOMAIN ),
+			'all_items'				=>	__( 'All Site Categories', SITE_CATEGORIES_I18N_DOMAIN ),
+			'parent_item'			=>	__( 'Parent Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
+			'parent_item_colon'		=>	__( 'Parent Site Category:', SITE_CATEGORIES_I18N_DOMAIN ),
+			'edit_item'				=>	__( 'Edit Site Category', SITE_CATEGORIES_I18N_DOMAIN ), 
+			'update_item'			=>	__( 'Update Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
+			'add_new_item'			=>	__( 'Add New Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
+			'new_item_name'			=>	__( 'New Site Category Name', SITE_CATEGORIES_I18N_DOMAIN ),
+			'menu_name'				=>	__( 'Site Category', SITE_CATEGORIES_I18N_DOMAIN ),
+		);	
 
 
 		if (is_super_admin()) {
-			$show_ui 	= true;
+			$show_ui	= true;
 			$query_var	= true;
 			$rewrite	= array( 'slug' => SITE_CATEGORIES_TAXONOMY );
 		}
 		else {
-			$show_ui 	= false;
+			$show_ui	= false;
 			$query_var	= false;
 			$rewrite	= '';
 		}
 			
 		register_taxonomy(SITE_CATEGORIES_TAXONOMY, null, array(
-			'hierarchical' 				=> 	true,
+			'hierarchical'				=>	true,
 			'update_count_callback'		=>	array($this, 'bcat_taxonomy_terms_count'),
-			'labels' 					=> 	$labels,
-			'show_ui' 					=> 	$show_ui,
-			'query_var' 				=> 	$query_var,
-			'rewrite' 					=> 	$rewrite
+			'labels'					=>	$labels,
+			'show_ui'					=>	$show_ui,
+			'query_var'					=>	$query_var,
+			'rewrite'					=>	$rewrite
 		));
 	}
 	
@@ -1299,7 +1299,7 @@ class SiteCategories {
 			);
 
 			// Hook into the WordPress load page action for our new nav items. This is better then checking page query_str values.
-			add_action('load-'. $this->_pagehooks['site-categories-settings-main-site'], 		array(&$this, 'on_load_page_main_site'));
+			add_action('load-'. $this->_pagehooks['site-categories-settings-main-site'],		array(&$this, 'on_load_page_main_site'));
 		
 		} 
 		
@@ -1311,7 +1311,7 @@ class SiteCategories {
 			array(&$this, 'settings_panel_site')
 		);
 	
-		add_action('load-'. $this->_pagehooks['site-categories-settings-site'], 		array(&$this, 'on_load_page_site'));	
+		add_action('load-'. $this->_pagehooks['site-categories-settings-site'],			array(&$this, 'on_load_page_site'));	
 	}
 
 	/**
@@ -1327,7 +1327,7 @@ class SiteCategories {
 		if ( ! current_user_can( 'manage_options' ) )
 			wp_die( __( 'Cheatin&#8217; uh?' ) );
 
-		$this->_messages['success-settings'] 			= __( "Settings have been update.", SITE_CATEGORIES_I18N_DOMAIN );
+		$this->_messages['success-settings']			= __( "Settings have been update.", SITE_CATEGORIES_I18N_DOMAIN );
 
 		$this->load_config();
 		$this->process_actions_main_site();
@@ -1388,7 +1388,7 @@ class SiteCategories {
 		if ( ! current_user_can( 'manage_options' ) )
 			wp_die( __( 'Cheatin&#8217; uh?' ) );
 
-		$this->_messages['success-settings'] 			= __( "Settings have been update.", SITE_CATEGORIES_I18N_DOMAIN );
+		$this->_messages['success-settings']			= __( "Settings have been update.", SITE_CATEGORIES_I18N_DOMAIN );
 
 		$this->load_config();
 		$this->process_actions_site();
@@ -1540,43 +1540,43 @@ class SiteCategories {
 				$screen->add_help_tab( array(
 					'id'		=> 'site-categories-help-overview',
 					'title'		=> __('Settings Overview', SITE_CATEGORIES_I18N_DOMAIN ),
-					'content'	=>  $screen_help_text['site-categories-help-overview']
-			    	) 
+					'content'	=>	$screen_help_text['site-categories-help-overview']
+					) 
 				);
 
 				$screen->add_help_tab( array(
 					'id'		=> 'site-categories-help-settings-landing',
 					'title'		=> __('Landing Page Selection', SITE_CATEGORIES_I18N_DOMAIN ),
-					'content'	=>  $screen_help_text['site-categories-help-settings-landing']
-			    	) 
+					'content'	=>	$screen_help_text['site-categories-help-settings-landing']
+					) 
 				);
 
 				$screen->add_help_tab( array(
 					'id'		=> 'site-categories-help-settings-selection',
 					'title'		=> __('Site Categories Selection Options', SITE_CATEGORIES_I18N_DOMAIN ),
-					'content'	=>  $screen_help_text['site-categories-help-settings-selection']
-			    	) 
+					'content'	=>	$screen_help_text['site-categories-help-settings-selection']
+					) 
 				);
 				
 				$screen->add_help_tab( array(
 					'id'		=> 'site-categories-help-settings-landing-categories',
 					'title'		=> __('Categories Display Options', SITE_CATEGORIES_I18N_DOMAIN ),
-					'content'	=>  $screen_help_text['site-categories-help-settings-landing-categories']
-			    	) 
+					'content'	=>	$screen_help_text['site-categories-help-settings-landing-categories']
+					) 
 				);
 
 				$screen->add_help_tab( array(
 					'id'		=> 'site-categories-help-settings-landing-sites',
 					'title'		=> __('Sites Display Options', SITE_CATEGORIES_I18N_DOMAIN ),
-					'content'	=>  $screen_help_text['site-categories-help-settings-landing-sites']
-			    	) 
+					'content'	=>	$screen_help_text['site-categories-help-settings-landing-sites']
+					) 
 				);
 
 				$screen->add_help_tab( array(
 					'id'		=> 'site-categories-help-signup-form',
 					'title'		=> __('New Site Signup Form Options', SITE_CATEGORIES_I18N_DOMAIN ),
-					'content'	=>  $screen_help_text['site-categories-help-signup-form']
-			    	) 
+					'content'	=>	$screen_help_text['site-categories-help-signup-form']
+					) 
 				);
 				
 			}			
@@ -1613,8 +1613,8 @@ class SiteCategories {
 				$screen->add_help_tab( array(
 					'id'		=> 'site-categories-page-settings',
 					'title'		=> __('Settings Overview', SITE_CATEGORIES_I18N_DOMAIN ),
-					'content'	=>  $screen_help_text['site-categories-page-settings']
-			    	) 
+					'content'	=>	$screen_help_text['site-categories-page-settings']
+					) 
 				);
 			}			
 		} 
@@ -1985,7 +1985,7 @@ class SiteCategories {
 
 					<p class="site-categories-accordion-options site-categories-grid-options" style="<?php echo $display_grid_accordion_options; ?>"><?php _e('Parents',  SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 					<input type="text" class='' size="5" name="bcat[categories][icon_size]" 
-						value="<?php echo intval($this->opts['categories']['icon_size']); ?>" />px  <?php _e('square', SITE_CATEGORIES_I18N_DOMAIN); ?>
+						value="<?php echo intval($this->opts['categories']['icon_size']); ?>" />px	<?php _e('square', SITE_CATEGORIES_I18N_DOMAIN); ?>
 					<p class="description"><?php _e('default is 32px', SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 
 				</div>
@@ -2022,7 +2022,7 @@ class SiteCategories {
 				<?php
 					if ((isset($this->opts['categories']['default_icon_id'])) && (intval($this->opts['categories']['default_icon_id']))) {
 						
-						$image_src 	= wp_get_attachment_image_src(intval($this->opts['categories']['default_icon_id']), array(100, 100));
+						$image_src	= wp_get_attachment_image_src(intval($this->opts['categories']['default_icon_id']), array(100, 100));
 						if (!$image_src) {
 							$image_src[0] = "#";
 						}
@@ -2188,7 +2188,7 @@ class SiteCategories {
 							for="site-categories-show-sites-icons-show-no"><?php _e('No', SITE_CATEGORIES_I18N_DOMAIN); ?></label>						
 						<?php
 					} else {
-						?><p><?php echo sprintf(__('Install the %1$sAvatars%2$s plugin to show Site icons.', SITE_CATEGORIES_I18N_DOMAIN),  
+						?><p><?php echo sprintf(__('Install the %1$sAvatars%2$s plugin to show Site icons.', SITE_CATEGORIES_I18N_DOMAIN),	
 							'<a href="http://premium.wpmudev.org/project/avatars/" target="_blank">', 
 							'</a>'); ?></p><?php
 					}
@@ -2328,12 +2328,12 @@ class SiteCategories {
 				<?php	
 
 					wp_dropdown_pages( array( 
-							'name' 				=> 'bcat[landing_page_id]', 
+							'name'				=> 'bcat[landing_page_id]', 
 							'id'				=> 'site-categories-landing-page',
-							'echo' 				=> 1, 
-							'show_option_none' 	=> __( '&mdash; Select &mdash;' ), 
+							'echo'				=> 1, 
+							'show_option_none'	=> __( '&mdash; Select &mdash;' ), 
 							'option_none_value' => '0', 
-							'selected' 			=>  $landing_page_id
+							'selected'			=>	$landing_page_id
 						)
 					);
 
@@ -2467,7 +2467,7 @@ class SiteCategories {
 				<p class="description"><?php _e('Set the default category for when the site admin does not select a site category.', SITE_CATEGORIES_I18N_DOMAIN); ?></p>
 				<?php
 					$bcat_args = array(
-						'taxonomy'			=> 	SITE_CATEGORIES_TAXONOMY,
+						'taxonomy'			=>	SITE_CATEGORIES_TAXONOMY,
 						'hierarchical'		=>	true,
 						'hide_empty'		=>	false,
 						'exclude'			=>	$cat_excludes,
@@ -2586,7 +2586,7 @@ class SiteCategories {
 				} 
 				if ($cat_ecluded == false) {
 					$bcat_args = array(
-						'taxonomy'			=> 	SITE_CATEGORIES_TAXONOMY,
+						'taxonomy'			=>	SITE_CATEGORIES_TAXONOMY,
 						'hierarchical'		=>	true,
 						'hide_empty'		=>	false,
 						'exclude'			=>	$cat_excludes,
@@ -2687,7 +2687,7 @@ class SiteCategories {
 		if ($user_access_content === false)
 			return $content;
 
-		// If the filters returned a string/text we want to use that as the user viewed content 	
+		// If the filters returned a string/text we want to use that as the user viewed content		
 		if ((is_string($user_access_content)) && (!empty($user_access_content)))
 			return $user_access_content;
 				
@@ -2735,9 +2735,9 @@ class SiteCategories {
 
 			} else {
 
-				$data['offset'] 		= intval($args['per_page']) * (intval($data['current_page'])-1); 
-				$data['sites'] 			= array_slice($sites, $data['offset'], $args['per_page'], true);
-				$data['total_pages'] 	= ceil(count($sites)/intval($args['per_page']));
+				$data['offset']			= intval($args['per_page']) * (intval($data['current_page'])-1); 
+				$data['sites']			= array_slice($sites, $data['offset'], $args['per_page'], true);
+				$data['total_pages']	= ceil(count($sites)/intval($args['per_page']));
 												
 				if (intval($data['current_page']) > 1) {
 
@@ -2823,13 +2823,13 @@ class SiteCategories {
 
 			$get_terms_args['orderby']		=	$args['orderby'];
 			$get_terms_args['order']		=	$args['order'];
-			$get_terms_args['pad_counts'] 	= 	false;
+			$get_terms_args['pad_counts']	=	false;
 			
 			$get_terms_args['hierarchical']	=	false;
 			
 			if ($args['show_style'] == "grid") {
-				$get_terms_args['pad_counts'] 		= 1;
-				$get_terms_args['parent'] 			= 0;
+				$get_terms_args['pad_counts']		= 1;
+				$get_terms_args['parent']			= 0;
 				$get_terms_args['hierarchical']		= 0;
 
 				// For the grid we replace the 'per_page' value with the number of rows * cols
@@ -2868,10 +2868,10 @@ class SiteCategories {
 
 					} else {
 
-						$data['offset'] 		= intval($args['per_page']) * (intval($data['current_page'])-1); 
-						$data['categories'] 	= array_slice($categories, $data['offset'], $args['per_page'], true);
+						$data['offset']			= intval($args['per_page']) * (intval($data['current_page'])-1); 
+						$data['categories']		= array_slice($categories, $data['offset'], $args['per_page'], true);
 
-						$data['total_pages'] 	= ceil(count($categories)/intval($args['per_page']));
+						$data['total_pages']	= ceil(count($categories)/intval($args['per_page']));
 
 						if (intval($data['current_page']) > 1) {
 
@@ -3202,7 +3202,7 @@ class SiteCategories {
 			}
 
 			$bcat_args = array(
-				'taxonomy'			=> 	SITE_CATEGORIES_TAXONOMY,
+				'taxonomy'			=>	SITE_CATEGORIES_TAXONOMY,
 				'hierarchical'		=>	true,
 				'hide_empty'		=>	false,
 				'exclude'			=>	$cat_excludes,
@@ -3423,25 +3423,25 @@ class SiteCategories {
 	
 	function wp_dropdown_categories( $args = '' ) {
 		$defaults = array(
-			'show_option_all' 		=> '', 
-			'show_option_none' 		=> '',
-			'orderby' 				=> 'id', 
-			'order' 				=> 'ASC',
-			'show_last_update' 		=> 0, 
-			'show_count' 			=> 0,
-			'hide_empty' 			=> 1, 
-			'child_of' 				=> 0,
-			'exclude' 				=> '', 
-			'echo' 					=> 1,
-			'selected' 				=> 0, 
-			'hierarchical' 			=> 0,
-			'name' 					=> 'cat', 
-			'id' 					=> '',
-			'class' 				=> 'postform', 
-			'depth' 				=> 0,
-			'tab_index' 			=> 0, 
-			'taxonomy' 				=> 'category',
-			'hide_if_empty' 		=> false
+			'show_option_all'		=> '', 
+			'show_option_none'		=> '',
+			'orderby'				=> 'id', 
+			'order'					=> 'ASC',
+			'show_last_update'		=> 0, 
+			'show_count'			=> 0,
+			'hide_empty'			=> 1, 
+			'child_of'				=> 0,
+			'exclude'				=> '', 
+			'echo'					=> 1,
+			'selected'				=> 0, 
+			'hierarchical'			=> 0,
+			'name'					=> 'cat', 
+			'id'					=> '',
+			'class'					=> 'postform', 
+			'depth'					=> 0,
+			'tab_index'				=> 0, 
+			'taxonomy'				=> 'category',
+			'hide_if_empty'			=> false
 		);
 
 		$defaults['selected'] = ( is_category() ) ? get_query_var( 'cat' ) : 0;
@@ -3466,16 +3466,16 @@ class SiteCategories {
 		if ( (int) $tab_index > 0 )
 			$tab_index_attribute = " tabindex=\"$tab_index\"";
 
-        // Exclude irrelevant arguments, particularly name (which causes no categories to return).
-        $term_args = compact(
-            "taxonomy",
-            "orderby",
-            "order",
-            "hide_empty",
-            "child_of",
-            "exclude",
-            "hierarchical"
-        );
+		// Exclude irrelevant arguments, particularly name (which causes no categories to return).
+		$term_args = compact(
+			"taxonomy",
+			"orderby",
+			"order",
+			"hide_empty",
+			"child_of",
+			"exclude",
+			"hierarchical"
+		);
 		$categories = get_terms( $term_args );
 		$name = esc_attr( $name );
 		$class = esc_attr( $class );
@@ -3688,7 +3688,7 @@ class BCat_Walker_WidgetCategoryDropdown extends Walker {
 			$output .= "</option>\n";
 			
 		} else if (($args['show_style'] == "ul") || ($args['show_style'] == "ul-nested") 
-		        || ($args['show_style'] == "ol") || ($args['show_style'] == "ol-nested")) {
+				|| ($args['show_style'] == "ol") || ($args['show_style'] == "ol-nested")) {
 
 			$option_spacer = str_repeat('&nbsp;', $depth);
 
