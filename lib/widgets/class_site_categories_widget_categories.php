@@ -6,7 +6,7 @@ class Bcat_WidgetCategories extends WP_Widget {
 
 	function __construct () {
 		$widget_ops = array('classname' => __CLASS__, 'description' => __('Shows a list of all site categories.', SITE_CATEGORIES_I18N_DOMAIN));
-		parent::WP_Widget(__CLASS__, __('Site Categories', SITE_CATEGORIES_I18N_DOMAIN), $widget_ops);
+		parent::__construct(__CLASS__, __('Site Categories', SITE_CATEGORIES_I18N_DOMAIN), $widget_ops);
 	}
 
 	function form($instance) {
