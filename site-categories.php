@@ -672,6 +672,19 @@ class SiteCategories {
 			
 			$term_sites = get_objects_in_term( $terms, SITE_CATEGORIES_TAXONOMY);
 		}
+					
+		//Paul Kevin
+		//Incase we are dealing with the default category, we still need to show the child categories
+		if ($term_id == $this->opts['sites']['category_default']) {
+			$unassigned_sites = $this->get_unassigned_sites();
+			if(empty($term_sites)){
+				//If the categories are empty and we are on the default, we show all unassigned sites
+				$term_sites = $unassigned_sites;
+			}else{
+				//We merge the unassigned sites to the default category to match the count
+				$term_sites = array_merge($term_sites, $unassigned_sites);
+			}
+		}
 
 		//echo "term_sites<pre>"; print_r($term_sites); echo "</pre>";
 		
@@ -3705,7 +3718,7 @@ class BCat_Walker_WidgetCategoryDropdown extends Walker {
 			if ($category->count > 0) {
 				$output .= '</a>';
 			}
-
+			
 			if ($args['show_counts']) {
 				$output .= '<span class="site-category-count">('. $category->count .')</span>';
 			}
