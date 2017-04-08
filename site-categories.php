@@ -298,7 +298,8 @@ class SiteCategories {
 							if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
 								$bcat_url = trailingslashit($this->opts['landing_page_slug']) . $bcat_term->slug;
 							} else {
-								$bcat_url = $this->opts['landing_page_slug'] .'&amp;category_name=' . $bcat_term->slug;
+								$landing_page_slug = $this->opts['landing_page_slug'];
+								$bcat_url = $landing_page_slug . (strpos($landing_page_slug, '?') > 0  ? '&amp;' : '?') . 'category=' . $bcat_term->slug;
 							}
 
 							if (strlen($bcat_url)) {
@@ -368,7 +369,8 @@ class SiteCategories {
 						if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
 							$bcat_url = trailingslashit($this->opts['landing_page_slug']) . $bcat_term->slug;
 						} else {
-							$bcat_url = $this->opts['landing_page_slug'] .'&amp;category_name=' . $bcat_term->slug;
+							$landing_page_slug = $this->opts['landing_page_slug'];
+							$bcat_url = $landing_page_slug . (strpos($landing_page_slug, '?') > 0  ? '&amp;' : '?') . 'category=' . $bcat_term->slug;
 						}
 
 						if (strlen($bcat_url)) {
