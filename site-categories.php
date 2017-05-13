@@ -1014,6 +1014,10 @@ class SiteCategories {
 				$this->opts['landing_page_slug'] = '';
 			}
 
+			if (isset($_POST['bcat']['signups'])) {
+				$this->opts['signups'] = $_POST['bcat']['signups'];
+			}
+
 			//echo "_POST<pre>"; print_r($_POST); echo "</pre>";
 			//die();
 						
@@ -2312,6 +2316,34 @@ class SiteCategories {
 			</td>
 		</tr>
 
+		<tr>
+			<th scope="row">
+				<label for="site-categories-orderby"><?php _e('Order by', SITE_CATEGORIES_I18N_DOMAIN); ?></label>
+			</th>
+			<td>
+				<p><?php _e('This order by option controls how the listed Site Categories will be ordered in the dropdowns on the signup page.', 
+					SITE_CATEGORIES_I18N_DOMAIN); ?></p>
+				<div class="site-categories-parent-child-left">
+
+					<select id="signups-site-categories-orderby" name="bcat[signups][orderby]">
+						<option value="name" <?php if ($this->opts['signups']['orderby'] == "name") { 
+							echo 'selected="selected" '; } ?>><?php _e('Name', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="id" <?php if ($this->opts['signups']['orderby'] == "id") { 
+							echo 'selected="selected" '; } ?>><?php _e('Category ID', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="none" <?php if ($this->opts['signups']['orderby'] == "none") { 
+							echo 'selected="selected" '; } ?>><?php _e('None', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					</select>
+					<select id="signups-site-categories-order" name="bcat[signups][order]">
+						<option value="ASC" <?php if ($this->opts['signups']['order'] == "ASC") { 
+							echo 'selected="selected" '; } ?>><?php _e('ASC', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+						<option value="DESC" <?php if ($this->opts['signups']['order'] == "DESC") { 
+							echo 'selected="selected" '; } ?>><?php _e('DESC', SITE_CATEGORIES_I18N_DOMAIN); ?></option>
+					</select>
+				</div>
+				
+			</td>
+		</tr>
+
 		</table>
 		<?php
 	}
@@ -3224,6 +3256,8 @@ class SiteCategories {
 				'show_option_none'	=>	__('None Selected', SITE_CATEGORIES_I18N_DOMAIN), 
 				'name'				=>	'bcat_site_categories['. $cat_counter .']',
 				'class'				=>	'bcat_category',
+				'orderby'			=> $this->opts['signups']['orderby'],
+				'order'				=> $this->opts['signups']['order']
 			);
 			if (isset($_POST['bcat_site_categories'][$cat_counter])) {
 				$bcat_args['selected'] = intval($_POST['bcat_site_categories'][$cat_counter]);
