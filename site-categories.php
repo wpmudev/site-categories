@@ -112,7 +112,7 @@ class SiteCategories {
 		
 		// Adds our Site Categories to the Site signup form. 
 		add_action( 'signup_blogform',				array($this, 'bcat_signup_blogform') );
-		add_action( 'wpmu_new_blog',				array($this, 'wpmu_new_blog_proc'), 99, 6 );		
+		add_action( 'wpmu_new_blog',				array($this, 'wpmu_new_blog_proc'), 9999, 6 );		
 		add_filter( 'wpmu_validate_blog_signup',	array($this, 'bcat_wpmu_validate_blog_signup'));
 		add_filter( 'add_signup_meta',				array($this, 'bcat_add_signup_meta'));
 
