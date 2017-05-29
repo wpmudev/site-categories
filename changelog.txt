@@ -5,7 +5,10 @@ Author: Paul Menard (Incsub)
 
 1.0.9.2 - 2017-05-30
 ----------------------------------------------------------------------
-- 
+- Fixed: Image Upload Button Does Not Work
+- Fixed: "Category parents selectable" is set to "no" hides child categories
+- Fixed: PHP Notice for Site Categories outdated method
+- Fixed: Clicking on number of sites was generating wrong URL
 
 1.0.9.1 - 2014-03-02
 ----------------------------------------------------------------------
