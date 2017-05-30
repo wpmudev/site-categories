@@ -3426,9 +3426,12 @@ class SiteCategories {
 
 		if ((isset($blog_id)) && ($blog_id)) {
 
-			if (isset($meta['bcat_signup_meta']['bcat_site_categories'])) {
-				$bcat_set = wp_set_object_terms($blog_id, $meta['bcat_signup_meta']['bcat_site_categories'], SITE_CATEGORIES_TAXONOMY);
-			}
+            if( isset($meta['bcat_signup_meta']['bcat_site_categories']) && ! empty( $meta['bcat_signup_meta']['bcat_site_categories'] ) ){
+			    $bcat_set = wp_set_object_terms($blog_id, $meta['bcat_signup_meta']['bcat_site_categories'], SITE_CATEGORIES_TAXONOMY);
+		    }
+		    elseif( ! empty( $this->opts['sites']['category_default'] ) ){
+			    $bcat_set = wp_set_object_terms( $blog_id, intval( $this->opts['sites']['category_default'] ), SITE_CATEGORIES_TAXONOMY );
+		    }
 
 			if (isset($meta['bcat_signup_meta']['bcat_site_description'])) {
 				update_blog_option($blog_id, 'bact_site_description', $meta['bcat_signup_meta']['bcat_site_description']);
