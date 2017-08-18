@@ -101,6 +101,7 @@ class SiteCategories {
 		// Add/Modify the column for the Taxonomy terms list page 
 		add_filter( "manage_edit-bcat_columns",		array(&$this, 'bcat_taxonomy_column_headers') );	
 		add_filter( 'manage_bcat_custom_column',	array(&$this, 'bcat_taxonomy_column'), 10, 3 );
+        add_filter( 'bcat_row_actions',				array(&$this, 'bcat_taxonomy_row_actions'), 10, 2 );
 
 		add_filter( 'wpmu_blogs_columns',			array(&$this, 'bcat_sites_column_headers') );	
 		add_action( 'manage_sites_custom_column',	array(&$this, 'bcat_sites_column_row'), 10, 2 );
@@ -273,6 +274,29 @@ class SiteCategories {
 		$columns_tmp['sites'] = __('Sites', SITE_CATEGORIES_I18N_DOMAIN); 
 
 		return $columns_tmp;
+	}
+    
+    function bcat_taxonomy_row_actions( $actions, $tag ){
+
+		if ((isset($this->opts['landing_page_slug'])) && (strlen($this->opts['landing_page_slug']))) {
+
+			if ((isset($this->opts['landing_page_rewrite'])) && ($this->opts['landing_page_rewrite'] == true) && ($this->opts['landing_page_use_rewrite'] == "yes")) {
+				$bcat_url = trailingslashit($this->opts['landing_page_slug']) . $tag->slug;
+			} else {
+				$landing_page_slug = $this->opts['landing_page_slug'];
+				$bcat_url = $landing_page_slug . (strpos($landing_page_slug, '?') > 0  ? '&amp;' : '?') . 'category=' . $tag->slug;
+			}
+
+			if (strlen($bcat_url)) {
+
+				$label = sprintf( __( 'View ', SITE_CATEGORIES_I18N_DOMAIN ), $tag->name );				
+				$actions['view'] = '<a href="' . $bcat_url . '" aria-label="' . $label  . '">' . __( 'View', SITE_CATEGORIES_I18N_DOMAIN ) . '</a>';
+				
+			}					
+
+		}
+
+		return $actions;
 	}
 
 	/**
