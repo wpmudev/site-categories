@@ -1,7 +1,20 @@
 ----------------------------------------------------------------------
 Site Categories
-Author: Paul Menard (Incsub)
+Author: Paul Menard (Incsub), Ashok
 ----------------------------------------------------------------------
+
+1.0.9.3 - 2017-05-31
+----------------------------------------------------------------------
+- Fixed: The sorting of site categories on signup page
+- Fixed: Site description not being added for new blogs
+- Fixed: Default category not added when none selected from signup page
+
+1.0.9.2 - 2017-05-30
+----------------------------------------------------------------------
+- Fixed: Image Upload Button Does Not Work
+- Fixed: "Category parents selectable" is set to "no" hides child categories
+- Fixed: PHP Notice for Site Categories outdated method
+- Fixed: Clicking on number of sites was generating wrong URL
 
 1.0.9.1 - 2014-03-02
 ----------------------------------------------------------------------
