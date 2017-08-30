@@ -721,7 +721,7 @@ class SiteCategories {
 				$blog = get_blog_details($site_id);
 				//echo "blog<pre>"; print_r($blog); echo "</pre>";
 				
-				if (($blog) && ($blog->public == 1) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
+				if (($blog) && ($blog->public != 0) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
 					
 					if ((isset($args['blog_filter'])) && (isset($args['blog_ids'])) && (count($args['blog_ids']))) {
 						if ($args['blog_filter'] == "exclude") {
@@ -1287,7 +1287,7 @@ class SiteCategories {
 						$terms_count = count($term_sites);
 
 						$blog = get_blog_details($blog_id);
-						if (($blog) && ($blog->public == 1) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
+						if (($blog) && ($blog->public != 0) && ($blog->archived == 0) && ($blog->spam == 0) && ($blog->deleted == 0) && ($blog->mature == 0)) {
 							$terms_count += 1;
 						}
 						$wpdb->update( $wpdb->term_taxonomy, array('count' => $terms_count ), array( 'term_taxonomy_id' => $term->term_taxonomy_id ) );
