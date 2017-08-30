@@ -3762,7 +3762,7 @@ class BCat_Walker_WidgetCategoryDropdown extends Walker {
 			else
 				$pad = '';
 			
-			$output .= '<option class="level-$depth" value="'. $output_url .'"';
+			$output .= '<option class="level-' . $depth . '" value="'. $output_url .'"';
 			//if ((isset($args['selected'])) && ( $category->term_id == $args['selected'] ))
 			//	$output .= ' selected="selected"';
 			$output .= '>';

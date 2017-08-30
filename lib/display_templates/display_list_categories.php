@@ -25,7 +25,7 @@ function process_site_categories_list_display($content, $data, $args) {
 			} else if ($args['show_style'] == "ul-nested") { 
 				$content .= '<ul class="site-categories site-categories-list">'; 
 			} else if (($args['show_style'] == "select-nested") || ($args['show_style'] == "select-flat")) {
-				$content .= '<select id="site-categories-list-'. $category->slug .'" class="site-categories site-categories-list">'; 
+				$content .= '<select id="site-categories-list" class="site-categories site-categories-list">'; 
 				$content .= '<option value="">'. __('Select Category', SITE_CATEGORIES_I18N_DOMAIN) .'</option>';
 			}
 			
@@ -44,19 +44,21 @@ function process_site_categories_list_display($content, $data, $args) {
 				$content .= '</ol>'; 
 			} else if ($args['show_style'] == "ul-nested") { 
 				$content .= '</ul>'; 
-			} else if (($args['show_style'] == "select-nested") || ($args['show_style'] == "select-flar")) {
+			} else if (($args['show_style'] == "select-nested") || ($args['show_style'] == "select-flat")) {
 					$content .= '</select>';
-					$content .= '<script type="text/javascript">
+					// Create unique script class.
+					$class = 'site-categories-list-script' . rand();
+					$content .= '<script class="' . $class . '" type="text/javascript">
 					/* <![CDATA[ */
-						var dropdown_'. $category->slug .' = document.getElementById("site-categories-list-'. $category->slug .'");
-						function onCatChange_'. $category->slug .'() {
-							var selected_index = dropdown_'. $category->slug .'.selectedIndex;
-							var href = dropdown_'. $category->slug .'.options[selected_index].value;
+						var dropdown = document.querySelector(".' . $class . '").parentNode.querySelector(".site-categories-list");
+						function onCatChange(e) {
+							var selected_index = e.target.selectedIndex;
+							var href = e.target.options[selected_index].value;
 							if (href != "") {
 								window.location.href = href;
 							}					
 						}
-						dropdown_'. $category->slug .'.onchange = onCatChange_'.$category->slug.';
+						dropdown.onchange = onCatChange;
 					/* ]]> */
 					</script>';	
 					
