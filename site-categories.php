@@ -2065,6 +2065,7 @@ class SiteCategories {
 				<?php
 					if ((isset($this->opts['categories']['default_icon_id'])) && (intval($this->opts['categories']['default_icon_id']))) {
 						
+						$bcat_image_default_src = '';
 						$image_src	= wp_get_attachment_image_src(intval($this->opts['categories']['default_icon_id']), array(100, 100));
 						if (!$image_src) {
 							$image_src[0] = "#";
