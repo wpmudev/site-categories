@@ -646,7 +646,11 @@ class SiteCategories {
 					//}
 		
 					//echo "get_terms_args<pre>"; print_r($get_terms_args); echo "</pre>";
+
+					// Children terms only.
 					$terms = get_terms( SITE_CATEGORIES_TAXONOMY, $get_terms_args );
+					// Include top level too.
+					$terms[] = $term_id;
 				}
 			} else {
 				if ((!empty($term_id)) && (!isset($args['include-and']))) {
@@ -656,7 +660,8 @@ class SiteCategories {
 						$args['parent'] = '';
 				
 					//echo "args<pre>"; print_r($args); echo "</pre>";
-					$terms = get_terms( SITE_CATEGORIES_TAXONOMY, $args );
+					//$terms = get_terms( SITE_CATEGORIES_TAXONOMY, $args );
+					$terms[] = $term_id;
 				}
 			}
 		} else {
