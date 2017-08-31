@@ -2799,7 +2799,7 @@ class SiteCategories {
 		if ((!isset($data['current_page'])) || ($data['current_page'] == 0))
 			$data['current_page'] = 1;
 		
-		if ($category) {
+		if ($category && $data['term']) {
 
 			$args = $this->opts['sites'];
 
@@ -3168,7 +3168,7 @@ class SiteCategories {
 				$title_str .= '<span class="site-category-header-prefix">'. $this->opts['sites']['header_prefix'] .'</span>';
 			}
 			
-			$title_str .= '<span class="site-category-header-category-name">' ." ". $bcat_term->name .'</span>';
+			$title_str .= '<span class="site-category-header-category-name">' ." ". ($bcat_term ? $bcat_term->name : '') .'</span>';
 		$title_str .= '</span>';
 		
 		return $title_str;
